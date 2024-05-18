@@ -6,7 +6,7 @@ if [ "$PROVISION_DATABASE" = "1" ]; then
     if [ ! -f /opt/sql.initialized ]; then
 
         # Sleeping as MariaDB takes a bit to get going
-        sleep 20
+        sleep 30
         # Execute the SQL script on the newly created database with authentication
         mysql -h $MYSQL_HOST -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /var/www/html/sts/create_sts_db3.sql
 
