@@ -1,0 +1,39 @@
+"Id","Shipment
+ID","Description","Consignment","Car
+Code","Loading
+Location","Unloading
+Location","Last
+Ship
+Date","Min
+Int","Max
+Int","Min
+Amt","Max
+Amt","Special
+Instructions","Remarks"
+0,"BP-MILLWORK-NU","Bayport to NU Puhlmann Lumber","MILLWORK","X*","BP-ANDERSON","NU-RAMP",0,3,5,1,1,,
+0,"CL-CORN-SV","Courtland Elev to Savage","CORN","XM40","CL-ELEVATOR","SV-CARGILL",0,4,5,2,3,,
+0,"CL-GRAVEL-TR","Courtland Pit to Tracy","GRAVEL","H*","CL-GRAVEL","TR-COMTL",0,3,5,2,3,,
+0,"CL-GRAVEL-WA","Courtland Pit to Waseca","GRAVEL","H*","CL-GRAVEL","WA-COMTL",0,3,6,2,3,,
+0,"CO-BENTONITE-NU","Colony to NU team track","BENTONITE","LO4","CO-BENTONITE","NU-TEAM",0,1,2,1,2,,
+0,"MPLS-FEED-CL","Minneapolis to Courtland Elevator","ANIMALFEED","X*","MPLS-CARGILL","CL-ELEVATOR",0,3,5,1,1,,
+0,"MS-BUTTER-MPLS","Milford Siding AMPI to Minneapolis","BUTTER","R*","MS-WAREHOUSE","MPLS-SUPERVALUE",0,2,4,1,2,,
+0,"NU-CHEESE-MPLS","New Ulm Kraft to Minneapolis","CHEESECASE","R*","NU-KRAFT1","MPLS-SUPERVALUE",0,1,2,1,2,,
+0,"NUE-CORN-SV","NU Eagle Mill to Savage","CORN","LO*","NU-EAGLE","SV-CARGILL",0,2,3,3,4,,
+0,"NUE-SOYBEANS-SV","NU Eagle Mill to Savage","SOYBEANS","LO*","NU-EAGLE","SV-CARGILL",0,2,4,3,4,,
+0,"NUV-SOYBEANS-SV","New Ulm Valley Grain to Savage","SOYBEANS","XM40","NU-VALLEY","SV-CARGILL",0,3,5,2,3,,
+0,"RG-POTASH-CL","Regina to Courtland Elevator","POTASH","LO2","RG-POTASH","CL-ELEVATOR",0,4,5,1,1,,
+0,"RG-POTASH-NU","Regina to NU Valley Grain","POTASH","LO2","RG-POTASH","NU-VALLEY",0,4,6,1,1,,
+0,"RS-QUARRY-TR","Redstone Quarry to Tracy","BALLAST","H*","RS-QUARRY","TR-COMTL",0,3,5,2,3,,
+0,"RS-QUARRY-WA","Redstone Quarry to Waseca","BALLAST","H*","RS-QUARRY","WA-COMTL",0,3,5,2,3,,
+0,"RS-QUARRY-WIN","Redstone Quarry to Winona","ROCK","H*","RS-QUARRY","WIN-BARGE",0,3,6,3,4,,
+0,"WI-CHEESE-NU","Beaver Dam to New Ulm","CHEESEBARREL","R*","WI-KRAFT","NU-KRAFT2",0,1,2,1,2,,
+0,"WI-LUMBER-NU","Chippewa Falls to NU Pulhmann Lumber","LUMBER","X*","WI-LUMBER-SP","NU-RAMP",0,3,5,1,1,,
+0,"WI-LUMBER-SP","Chippewa Falls to St Peter Lumber Company","LUMBER","X*","WI-LUMBER-SP","SP-HOUSE",0,3,5,1,1,,
+0,"WI-PACKAGING-MS","Ft. Atkinson to MS AMPI","PACKAGING","X*","WI-WISPAC","MS-WAREHOUSE",0,3,5,1,1,,
+0,"WI-PACKAGING-NU","Ft. Atkinson to NU Kraft","PACKAGING","X*","WI-WISPAC","NU-KRAFT2",0,3,5,1,2,,
+0,"WY-COAL-NU","Gillette to Eagle Mill power plant","COAL","H*","WY-COAL","NU-EAGLEPP",0,2,4,1,1,,
+0,"WY-COAL-SP","Gillette WY to St Peter hospital power plant","COAL","H*","WY-COAL","SP-HPP",0,2,3,1,2,,
+0,"WY-DIESEL-NU","Casper to New Ulm Std Oil","DIESEL","TM","WY-DIESEL","NU-STDOIL",0,4,6,1,1,,
+0,"WY-FUELOIL-NU","Casper to New Ulm Std Oil","FUELOIL","TM","WY-FUELOIL","NU-STDOIL",0,3,5,1,1,,
+0,"WY-GASOLINE-NU","Casper to New Ulm Std Oil","GASOLINE","TM","WY-GASOLINE","NU-STDOIL",0,3,5,1,1,,
+0,"WY-LUBOIL-NU","Casper to New Ulm Std Oil","LUBRICANTS","X*","WY-LUBOIL","NU-STDOIL",0,4,6,1,1,,

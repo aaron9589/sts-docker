@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  web:
+    image:  shipper-driven-traffic-simulator:latest   # Replace with your PHP image and tag
+    ports:
+      - "8980:80"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=sts_user
+      - MYSQL_PASSWORD=sts_password
+      - MYSQL_DATABASE=sts_db3
+      - PROVISION_DATABASE=1  # Set to 1 to provision the database on first run
+    volumes:
+      - /volume1/docker/sts/backups:/var/www/html/sts/backups
+    depends_on: [db]
+  db:
+    image: mariadb:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=sts_db3
+      - MYSQL_USER=sts_user
+      - MYSQL_PASSWORD=sts_password
+    volumes:
+      - /volume1/docker/sts/db:/var/lib/mysql
