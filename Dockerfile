@@ -24,9 +24,9 @@ RUN docker-php-ext-configure gd && \
 RUN docker-php-ext-install mysqli
 
 # Add additional folders
-ADD php-barcode /var/www/html/php-barcode
-ADD phpqrcode /var/www/html/phpqrcode
-ADD sts /var/www/html/sts
+COPY php-barcode /var/www/html/php-barcode
+COPY phpqrcode /var/www/html/phpqrcode
+COPY sts /var/www/html/sts
 
 # Edit permissions for directories
 RUN chmod 757 /var/www/html/sts/backups && \
