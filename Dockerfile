@@ -40,5 +40,13 @@ RUN chmod 757 /var/www/html/sts/backups && \
 COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
+# Create User
+RUN useradd -m stsweb
+USER stsweb
+
+# Health check using curl
+HEALTHCHECK --interval=30s --timeout=10s \
+  CMD curl --silent --fail http://localhost/sts || exit 1
+
 # Define entrypoint
 ENTRYPOINT ["/usr/local/bin/start.sh"]
