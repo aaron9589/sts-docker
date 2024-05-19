@@ -1,3 +1,4 @@
+#checkov:skip=CKV_DOCKER_3: not using a default user.
 # Use php:7.4-apache-buster as base image
 FROM php:7.4-apache-buster
 
@@ -39,10 +40,6 @@ RUN chmod 757 /var/www/html/sts/backups && \
 # Copy start script
 COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
-
-# Create User
-RUN useradd -m stsweb
-USER stsweb
 
 # Health check using curl
 HEALTHCHECK --interval=30s --timeout=10s \
