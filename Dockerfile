@@ -4,7 +4,7 @@ FROM php:7.4-apache-buster
 # Expose port 80
 EXPOSE 80
 
-# Install MariaDB server and client
+# Install MariaDB client
 RUN apt-get update && \
     apt-get install -y mariadb-client
 
