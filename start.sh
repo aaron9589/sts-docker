@@ -4,7 +4,7 @@
 if [ "$PROVISION_DATABASE" = "1" ]; then
     # Check if the database has been initialized
     if [ ! -f /opt/sql.initialized ]; then
-
+        
         # Sleeping as MariaDB takes a bit to get going
         sleep 30
         
