@@ -5,10 +5,12 @@ FROM php:7.4-apache-buster
 EXPOSE 80
 
 # Install MariaDB client
+# hadolint ignore=DL3008,DL3009,DL3015
 RUN apt-get update && \
     apt-get install -y mariadb-client
 
 # Install graphics library dependencies
+# hadolint ignore=DL3008,DL3009,DL3015
 RUN apt-get update && \
     apt-get install -y zlib1g-dev libpng-dev
 
@@ -18,7 +20,7 @@ RUN apt-get clean && \
 
 # Configure and install GD extension
 RUN docker-php-ext-configure gd && \
-    docker-php-ext-install -j$(nproc) gd
+    docker-php-ext-install -j"$(nproc)" gd
 
 # Install MySQLi extension
 RUN docker-php-ext-install mysqli
