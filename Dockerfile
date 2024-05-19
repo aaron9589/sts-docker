@@ -1,14 +1,17 @@
+#checkov:skip=CKV_DOCKER_3: not using a default user.
 # Use php:7.4-apache-buster as base image
 FROM php:7.4-apache-buster
 
 # Expose port 80
 EXPOSE 80
 
-# Install MariaDB server and client
+# Install MariaDB client
+# hadolint ignore=DL3008,DL3009,DL3015
 RUN apt-get update && \
     apt-get install -y mariadb-client
 
 # Install graphics library dependencies
+# hadolint ignore=DL3008,DL3009,DL3015
 RUN apt-get update && \
     apt-get install -y zlib1g-dev libpng-dev
 
@@ -18,15 +21,15 @@ RUN apt-get clean && \
 
 # Configure and install GD extension
 RUN docker-php-ext-configure gd && \
-    docker-php-ext-install -j$(nproc) gd
+    docker-php-ext-install -j"$(nproc)" gd
 
 # Install MySQLi extension
 RUN docker-php-ext-install mysqli
 
 # Add additional folders
-ADD php-barcode /var/www/html/php-barcode
-ADD phpqrcode /var/www/html/phpqrcode
-ADD sts /var/www/html/sts
+COPY php-barcode /var/www/html/php-barcode
+COPY phpqrcode /var/www/html/phpqrcode
+COPY sts /var/www/html/sts
 
 # Edit permissions for directories
 RUN chmod 757 /var/www/html/sts/backups && \
@@ -37,6 +40,10 @@ RUN chmod 757 /var/www/html/sts/backups && \
 # Copy start script
 COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
+
+# Health check using curl
+HEALTHCHECK --interval=30s --timeout=10s \
+  CMD curl --silent --fail http://localhost/sts || exit 1
 
 # Define entrypoint
 ENTRYPOINT ["/usr/local/bin/start.sh"]

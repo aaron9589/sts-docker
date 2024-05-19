@@ -1,8 +1,9 @@
+---
 version: '3.8'
 
 services:
   web:
-    image:  shipper-driven-traffic-simulator:latest   # Replace with your PHP image and tag
+    image: shipper-driven-traffic-simulator:latest
     ports:
       - "8980:80"
     environment:
