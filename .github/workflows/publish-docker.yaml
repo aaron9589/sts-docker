@@ -30,6 +30,6 @@ jobs:
 
       - name: Publish Docker Image to GitHub Package
         run: |
-          IMAGE_ID="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+          IMAGE_ID="docker.io/${{ github.repository }}:${{ github.sha }}"
           docker tag $IMAGE_ID $IMAGE_ID
           docker push $IMAGE_ID
