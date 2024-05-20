@@ -44,7 +44,7 @@ jobs:
       - name: Publish Docker Image to GitHub Package
         run: |
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
-            docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:latest
+            docker image push --all-tags ghcr.io/aaron9589/shipper-driven-traffic-simulator
           else
             docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
           fi
