@@ -5,7 +5,7 @@ Dockerizing POC for the Shipper-Driven Trafffic Simulator app.
 
 ## Getting Started
 
-1) Ensure you have docker installed on your device of choise.
+1) Ensure you have docker installed on your device of choice.
 2) Download a copy of the docker-compose.yml to a new folder.
 3) Edit the YAML file where the comments are located to suit your use case
 4) cd into the newly created folder
