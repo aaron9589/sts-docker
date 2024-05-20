@@ -23,15 +23,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Determine Tag
-        id: determine_tag
-        run: echo "::set-output name=TAG::${GITHUB_REF/refs\/tags\//}"
-
       - name: Build Docker Image
         run: |
           docker build . -t ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
-            docker tag ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }} ghcr.io/aaron9589/shipper-driven-traffic-simulator:$GITHUB_REF
+            docker tag ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }} ghcr.io/aaron9589/shipper-driven-traffic-simulator:$GITHUB_REF_NAME
             docker rmi ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
           else
             docker tag ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }} ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
@@ -47,7 +43,7 @@ jobs:
       - name: Publish Docker Image to GitHub Package
         run: |
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
-            docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:$GITHUB_REF
+            docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:$GITHUB_REF_NAME
           else
             docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
           fi
