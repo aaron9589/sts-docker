@@ -12,6 +12,9 @@ jobs:
   build-and-publish:
     name: Build and Publish Docker Container
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout Repository
