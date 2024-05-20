@@ -5,7 +5,7 @@ services:
   web:
     image: ghcr.io/aaron9589/shipper-driven-traffic-simulator:latest
     ports:
-      - "8980:80" # Change the port on the LEFT of the colon to the desired port you want to advertise the service on your PC. 
+      - "8980:80" # Change the port on the LEFT of the colon to the desired port you want to advertise the service on your PC.
     environment:
     # Change these 3 if you wish - as a bare minimum I recommend changing the password.
       - MYSQL_HOST=db
@@ -13,13 +13,16 @@ services:
       - MYSQL_PASSWORD=sts_password # This must match the MYSQL_PASSWORD variable below.
       - MYSQL_DATABASE=sts_db3
       - PROVISION_DATABASE=1  # Set to 1 to provision the database if never initialised on this database server before.
-    
+
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
     #volumes:
       #- /volume1/docker/sts/backups:/var/www/html/sts/backups
-      
-    depends_on: [db]
+
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: mariadb:latest
     environment:
@@ -27,7 +30,19 @@ services:
       - MYSQL_DATABASE=sts_db3
       - MYSQL_USER=sts_user
       - MYSQL_PASSWORD=sts_password # ensure this matches the MYSQL_DATABASE variable you set earlier.
-    # If you want to persist your database somewhere outside of the container (you should) uncomment this line, 
+    # If you want to persist your database somewhere outside of the container (you should) uncomment this line,
     # and change the path on the left hand side of the colon.
     #volumes:
-      #- /volume1/docker/sts/db:/var/lib/mysql 
+      #- /volume1/docker/sts/db:/var/lib/mysql
+    healthcheck:
+      interval: 10s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      timeout: 10s
