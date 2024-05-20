@@ -43,8 +43,8 @@ jobs:
 
       - name: Publish Docker Image to GitHub Package
         run: |
-          DOCKER_TAG=${{ steps.determine_tag.outputs.TAG }}
-          docker push ghcr.io/${{ github.repository }}:$DOCKER_TAG
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
+            docker push ghcr.io/${{ github.repository }}:$DOCKER_TAG
+          else
             docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
           fi
