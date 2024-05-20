@@ -3,24 +3,32 @@ version: '3.8'
 
 services:
   web:
-    image: shipper-driven-traffic-simulator:latest
+    image: ghcr.io/aaron9589/shipper-driven-traffic-simulator:latest
     ports:
-      - "8980:80"
+      - "8980:80" # Change the port on the LEFT of the colon to the desired port you want to advertise the service on your PC. 
     environment:
+    # Change these 3 if you wish - as a bare minimum I recommend changing the password.
       - MYSQL_HOST=db
       - MYSQL_USER=sts_user
-      - MYSQL_PASSWORD=sts_password
+      - MYSQL_PASSWORD=sts_password # This must match the MYSQL_PASSWORD variable below.
       - MYSQL_DATABASE=sts_db3
-      - PROVISION_DATABASE=1  # Set to 1 to provision the database on first run
+      - PROVISION_DATABASE=1  # Set to 1 to provision the database if never initialised on this database server before.
     volumes:
-      - /volume1/docker/sts/backups:/var/www/html/sts/backups
+      # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
+      # You only want to change the <Source Path on PC> Variable.
+      
+      #- /volume1/docker/sts/backups:/var/www/html/sts/backups
+      
     depends_on: [db]
   db:
     image: mariadb:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=root_password
+      - MARIADB_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=sts_db3
       - MYSQL_USER=sts_user
-      - MYSQL_PASSWORD=sts_password
+      - MYSQL_PASSWORD=sts_password # ensure this matches the MYSQL_DATABASE variable you set earlier.
     volumes:
-      - /volume1/docker/sts/db:/var/lib/mysql
+      # If you want to persist your database somewhere outside of the container (you should) uncomment this line, 
+      # and change the path on the left hand side of the colon.
+      
+      #- /volume1/docker/sts/db:/var/lib/mysql 
