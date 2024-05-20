@@ -28,9 +28,10 @@ jobs:
         run: |
           docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }}
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
-            docker tag ghcr.io/${{ github.repository }}:$DOCKER_TAG
+            docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:$DOCKER_TAG
+            docker rmi ghcr.io/${{ github.repository }}:${{ github.sha }}
           else
-            docker tag ghcr.io/${{ github.repository }}:${{ github.sha }}
+            docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.sha }}
           fi
   
       - name: Log in to GitHub Container Registry
