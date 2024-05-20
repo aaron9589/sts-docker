@@ -45,6 +45,7 @@ jobs:
         run: |
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
             docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:latest
+            docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:$GITHUB_REF_NAME
           else
             docker push ghcr.io/aaron9589/shipper-driven-traffic-simulator:${{ github.sha }}
           fi
