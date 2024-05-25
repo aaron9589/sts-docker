@@ -1,5 +1,4 @@
 ---
-# checkov:skip:CKV2_GHA_1:Action needs to write back comments & PRs
 name: Publish Docker Container as GitHub Package
 
 on:
@@ -14,6 +13,7 @@ jobs:
   build-and-publish:
     name: Build and Publish Docker Container
     runs-on: ubuntu-latest
+    # checkov:skip:CKV2_GHA_1:Action needs to write back comments & PRs
     permissions:
       contents: read
       packages: write
