@@ -1,5 +1,4 @@
 ---
-#checkov:skip=CKV2_GHA_1: Required to publish a package.
 name: Publish Docker Container as GitHub Package
 
 on:
@@ -14,6 +13,7 @@ jobs:
   build-and-publish:
     name: Build and Publish Docker Container
     runs-on: ubuntu-latest
+    #checkov:skip=CKV2_GHA_1: Required to publish a package.
     permissions:
       contents: read
       packages: write
