@@ -1,5 +1,5 @@
 ---
-# checkov:skip=CKV2_GHA_1: Required to publish a package.
+# checkov:skip:CKV2_GHA_1:Action needs to write back comments & PRs
 name: Publish Docker Container as GitHub Package
 
 on:
