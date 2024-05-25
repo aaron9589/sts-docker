@@ -1,6 +1,6 @@
 ---
 name: Publish Docker Container as GitHub Package
-
+permissions: read-all
 on:
   push:
     branches:
