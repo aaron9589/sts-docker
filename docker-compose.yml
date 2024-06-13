@@ -25,7 +25,7 @@ services:
         condition: service_healthy
 
   db:
-    image: mariadb:10.4 # Pinning in lockstep with xampp release
+    image: mariadb:latest
     environment:
       - MARIADB_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=sts_db3
