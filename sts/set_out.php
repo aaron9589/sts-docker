@@ -319,7 +319,7 @@
           job_name = document.getElementById("job_list").value;
           
           // tell the user that there aren't any cars in this job
-          document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for " + job_name + " doesn't contain any cars.</td></tr>";
+          document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for this job/train doesn't contain any cars.</td></tr>";
         }
         else
         {

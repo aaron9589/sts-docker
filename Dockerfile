@@ -1,6 +1,6 @@
 #checkov:skip=CKV_DOCKER_3: not using a default user.
 # Use php:7.4-apache-buster as base image
-FROM php:7.4-apache-buster
+FROM php:8.1-apache-buster
 
 # Expose port 80
 EXPOSE 80

@@ -8,11 +8,12 @@
   // clicked and if there is something in the reporting marks text box.
 
   // generate some javascript to display the table name, identify this table to the form, and set the 
-  // update button's tab index
+  // update button's tab index as well as disabling it until the data entry radio button is clicked
   print '<script type="text/javascript">
            document.getElementById("table_name").innerHTML = "Cars";
            document.getElementById("tbl_name").value = "cars";
            document.getElementById("update_btn").tabIndex = "9";
+           document.getElementById("update_btn").disabled = true;
          </script>';
 
   // generate some javascript that will hide rows
@@ -103,8 +104,64 @@
                }
              }
            }
-         </script>';
 
+           // generate some javascript that disable the data entry boxes (default setting) and enable the
+           // filters when the filter radio button is clicked
+           function add_cars()
+           {
+             document.getElementById("update_btn").disabled = false;
+             document.getElementById("rptgmarks").disabled = false;
+             document.getElementById("car_code").disabled = false;
+             document.getElementById("current_location").disabled = false;
+             document.getElementById("position").disabled = false;
+             document.getElementById("remarks").disabled = false;
+             document.getElementById("home_location").disabled = false;
+             document.getElementById("RFID_code").disabled = false;
+             
+             document.getElementById("reporting_marks_filter").disabled = true;
+             document.getElementById("car_code_filter").disabled = true;
+             document.getElementById("current_location_filter").disabled = true;
+             document.getElementById("status_filter").disabled = true;
+             document.getElementById("job_filter").disabled = true;
+             document.getElementById("commodity_filter").disabled = true;
+             document.getElementById("loading_location_filter").disabled = true;
+             document.getElementById("unloading_location_filter").disabled = true;
+             document.getElementById("home_location_filter").disabled = true;
+           }
+    
+           // generate some javascript that disables the filters and enables the data entry boxes when
+           // the data entry radio button is clicked
+           function filter_cars()
+           {
+             document.getElementById("update_btn").disabled = true;
+             document.getElementById("rptgmarks").disabled = true;
+             document.getElementById("car_code").disabled = true;
+             document.getElementById("current_location").disabled = true;
+             document.getElementById("position").disabled = true;
+             document.getElementById("remarks").disabled = true;
+             document.getElementById("home_location").disabled = true;
+             document.getElementById("RFID_code").disabled = true;
+             
+             document.getElementById("reporting_marks_filter").disabled = false;
+             document.getElementById("car_code_filter").disabled = false;
+             document.getElementById("current_location_filter").disabled = false;
+             document.getElementById("status_filter").disabled = false;
+             document.getElementById("job_filter").disabled = false;
+             document.getElementById("commodity_filter").disabled = false;
+             document.getElementById("loading_location_filter").disabled = false;
+             document.getElementById("unloading_location_filter").disabled = false;
+             document.getElementById("home_location_filter").disabled = false;
+           }
+           
+           // replace reloads the window without sending the POST parameters through again
+           // because doing just a window.location.reload() was sending those parameters
+           // through atain which caused a second record to be inserted into the cars table
+           function clear_filters()
+           {
+             window.location.replace("db_list.php?tbl_name=cars");
+           }
+         </script>';
+  
   // set up some styles for the table
   print '<style>
            th, td {padding: 3px;}
@@ -156,7 +213,8 @@
   
   // generate the table
   print '<table class="sortable" id="car_tbl" style="font: normal 12px Verdana, Arial, sans-serif;"  style="white-space: nowrap;">
-           <caption style="font: bold 15px Verdana, Arial, sans-serif; text-align:left;">Add New Car</caption>
+           <caption style="font: bold 15px Verdana, Arial, sans-serif; text-align:left;">
+           <input type="radio" name="entry-filter" id="entry" value="entry" checked=false onclick="add_cars()">Add New Car</caption>
            <thead>
              <tr style="background-color: lightgreen;">
                <th>Reporting<br />Marks</th>
@@ -176,17 +234,19 @@
                <th>Last<br />Spotted</th>
                <th>Car<br />History</th>
              </tr>
-             <tr style="background-color: lightgreen;">
-               <td style="text-align:center;"><input id="rptgmarks" name="rptgmarks" type="text" tabindex="1" size="10" required autofocus></td>
+             <tr id="entry_row" style="background-color: lightgreen;">
+               <td style="text-align:center;">
+                 <input id="rptgmarks" name="rptgmarks" type="text" tabindex="1" size="10" required autofocus>
+               </td>
                <td style="text-align:center;">' . drop_down_car_codes('car_code', 2, 'no_wild') . '</td>
                <td style="text-align:center;">' . drop_down_locations('current_location', 3, '') . '</td>
-               <td style="text-align:center;"><input name="position" type="text" tabindex="4" size="3"></td>
+               <td style="text-align:center;"><input id="position" name="position" type="text" tabindex="4" size="3"></td>
                <td></td>
                <td></td>
                <td></td>
                <td></td>
                <td></td>
-               <td style="text-align: center";><input name="remarks" type="text" tabindex="5"></td>
+               <td style="text-align: center";><input id="remarks" name="remarks" type="text" tabindex="5"></td>
                <td style="text-align:center;">' . drop_down_locations('home_location', 6, '') . '</td>
                <td></td>
                <td></td>
@@ -197,11 +257,13 @@
              <tr>
                <td colspan="15" style="border:0px; height:50px">&nbsp;
              </td>
-             </tr>
-               <td style="font: bold 15px Verdana, Arial, sans-serif; text-align:left; border:0px;"><b>Row Filters</b></td>
+             </tr id="filter_row">
+               <td style="font: bold 15px Verdana, Arial, sans-serif; text-align:left; border:0px;">
+                 <input type="radio" name="entry-filter" id="filter" value="filter" checked=true onclick="filter_cars()"><b>Filters</b>
+               </td>
                <td  colspan="14" style="border: 0px;">
                  <input type="button" id="clear_filters_btn" name="clear_filters_btn" value="CLEAR FILTERS"
-                  onclick="location.reload();" style=" font: normal 10px Verdana, Arial, sans-serif;">
+                  onclick="clear_filters();" style=" font: normal 10px Verdana, Arial, sans-serif;">
                </td>
              </tr>
              <tr style="background-color: yellow;">
@@ -467,7 +529,8 @@
   // generate a javascript line to set focus on the first input text box
   print '<script>document.getElementById("rptgmarks").focus();</script>';
   
-  // add some extra lines to the instructions div
+  // add some extra lines to the instructions div and initally disable the data entry boxes which 
+  // can be enabled by clicking on the add car radio button
   print '<script>
            document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + 
                                                                \'Filters can be used to hide rows. \';
@@ -475,6 +538,14 @@
                                                                \'Click on column titles shown in <i>italics</i> to sort the table<br /><br />\';
            document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML +
                                                                \'Cars in a car/shipment pooling arrangement are <span style="background-color:#ffff80;">highlighted.</span><br /><br />\';
+
+           document.getElementById("rptgmarks").disabled = true;
+           document.getElementById("car_code").disabled = true;
+           document.getElementById("current_location").disabled = true;
+           document.getElementById("position").disabled = true;
+           document.getElementById("remarks").disabled = true;
+           document.getElementById("home_location").disabled = true;
+           document.getElementById("RFID_code").disabled = true;
          </script>';
   
   // add a "None" option to the top of the home location drop down box

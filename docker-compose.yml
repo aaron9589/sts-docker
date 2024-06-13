@@ -32,6 +32,8 @@ services:
       - MYSQL_USER=sts_user
       - MYSQL_PASSWORD=sts_password # ensure this matches the MYSQL_DATABASE variable you set earlier.
 
+    command: --sql_mode="" # Required to disable STRICT_TRANS_TABLES. Causes issues with pu_criteria.php
+
     # If you want to persist your database somewhere outside of the container (you should) uncomment this line,
     # and change the path on the left hand side of the colon.
     #volumes:
