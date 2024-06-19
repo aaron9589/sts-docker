@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL ^ E_DEPRECATED); # disabling some PHP8 warnings until the function is updated.
 /*
  * PHP QR Code encoder
  *
