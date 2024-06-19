@@ -14,6 +14,7 @@ services:
       - MYSQL_PASSWORD=sts_password # This must match the MYSQL_PASSWORD variable below.
       - MYSQL_DATABASE=sts_db3
       - PROVISION_DATABASE=1  # Set to 1 to provision the database if never initialised on this database server before.
+      - TZ=Australia/Sydney # Set to your time zone as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
