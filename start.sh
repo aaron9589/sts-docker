@@ -16,5 +16,12 @@ if [ "$PROVISION_DATABASE" = "1" ]; then
     fi
 fi
 
+# Set a Time Zone for PHP if one is set in the PHP containers TZ Env var.
+if [ -n "$TZ" ]; then
+    echo "date.timezone = $TZ" > /usr/local/etc/php/conf.d/timezone.ini
+else
+    rm -f /usr/local/etc/php/conf.d/timezone.ini
+fi
+
 # Start Apache
 exec apache2-foreground
