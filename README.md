@@ -10,4 +10,4 @@ Dockerizing POC for the Shipper-Driven Trafffic Simulator app.
 4) `cd` into the newly created folder
 5) Edit the `docker-compose.yml` file where the comments are located to suit your use case. Read the comments alongside each setting!
 6) Run `docker compose up -d` and wait for the containers to start
-7) browse to http://localhost:8980 (or whatever port you mapped to) and start using STS!
+7) browse to http://localhost:8980/sts/ (or whatever port you mapped to) and start using STS!
