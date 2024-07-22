@@ -11,7 +11,11 @@ services:
       - MYSQL_USER=sts_user
       - MYSQL_PASSWORD=sts_password # This must match the MYSQL_PASSWORD variable below.
       - MYSQL_DATABASE=sts_db3
-      - PROVISION_DATABASE=1  # Set to 1 to provision the database if never initialised on this database server before.
+      # Set to 1 to provision the database by running the MySQL setup script
+      # It is STRONGLY RECOMMENDED that you set this to 0 once initially deployed,
+      # So you don't inadverdently wipe your database when deploying a new container instance!
+      - PROVISION_DATABASE=1
+      
 
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
