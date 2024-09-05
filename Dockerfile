@@ -38,7 +38,8 @@ RUN mkdir /var/www/html/sts/temp && \
     chmod 757 /var/www/html/sts/backups && \
     chmod -R 757 /var/www/html/sts/ImageStore && \
     chmod 757 /var/www/html/sts/temp && \
-    chmod 757 /var/www/html/sts/uploads
+    chmod 757 /var/www/html/sts/uploads && \
+    chmod 757 /var/www/html/sts/cargo_list.txt
 
 # Copy start script
 COPY start.sh /usr/local/bin/
