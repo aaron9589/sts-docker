@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freight Cars Unloader with Server-Side Cargo Management</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #87CEEB;
+        }
+        #cars-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .freight-car {
+            width: 150px;
+            height: 120px;
+            background-color: #8B4513;
+            position: relative;
+            border: 4px solid #4A2800;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-color: #FFD700;
+            transition: height 0.1s;
+            z-index: 1;
+        }
+        .cargo-select {
+            width: 90%;
+            margin-top: 5px;
+            z-index: 2;
+        }
+        .wheels {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .wheel {
+            width: 20px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 3px solid #666;
+        }
+        #track {
+            width: 100%;
+            height: 10px;
+            background-color: #666;
+            position: relative;
+            margin-top: 10px;
+        }
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #message {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="cars-container"></div>
+    <div id="track"></div>
+    <div id="controls">
+        <div>
+            <label for="carCount">Number of cars (1-5): </label>
+            <input type="number" id="carCount" min="1" max="5" value="3">
+        </div>
+        <button id="unloadBtn">Unload</button>
+        <button id="resetBtn" style="display: none;">Reset</button>
+    </div>
+    <div id="message"></div>
+
+    <script>
+        const carsContainer = document.getElementById('cars-container');
+        const unloadBtn = document.getElementById('unloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const carCountInput = document.getElementById('carCount');
+        const messageDiv = document.getElementById('message');
+
+        let availableCargo = [];
+
+        async function fetchCargo() {
+            const response = await fetch('manage_cargo.php?action=get');
+            availableCargo = await response.json();
+            updateCarCount();
+        }
+
+        async function removeCargo(cargo) {
+            await fetch(`manage_cargo.php?action=remove&cargo=${encodeURIComponent(cargo)}`);
+        }
+
+        async function resetCargo() {
+            await fetch('manage_cargo.php?action=reset');
+            await fetchCargo();
+        }
+
+        function createFreightCar() {
+            const car = document.createElement('div');
+            car.className = 'freight-car';
+            car.innerHTML = `
+                <select class="cargo-select"></select>
+                <div class="content"></div>
+                <div class="wheels">
+                    <div class="wheel"></div>
+                    <div class="wheel"></div>
+                </div>
+            `;
+            const select = car.querySelector('.cargo-select');
+            populateCargoSelect(select);
+            return car;
+        }
+
+        function populateCargoSelect(select) {
+            select.innerHTML = '<option value="">Select cargo</option>';
+            availableCargo.forEach(cargo => {
+                const option = document.createElement('option');
+                option.value = cargo;
+                option.textContent = cargo;
+                select.appendChild(option);
+            });
+        }
+
+        function updateCarCount() {
+            const count = parseInt(carCountInput.value);
+            carsContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                carsContainer.appendChild(createFreightCar());
+            }
+            resetCars();
+        }
+
+        function setContentLevel(car, percentage) {
+            car.querySelector('.content').style.height = `${percentage}%`;
+        }
+
+        async function unloadFreightCars() {
+            const cars = document.querySelectorAll('.freight-car');
+            const totalDurations = Array.from(cars).map(() => Math.random() * 1000 + 2000);
+            const startTime = Date.now();
+            const currentPercentages = Array(cars.length).fill(100);
+
+            async function updateContent() {
+                const elapsedTime = Date.now() - startTime;
+                let allEmpty = true;
+
+                for (let index = 0; index < cars.length; index++) {
+                    const car = cars[index];
+                    if (currentPercentages[index] > 0) {
+                        const speedFactor = 0.5 + Math.random();
+                        const decrease = (100 / totalDurations[index]) * 16.67 * speedFactor;
+                        currentPercentages[index] = Math.max(0, currentPercentages[index] - decrease);
+                        setContentLevel(car, currentPercentages[index]);
+                        allEmpty = false;
+                    } else if (currentPercentages[index] === 0) {
+                        const select = car.querySelector('.cargo-select');
+                        if (select.value) {
+                            await removeCargo(select.value);
+                            select.value = '';
+                            select.disabled = true;
+                        }
+                    }
+                }
+
+                if (allEmpty) {
+                    messageDiv.textContent = 'Unloading complete!';
+                    unloadBtn.style.display = 'none';
+                    resetBtn.style.display = 'block';
+                } else {
+                    requestAnimationFrame(updateContent);
+                }
+            }
+
+            updateContent();
+        }
+
+        async function resetCars() {
+            const cars = document.querySelectorAll('.freight-car');
+            await resetCargo();
+            cars.forEach(car => {
+                setContentLevel(car, 100);
+                const select = car.querySelector('.cargo-select');
+                select.disabled = false;
+                populateCargoSelect(select);
+            });
+            messageDiv.textContent = '';
+            unloadBtn.style.display = 'block';
+            resetBtn.style.display = 'none';
+        }
+
+        carCountInput.addEventListener('change', updateCarCount);
+        unloadBtn.addEventListener('click', unloadFreightCars);
+        resetBtn.addEventListener('click', resetCars);
+
+        // Initialize by fetching cargo
+        fetchCargo();
+    </script>
+</body>
+</html>
