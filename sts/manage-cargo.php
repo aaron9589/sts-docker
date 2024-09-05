@@ -19,7 +19,7 @@ function reset_cargo() {
         'Coal', 'Grain', 'Timber', 'Oil', 'Ore', 
         'Containers', 'Automobiles', 'Livestock'
     ];
-    file_put_contents($cargo_file, implode("\n", $original_cargo));
+    //file_put_contents($cargo_file, implode("\n", $original_cargo));
 }
 
 $action = $_GET['action'] ?? '';
