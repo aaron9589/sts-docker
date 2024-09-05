@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargo Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #cargo-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #cargo-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cargo Management</h1>
+    <ul id="cargo-list"></ul>
+    <button onclick="resetCargo()">Reset Cargo List</button>
+
+    <script>
+        function loadCargo() {
+            axios.get('manage_cargo.php?action=get')
+                .then(response => {
+                    const cargoList = document.getElementById('cargo-list');
+                    cargoList.innerHTML = '';
+                    response.data.forEach(cargo => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            ${cargo}
+                            <button onclick="removeCargo('${cargo}')">Remove</button>
+                        `;
+                        cargoList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error loading cargo:', error));
+        }
+
+        function removeCargo(cargo) {
+            axios.get(`manage_cargo.php?action=remove&cargo=${encodeURIComponent(cargo)}`)
+                .then(response => {
+                    if (response.data.success) {
+                        loadCargo();
+                    }
+                })
+                .catch(error => console.error('Error removing cargo:', error));
+        }
+
+        function resetCargo() {
+            axios.get('manage_cargo.php?action=reset')
+                .then(response => {
+                    if (response.data.success) {
+                        loadCargo();
+                    }
+                })
+                .catch(error => console.error('Error resetting cargo:', error));
+        }
+
+        // Load cargo list on page load
+        loadCargo();
+    </script>
+</body>
+</html>
