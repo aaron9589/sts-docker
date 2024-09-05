@@ -165,7 +165,7 @@
             for (let i = 0; i < count; i++) {
                 carsContainer.appendChild(createFreightCar());
             }
-            resetCars();
+            resetCars(true);
         }
 
         function setContentLevel(car, percentage) {
@@ -212,9 +212,11 @@
             updateContent();
         }
 
-        async function resetCars() {
+        async function resetCars(skipFetch = false) {
             const cars = document.querySelectorAll('.freight-car');
-            await resetCargo();
+            if (!skipFetch) {
+                await resetCargo();
+            }
             cars.forEach(car => {
                 setContentLevel(car, 100);
                 const select = car.querySelector('.cargo-select');
@@ -228,10 +230,10 @@
 
         carCountInput.addEventListener('change', updateCarCount);
         unloadBtn.addEventListener('click', unloadFreightCars);
-        resetBtn.addEventListener('click', resetCars);
+        resetBtn.addEventListener('click', () => resetCars());
 
         // Initialize by fetching cargo
-        fetchCargo();
+        fetchCargo().then(() => updateCarCount()).then(() => resetCars(true));
     </script>
 </body>
 </html>
