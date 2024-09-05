@@ -1,0 +1,8 @@
+Coal
+Grain
+Timber
+Oil
+Ore
+Containers
+Automobiles
+Livestock
