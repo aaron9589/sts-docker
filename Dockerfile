@@ -33,8 +33,8 @@ COPY sts /var/www/html/sts
 
 # Edit permissions for directories and create folder structure
 RUN mkdir /var/www/html/sts/temp && \
-    mkdir /var/www/html/sts/ImageStore/barcodes && \
-    mkdir /var/www/html/sts/ImageStore/qrcodes && \
+    mkdir /var/www/html/sts/ImageStore/DB_Images/barcodes && \
+    mkdir /var/www/html/sts/ImageStore/DB_Images/qrcodes && \
     chmod 757 /var/www/html/sts/backups && \
     chmod -R 757 /var/www/html/sts/ImageStore && \
     chmod 757 /var/www/html/sts/temp && \
