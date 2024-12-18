@@ -105,9 +105,11 @@
 
           // build a table showing the information
           // add links to db_edit_car.php, db_edit_car_code.php, db_edit_location.php, db_edit_job.php, and db_edit_shipment.php programs
-          $car_link = '<a href="db_edit.php?tbl_name=cars&obj_name=' . 
-                       $row['reporting_marks'] . '">' . 
-                       $row['reporting_marks'] . '</a>';
+
+          $car_link = '<a href="db_edit.php?tbl_name=cars&obj_id=' .
+                                 $row['reporting_marks'] . '&obj_name=' .
+                                 $row['id'] . '">' . 
+                                 $row['reporting_marks'] . '</a>';
                        
           $car_code_link = '<a href="db_edit.php?tbl_name=car_codes&obj_id=' . 
                             $row['car_code_id'] . '&obj_name=' .
