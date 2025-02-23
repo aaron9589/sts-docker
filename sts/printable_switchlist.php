@@ -433,7 +433,7 @@
               print '<td>' . $row['reporting_marks'] . '</td>';
               
               // column 2 - car code
-              print '<td style="text-align: center">' . substr($row['car_code'], 0, 2) . '</td>';
+              print '<td style="text-align: center">' . substr($row['car_code'], 0, 4) . '</td>';
 
               // column 3 - L/E
               if (($row['status'] == "Empty") || ($row['status'] == "Ordered"))
