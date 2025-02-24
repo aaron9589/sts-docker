@@ -41,11 +41,12 @@
       // generate a drop-down list of jobs and the submit button
       print drop_down_jobs('job_name', '', 'activate_button()');
       print '<br /><br />';
-      print '<input type="radio" name="format" id="mobile" value="mobile" checked> Mobile<br />';
-      print '<input type="radio" name="format" id="half"  value="half"> Half Sheet<br />';
+      print '<input type="radio" name="format" id="mobile" value="mobile" > Mobile<br />';
+      print '<input type="radio" name="format" id="half"  value="half" checked> Half Sheet<br />';
       print '<input type="radio" name="format" id="full"  value="full"> Full Sheet<br />';
       print '<input type="radio" name="format" id="dmp"  value="dmp"> Dot Matrix<br />';
-      print '<input type="radio" name="format" id="wo"  value="wo"> Work Order<br /><br />';
+      print '<input type="radio" name="format" id="wo"  value="wo"> Work Order<br />';
+      print '<input type="radio" name="format" id="x2010"  value="x2010"> X2010 (PN)<br /><br />';
       print '&nbsp;<input id="display_btn" name="display_btn" value="DISPLAY" type="submit" disabled><br /><br >';
     ?>
     </form>
