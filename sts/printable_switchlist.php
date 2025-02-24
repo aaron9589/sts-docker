@@ -28,7 +28,7 @@
           document.getElementById("half_sheet_job_instructions").style.display = "none";
         }
       }
-      
+
       function toggle_full_sheet()
       {
         var checkbox = document.getElementById("full_sheet_checkbox");
@@ -66,7 +66,7 @@
           document.getElementById("workorder_job_instructions").style.display = "none";
         }
       }
-      
+
       function move_row(cell, move)
       {
         // incoming cell is the one containing the up or down arrow image
@@ -121,7 +121,7 @@
       }
 
     </script>
- 
+
     <?php
       // bring in the utility files
       require 'drop_down_list_functions.php';
@@ -149,7 +149,7 @@
         $rs = mysqli_query($dbc, $sql);
         $row = mysqli_fetch_row($rs);
         $rr_initials = $row[0];
-        
+
         $sql = 'select setting_value from settings where setting_name = "railroad_name"';
         $rs = mysqli_query($dbc, $sql);
         $row = mysqli_fetch_row($rs);
@@ -246,7 +246,7 @@
 --*/
 
          $sql = '(select
-                 cars.reporting_marks as reporting_marks, 
+                 cars.reporting_marks as reporting_marks,
                  car_codes.code as car_code,
                  cars.status as status,
                  commodities.code as consignment,
@@ -258,39 +258,39 @@
                  loading_loc.code as loading_location,
                  unloading_sta.station as unloading_station,
                  unloading_loc.code as unloading_location,
-                 
+
                  cars.current_location_id,
-                 cars.position as position, 
-                 cars.car_code_id as car_code_id, 
+                 cars.position as position,
+                 cars.car_code_id as car_code_id,
                  cars.handled_by_job_id as handled_by,
                  locations.station as current_station_id,
                  `' . $table_name . '`.step_number
 
                  from cars
-                 
+
                  left join locations on locations.id = cars.current_location_id
                  left join routing on routing.id = locations.station
                  inner join car_orders on car_orders.car = cars.Id
                  inner join car_codes on car_codes.id = cars.car_code_id
                  inner join shipments on shipments.id = car_orders.shipment
                  inner join commodities on commodities.id = shipments.consignment
-                 
+
                  inner join locations loading_loc on loading_loc.id = shipments.loading_location
                  inner join routing loading_sta on loading_sta.id = loading_loc.station
-                 
+
                  inner join locations unloading_loc on unloading_loc.id = shipments.unloading_location
                  inner join routing unloading_sta on unloading_sta.id = unloading_loc.station
 
                  left join `' . $table_name . '` on `' . $table_name . '`.station = routing.id
 
                  where ((cars.handled_by_job_id = "' . $job_name . '") and (not instr(car_orders.waybill_number, "E")))
-                 
+
                  group by cars.reporting_marks)
-                 
+
                  UNION
-                 
+
                  (select
-                 cars.reporting_marks as reporting_marks, 
+                 cars.reporting_marks as reporting_marks,
                  car_codes.code as car_code,
                  cars.status as status,
                  "" as consignment,
@@ -302,30 +302,30 @@
                  "" as loading_location,
                  unloading_sta.station as unloading_station,
                  unloading_loc.code as unloading_location,
-                 
+
                  cars.current_location_id,
-                 cars.position as position, 
-                 cars.car_code_id as car_code_id, 
+                 cars.position as position,
+                 cars.car_code_id as car_code_id,
                  cars.handled_by_job_id as handled_by,
                  locations.station as current_station_id,
                  `' . $table_name . '`.step_number
 
                  from cars
-                 
+
                  left join locations on locations.id = cars.current_location_id
                  left join routing on routing.id = locations.station
                  inner join car_orders on car_orders.car = cars.Id
                  inner join car_codes on car_codes.id = cars.car_code_id
-                 
+
                  inner join locations unloading_loc on unloading_loc.id = car_orders.shipment
                  inner join routing unloading_sta on unloading_sta.id = unloading_loc.station
 
                  left join `' . $table_name . '` on `' . $table_name . '`.station = routing.id
 
                  where ((cars.handled_by_job_id = "' . $job_name . '") and (instr(car_orders.waybill_number, "E")))
-                 
+
                  group by cars.reporting_marks)
-                 
+
                  ORDER BY position, step_number, current_station, current_location, unloading_location, reporting_marks';
 //                 inner join shipments on shipments.id = car_orders.shipment // removed because repositions don't have shipments
 //                 inner join commodities on commodities.id = shipments.consignment // ditto
@@ -428,10 +428,10 @@
             while ($row = mysqli_fetch_array($rs))
             {
               print '<tr>';
-              
+
               // column 1 - reporting marks
               print '<td>' . $row['reporting_marks'] . '</td>';
-              
+
               // column 2 - car code
               print '<td style="text-align: center">' . substr($row['car_code'], 0, 4) . '</td>';
 
@@ -578,11 +578,146 @@
             print '<hr />';
             print '</div>';
           }
+
+          // x2010 format based on Pacific National Train Consist Form
+if ($_GET['format'] == 'x2010')
+{
+    print '<div class="noprint">';
+    // Print button and return link
+    print '<button onclick="window.print()">PRINT</button>&nbsp;&nbsp;';
+    print '<a href="display_switchlist.php">Return to Display Switchlist page</a><br /><br />';
+    print '</div>';
+
+    // Generate random serial number
+    $serial_number = sprintf("%06d", rand(1, 999999));
+
+    // Main form container
+    print '<div style="font-family: \'Arial Narrow\', \'Franklin Gothic\', Arial, sans-serif; width: 100%; max-width: 1200px;">';
+
+    // Header with logo and form title - modified to include logo
+    print '<table style="width: 100%; border-collapse: collapse;">';
+    print '<tr>';
+    print '<td style="width: 30%;"><img src="pn_logo.jpg" alt="Company Logo" style="height: 50px; width: auto;"></td>';
+    print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
+    print '<td style="width: 25%; text-align: right; position: relative;">
+            <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
+            <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF</div>
+           </td>';
+    print '</tr>';
+    print '</table>';
+
+    // Define the widths for the aligned columns
+    $driverNameWidth = "15%";
+    $timeOnDutyWidth = "12%";
+    $depotWidth = "12%";
+
+    // Top section with train details
+    print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">';
+    print '<tr>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Train No.<br/>' . $table_name . '</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Date</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Dept Time</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 15%;">Origin</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 16%;">Destination</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: ' . $driverNameWidth . ';">Driver Name</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: ' . $timeOnDutyWidth . ';">Time on Duty</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: ' . $depotWidth . ';">Depot</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Second row with radio and unit details - matching column widths
+    print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
+    print '<tr>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 32.5%;">Train Radio Number</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 15.25%;">Unit No.</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 16.25%;">P.M. Date Due</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 15.2%;">Driver Name</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 12.3%;">Time on Duty</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 12.1%;">Depot</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Rest of the form remains the same
+    print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
+    print '<tr>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 50%;">Mobile Number</td>';
+    print '<td style="border: 1px solid black; padding: 5px; width: 30%;">Brake Certificate No.</td>';
+    print '<td style="border: 1px solid black; padding: 5px;">Train Type</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Main consist table
+    print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px; font-size: 12px;">';
+    print '<tr style="background-color: #f5f5f5;">';
+    print '<th style="border: 1px solid black; padding: 5px;">Sl.<br/>No</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Wagon Class</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Wagon or Locomotive<br/>Number</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">CL</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Sta</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">DG</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Gross<br/>Mass</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Length<br/>Metres</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Destination</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Consignee</th>';
+    print '<th style="border: 1px solid black; padding: 5px;">Contents or Fuel<br/>Reading</th>';
+    print '</tr>';
+
+    // Generate rows for consist entries
+    $row_num = 1;
+    while ($row = mysqli_fetch_array($rs)) {
+        print '<tr>';
+        print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row_num . '</td>';
+        print '<td style="border: 1px solid black; padding: 5px;">' . substr($row['car_code'], 0, 4) . '</td>';
+        print '<td style="border: 1px solid black; padding: 5px;">' . $row['reporting_marks'] . '</td>';
+        print '<td style="border: 1px solid black; padding: 5px;"></td>'; // CL
+        print '<td style="border: 1px solid black; padding: 5px;"></td>'; // Sta
+        print '<td style="border: 1px solid black; padding: 5px;"></td>'; // DG
+        print '<td style="border: 1px solid black; padding: 5px;"></td>'; // Gross Mass
+        print '<td style="border: 1px solid black; padding: 5px;"></td>'; // Length
+
+        // Destination
+        if ($row['status'] == "Loaded") {
+            print '<td style="border: 1px solid black; padding: 5px;">' . $row['unloading_station'] . '</td>';
+        } else {
+            print '<td style="border: 1px solid black; padding: 5px;">' . $row['loading_station'] . '</td>';
+        }
+
+        // Consignee
+        print '<td style="border: 1px solid black; padding: 5px;">' . $row['consignment'] . '</td>';
+
+        // Contents
+        if ($row['status'] == "Loaded") {
+            print '<td style="border: 1px solid black; padding: 5px;">L-' . $row['consignment'] . '</td>';
+        } else {
+            print '<td style="border: 1px solid black; padding: 5px;">E</td>';
+        }
+
+        print '</tr>';
+        $row_num++;
+    }
+
+    // Fill remaining rows up to 16
+    while ($row_num <= 16) {
+        print '<tr>';
+        print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row_num . '</td>';
+        for ($i = 0; $i < 10; $i++) {
+            print '<td style="border: 1px solid black; padding: 5px;">&nbsp;</td>';
+        }
+        print '</tr>';
+        $row_num++;
+    }
+
+    print '</table>';
+    print '</div>';
+}
+
+
+
           else if ($_GET['format'] == 'full')
           {
 /*----------------------------------------------------------------------------------------------------------------*/
             // full page format
-            
+
             // remember if there are any special instructions to be displayed/printed
             $special_instructions = array();
             $special_instruction_counter = 0;
@@ -647,10 +782,10 @@
             while ($row = mysqli_fetch_array($rs))
             {
               print '  <tr>';
-              
+
               // column 1 - reporting marks
               print '    <td>' . $row['reporting_marks'] . '</td>';
-              
+
               // column 2 - car code
               print '    <td style="text-align: center">' . $row['car_code'] . '</td>';
 
@@ -789,7 +924,7 @@
             print '</tr>';
             print '</table>';
             print '</div>';
-            
+
             // generate a page break
             print '<p style="page-break-after: always;">&nbsp;</p>';
             print '<div class="noprint">';
@@ -800,7 +935,7 @@
           {
 /*----------------------------------------------------------------------------------------------------------------*/
             // dot matrix and mobile formats
-            
+
             // remember if there are any special instructions to be displayed/printed
             $special_instructions = array();
             $special_instruction_counter = 0;
@@ -818,14 +953,14 @@
             // display a link to go to the previous page
             print '<a href="display_switchlist.php">Return to Display Switchlist page</a>';
             print '</div><br />';
-            
+
             // generate the headings based on format (mobile = less heading information)
             print str_pad($rr_name, $page_width, ' ', STR_PAD_BOTH). '<br/>';
             if ($_GET['format'] != 'mobile')
             {
               print '<br />';
             }
-            
+
             print str_pad('Switchlist', $page_width, ' ', STR_PAD_BOTH) . '<br />';
             if ($_GET['format'] != 'mobile')
             {
@@ -858,7 +993,7 @@
             while ($row = mysqli_fetch_array($rs))
             {
               // generate the first line for each car -----------------------------------------------------------------------------------------------------
-              
+
               // columns 1 and 2 - reporting marks and car code
               print str_pad(substr($row['reporting_marks'], 0, 11), 11) . ' ' . str_pad(substr($row['car_code'], 0, 4), 4) . ' ';
 
@@ -934,12 +1069,12 @@
                 }
               }
               print '<br />';
-              
+
               // generate the second line for each car ---------------------------------------------------------------------------------------------------
-              
+
               // skip past the first three fields
               print str_repeat(' ', 20) . ' ';
-              
+
               // column 4 - display a special instructions reminder if one exists
               if (strlen($row['special_instructions']) > 0)
               {
@@ -953,7 +1088,7 @@
               {
                 print str_repeat(' ', 13) . ' ';
               }
-              
+
               // column 5 - current location
 //              if ($row['current_location_id'] > 0)
 //              {
@@ -982,7 +1117,7 @@
               {
                 print str_pad(substr($row['unloading_location'], 0, 14), 14) . ' ';
               }
-              
+
               // column 7 - picked up
               // If the car hasn't been picked up yet, leave this box blank, otherwise put an X in it
               if ($row['current_location_id'] > 0)
@@ -1003,13 +1138,13 @@
               // increment the row number
               $row_num = $row_num + 3;
             }
-            
+
             // display the number of loads and empties
             $total_cars = $loads + $empties;
             print 'Loads: ' . $loads . '<br />';
             print 'Empties: ' . $empties . '<br />';
             print 'Total cars: ' . $total_cars . '<br />';
-  
+
             // generate a page break
             if ($special_instruction_counter > 0)
             {
@@ -1023,7 +1158,7 @@
             }
             // generate a page break
             print '<p style="page-break-after: always;">&nbsp;</p>';
-    
+
             // display the selected job's description
             print '<div  id="dot_matrix_job_instructions">';
             print str_pad(' Crew Instructions ', $page_width-1, '-', STR_PAD_BOTH) . '<br />';
@@ -1033,7 +1168,7 @@
 
             // generate a page break
             print '<p style="page-break-after: always;">&nbsp;</p>';
-            print '<div class="noprint">';            
+            print '<div class="noprint">';
             print '<hr />';
             print '</div>';
             print '</pre>';
@@ -1042,7 +1177,7 @@
           {
 /*----------------------------------------------------------------------------------------------------------------*/
             // work order format
-            
+
             // remember if there are any special instructions to be displayed/printed
             $special_instructions = array();
             $special_instruction_counter = 0;
@@ -1058,10 +1193,10 @@
             // display a link to go to the previous page
             print '<a href="display_switchlist.php">Return to Display Switchlist page</a>';
             print '</div><br />';
-            
+
             // generate the headings based on format (mobile = less heading information)
             print str_pad($rr_name, $page_width, ' ', STR_PAD_BOTH). '<br/><br />';
-            
+
             print str_pad('Work Order', $page_width, ' ', STR_PAD_BOTH) . '<br /><br />';
 
             // generate the train number and other header information
@@ -1099,8 +1234,8 @@
                 {
                   $current_station = 'IN TRAIN';
                 }
-                print str_repeat('-', (($page_width - strlen($current_station)) / 2)) . 
-                      ' ' . $current_station . ' ' . 
+                print str_repeat('-', (($page_width - strlen($current_station)) / 2)) .
+                      ' ' . $current_station . ' ' .
                       str_repeat('-', (($page_width - strlen($current_station)) /2)) . '<br /><br />';
 
                 print 'Loc/Trk/Spot   Rptg Marks  E/L Type Contents      To Station     Loc/Trk/Spot<br />';
@@ -1109,14 +1244,14 @@
                 $prev_station = $row['current_station'];
                 $first_station = false;
               }
-              
+
               // generate the first line for each car -----------------------------------------------------------------------------------------------------
-              
+
               // column 1 - current location
               if ($row['current_location_id'] > 0)
               {
                 print str_pad(substr($row['current_location'], 0, 14), 14) . ' ';
-                
+
                 // get the track and spot for this location
                 $sql1 = 'select track, spot from locations where code = "' . $row['current_location'] . '"';
                 $rs1 = mysqli_query($dbc, $sql1);
@@ -1130,7 +1265,7 @@
                 $current_track = '';
                 $current_spot = '';
               }
-              
+
               // columns 2 reporting marks
               print str_pad(substr($row['reporting_marks'], 0, 11), 11) . ' ';
 
@@ -1198,11 +1333,11 @@
                 $destination_spot = $row3['spot'];
                 $style_color = set_colors($dbc, $row['unloading_location']);
               }
-              
+
               print '<br />';
-              
+
               // generate the second line for each car ---------------------------------------------------------------------------------------------------
-              
+
               // column 1 - display the current track
               if (strlen(trim($current_spot)) > 0)
               {
@@ -1212,10 +1347,10 @@
               {
                 print str_pad(substr($current_track, 0, 9), 14) . ' ';
               }
-              
+
               // skip past the next three fields
               print str_repeat(' ', 20) . ' ';
-              
+
               // column 5 - display a special instructions reminder if one exists
               if (strlen($row['special_instructions']) > 0)
               {
@@ -1229,10 +1364,10 @@
               {
                 print str_repeat(' ', 13) . ' ';
               }
-              
+
               // skip column 6
               print str_repeat(' ', 14) . ' ';
-              
+
               // column 7 - destination location, track and spot
               if (strlen(trim($destination_spot)) > 0)
               {
@@ -1242,20 +1377,20 @@
               {
                 print str_pad(substr($destination_track, 0, 14), 14);
               }
-              
+
               // print two blank lines between cars for improved readability
               print '<br /><br />';
 
               // increment the row number
               $row_num = $row_num + 3;
             }
-            
+
             // display the number of loads and empties
             $total_cars = $loads + $empties;
             print 'Loads: ' . $loads . '<br />';
             print 'Empties: ' . $empties . '<br />';
             print 'Total cars: ' . $total_cars . '<br />';
-  
+
             // generate a page break
             if ($special_instruction_counter > 0)
             {
@@ -1270,7 +1405,7 @@
 
            // generate a page break
             print '<p style="page-break-after: always;">&nbsp;</p>';
-            print '<div class="noprint">';            
+            print '<div class="noprint">';
             print '<hr />';
             print '</div>';
             print '</pre>';
@@ -1320,8 +1455,8 @@
         }
       }
     }
-            
- 
+
+
     ?>
 <div class="noprint">
     <br /><a href="display_switchlist.php">Return to Display Switchlist page</a>
