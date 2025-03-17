@@ -182,15 +182,6 @@
         $first_field = false;
       }
 
-      if (strlen($_GET['special_instructions']) == 0) { // if its empty, make sure the value in the DB is null
-        if (!$first_field)
-        {
-          $sql .= ', ';
-        }
-        $sql .= 'special_instructions = NULL ';
-        $first_field = false;
-      }
-
        if (strlen($_GET['remarks']) > 0)
       {
         if (!$first_field)
