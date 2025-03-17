@@ -421,9 +421,10 @@
                       print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row['consignment'];
                       if (strlen($row['special_instructions']) > 0) {
                           print '<br />Spec Instr';
-                          $special_instructions[$special_instruction_counter][0] = $row['reporting_marks'];
-                          $special_instructions[$special_instruction_counter][1] = $row['consignment'];
-                          $special_instructions[$special_instruction_counter][2] = $row['special_instructions'];
+                          $special_instructions[$special_instruction_counter][0] = $row['car_code'];
+                          $special_instructions[$special_instruction_counter][1] = $row['reporting_marks'];
+                          $special_instructions[$special_instruction_counter][2] = $row['consignment'];
+                          $special_instructions[$special_instruction_counter][3] = $row['special_instructions'];
                           $special_instruction_counter++;
                       }
                       print '</td>';
@@ -431,9 +432,10 @@
                       print '<td style="border: 1px solid black; padding: 5px; text-align: center;">';
                       if (strlen($row['special_instructions']) > 0) {
                           print 'Spec Instr';
-                          $special_instructions[$special_instruction_counter][0] = $row['reporting_marks'];
-                          $special_instructions[$special_instruction_counter][1] = $row['consignment'];
-                          $special_instructions[$special_instruction_counter][2] = $row['special_instructions'];
+                          $special_instructions[$special_instruction_counter][0] = $row['car_code'];
+                          $special_instructions[$special_instruction_counter][1] = $row['reporting_marks'];
+                          $special_instructions[$special_instruction_counter][2] = $row['consignment'];
+                          $special_instructions[$special_instruction_counter][3] = $row['special_instructions'];
                           $special_instruction_counter++;
                       }
                       print '</td>';
@@ -477,9 +479,11 @@
         print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 12px; table-layout: auto;">';
         print '<tr style="background-color: #f5f5f5;">';
         print '<td style="border: 1px solid black; padding: 5px;">';
+        print '<ul>';
         for ($i = 1; $i < $special_instruction_counter; $i++) {
-            print $special_instructions[$i][0] . ' (' . $special_instructions[$i][1] . ') ' . $special_instructions[$i][2] . '<br /><br />';
+            print '<li>' . $special_instructions[$i][0] . ' ' . $special_instructions[$i][1] . ' (' . $special_instructions[$i][2] . ')</li> <ul><li> ' . $special_instructions[$i][3] . '</li></ul><br>';
         }
+        print '</ul>';
         print '</td>';
         print '</tr>';
         print '</table>';
