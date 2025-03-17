@@ -2,7 +2,7 @@
 services:
   web:
     #build: .
-    image: ghcr.io/aaron9589/shipper-driven-traffic-simulator:latest
+    build: .
     ports:
       - "8980:80" # Change the port on the LEFT of the colon to the desired port you want to advertise the service on your PC.
     environment:
@@ -15,7 +15,6 @@ services:
       # It is STRONGLY RECOMMENDED that you set this to 0 once initially deployed,
       # So you don't inadverdently wipe your database when deploying a new container instance!
       - PROVISION_DATABASE=1
-      
 
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
