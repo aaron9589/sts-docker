@@ -230,6 +230,9 @@
       $i++;
     }
 
+    // set a variable for the number of pages
+    $page_count = count($car_list) > 13 ? 2 : 1;
+
     // run the query again to build the switchlist table
     $rs = mysqli_query($dbc, $sql);
     //print "num_rows = " . mysqli_num_rows($rs) . '<br />';
@@ -273,7 +276,7 @@
         print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
         print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF</div>
+                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF '. $page_count .'</div>
                     </td>';
         print '</tr>';
         print '</table>';
@@ -451,7 +454,7 @@
             print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
             print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF</div>
+                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 2 OF ' .$page_count .'</div>
                     </td>';
             print '</tr>';
             print '</table>';
