@@ -27,7 +27,8 @@
     <!-- this form generates another page that is modified for better printing  -->
     <!-- the user needs to use the browser's back button to return to this page -->
     <!-- or user the link displayed at the bottom of the last page              -->
-    <form action="printable_switchlist.php" method="get"> 
+    <form id="switchlistForm" action="printable_switchlist.php" method="get"> 
+
     Select job and display/print format and then click the <b>DISPLAY</b> button.<br />
     A new page will be displayed that is formatted for printing.<br />
     Use the browser's <b>BACK</b> button to return to this page<br />
@@ -46,10 +47,20 @@
       print '<input type="radio" name="format" id="full"  value="full"> Full Sheet<br />';
       print '<input type="radio" name="format" id="dmp"  value="dmp"> Dot Matrix<br />';
       print '<input type="radio" name="format" id="wo"  value="wo"> Work Order<br />';
-      print '<input type="radio" name="format" id="x2010"  value="x2010"> X2010 (PN)<br /><br />';
+      print '<input type="radio" name="format" id="x2010"  value="x2010"> X2010 <br /><br />';
       print '&nbsp;<input id="display_btn" name="display_btn" value="DISPLAY" type="submit" disabled><br /><br >';
     ?>
     </form>
-  
+
+<!-- additional logic to ensure that when x2010 is selected the other page is selected -->
+<script>
+  document.getElementById("switchlistForm").onsubmit = function() {
+    if (document.getElementById("x2010").checked) {
+      this.action = "printable_switchlist_x2010.php"; // Change this to your desired file
+    }
+  };
+</script>
+<!-- additional logic to ensure that when x2010 is selected the other page is selected -->
+ 
 </body>
 </html>
