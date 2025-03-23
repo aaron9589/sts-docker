@@ -548,7 +548,7 @@
       print '<tr style="background-color: #f5f5f5;">';
       print '<td style="border: 1px solid black; padding: 5px;">';
       print '<ul>';
-      for ($i = 1; $i < $special_instruction_counter; $i++) {
+      for ($i = 0; $i < $special_instruction_counter; $i++) {
         print '<li>' . $special_instructions[$i][0] . ' ' . $special_instructions[$i][1] . ' (' . $special_instructions[$i][2] . ')</li> <ul><li> ' . $special_instructions[$i][3] . '</li></ul><br>';
       }
       print '</ul>';
