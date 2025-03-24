@@ -261,7 +261,8 @@
           '2' => 'pn',
           '8' => 'arg',
           '4' => 'ssr',
-          default => 'No valid digit found'
+          'n' => 'manildra',
+          default => 'nswgr'
         };
 
         // Define the widths for the aligned columns
@@ -272,7 +273,7 @@
         // Header with logo and form title - modified to include logo
         print '<table style="width: 100%; border-collapse: collapse;">';
         print '<tr>';
-        print '<td style="width: 30%;"><img src="' . $logo . '_logo.jpg" alt="Company Logo" style="height: 50px; width: auto;"></td>';
+        print '<td style="width: 30%;"><img src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 100px; width: auto;"></td>';
         print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
         print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
@@ -332,6 +333,9 @@
         print '<th style="border: 1px solid black; padding: 5px;">Destination</th>';
         print '<th style="border: 1px solid black; padding: 5px;">Contents</th>';
         print '</tr>';
+
+        //initialise an array
+        $special_instruction_counter = 0;
 
         // Generate rows for consist entries
         $row_num = 1;
@@ -443,7 +447,7 @@
 
           print '</tr>';
           $row_num++;
-          if ($row_num == 14) {
+          if ($row_num == 14 && count($car_list) > 13) { //only generate next page if it will spill over to another page
             $serial_number++; //generate the next page serial
             // generate a page break
             print '</table>';
@@ -511,17 +515,6 @@
             print '<th style="border: 1px solid black; padding: 5px;">Contents</th>';
             print '</tr>';
           }
-        }
-
-        // Fill remaining rows up to 16
-        while ($row_num <= 16) {
-          print '<tr>';
-          print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row_num . '</td>';
-          for ($i = 0; $i < 10; $i++) {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">&nbsp;</td>';
-          }
-          print '</tr>';
-          $row_num++;
         }
 
         print '</table>';
