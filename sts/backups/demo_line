@@ -1,164 +1,168 @@
-drop table `1121/1122 | Kembla Heights Trip Train`;
+drop table `1`;
 #
-CREATE TABLE `1121/1122 | Kembla Heights Trip Train` (
+CREATE TABLE `1` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `1121/1122 | Kembla Heights Trip Train` values("1","5","T","F","");
+insert into `1` values("10","2","T","F","Pick up cars for MD, BT, ES, WS, and WEST");
 #
-insert into `1121/1122 | Kembla Heights Trip Train` values("2","2","T","T","");
+insert into `1` values("20","6","T","T","Set out cars for MD, BT, and ES; Pick up cars for WS and WEST");
 #
-insert into `1121/1122 | Kembla Heights Trip Train` values("3","5","F","T","");
+insert into `1` values("30","9","F","T","Set out remaining cars; Tie up");
 #
 
 #
-drop table `1124/1123 | Kembla Heights Pickup Goods`;
+drop table `11`;
 #
-CREATE TABLE `1124/1123 | Kembla Heights Pickup Goods` (
+CREATE TABLE `11` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `1124/1123 | Kembla Heights Pickup Goods` values("1","1","T","F","");
+insert into `11` values("10","2","T","F","Pick up cars for BB, PW, TC, and CB");
 #
-insert into `1124/1123 | Kembla Heights Pickup Goods` values("2","2","T","T","");
+insert into `11` values("20","3","T","T","Set out cars for customers; Pick up all westbound cars");
 #
-insert into `1124/1123 | Kembla Heights Pickup Goods` values("3","4","T","T","");
+insert into `11` values("30","4","T","T","Set out cars for customers; Pick up all westbound cars");
 #
-insert into `1124/1123 | Kembla Heights Pickup Goods` values("4","1","F","T","");
+insert into `11` values("40","5","T","T","Set out cars for TC and CB; Pick up all westbound cars");
+#
+insert into `11` values("50","6","T","T","Set out remaining cars; Respot if necessary; Make up pick up for No. 1");
 #
 
 #
-drop table `1907/9108 | Bombo Ballast`;
+drop table `12`;
 #
-CREATE TABLE `1907/9108 | Bombo Ballast` (
+CREATE TABLE `12` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `1907/9108 | Bombo Ballast` values("1","5","T","F","");
+insert into `12` values("10","6","T","F","Pick up cars for CB, TC, PW, and BB");
 #
-insert into `1907/9108 | Bombo Ballast` values("2","3","T","T","");
+insert into `12` values("20","5","T","T","Set out cars for CB and TC; Pick up all eastbound cars");
 #
-insert into `1907/9108 | Bombo Ballast` values("3","5","F","T","");
+insert into `12` values("30","4","T","T","Spot cars for customers; Pick up all eastbound cars");
+#
+insert into `12` values("40","3","T","T","Spot cars for customers; Pick up all eastbound cars");
+#
+insert into `12` values("50","2","F","T","Set out remaining cars; Tie up");
 #
 
 #
-drop table `1921/9122 | Nowra Mixed Goods`;
+drop table `13`;
 #
-CREATE TABLE `1921/9122 | Nowra Mixed Goods` (
+CREATE TABLE `13` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `1921/9122 | Nowra Mixed Goods` values("1","5","T","F","");
+insert into `13` values("10","6","T","F","Pick up cars for BT and ES");
 #
-insert into `1921/9122 | Nowra Mixed Goods` values("2","1","T","T","");
+insert into `13` values("20","7","T","T","Set out cars for Forest Products, Pick up all westbound cars");
 #
-insert into `1921/9122 | Nowra Mixed Goods` values("3","5","F","T","");
+insert into `13` values("30","8","T","T","Set out cars for customers; Pick up all westbound cars");
+#
+insert into `13` values("40","9","F","T","Set out remaining cars");
 #
 
 #
-drop table `1981/9182 | Rozelle Containers`;
+drop table `14`;
 #
-CREATE TABLE `1981/9182 | Rozelle Containers` (
+CREATE TABLE `14` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `1981/9182 | Rozelle Containers` values("1","5","F","T","");
+insert into `14` values("10","9","T","F","Pick up cars for BT and ES");
 #
-insert into `1981/9182 | Rozelle Containers` values("2","6","T","T","");
+insert into `14` values("20","8","T","T","Spot cars for customers; Pick up all eastbound cars");
 #
-insert into `1981/9182 | Rozelle Containers` values("3","5","F","T","");
+insert into `14` values("30","7","T","T","Set out cars for Forest Products, Pick up all eastbound cars");
+#
+insert into `14` values("40","6","T","T","Spot cars for customers; Make up eastbound pickup for No. 2; Tie up");
 #
 
 #
-drop table `5981/9582 | Gunnedah Flour`;
+drop table `2`;
 #
-CREATE TABLE `5981/9582 | Gunnedah Flour` (
+CREATE TABLE `2` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `5981/9582 | Gunnedah Flour` values("1","5","T","F","");
+insert into `2` values("10","9","T","F","Pick up cars for CB, TD, MD, PW, BB, EV, and EAST");
 #
-insert into `5981/9582 | Gunnedah Flour` values("2","6","T","T","");
+insert into `2` values("20","6","T","T","Set out cars for CB, TC, MD, PW, and BB; Pick up cars for EV and EAST");
 #
-insert into `5981/9582 | Gunnedah Flour` values("3","5","F","T","");
+insert into `2` values("30","2","F","T","Set out remaining cars; Tie up");
 #
 
 #
-drop table `9381/3982 | Narranderra Flour`;
+drop table `21`;
 #
-CREATE TABLE `9381/3982 | Narranderra Flour` (
+CREATE TABLE `21` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `9381/3982 | Narranderra Flour` values("1","5","T","F","");
+insert into `21` values("10","4","T","F","Pick up empty cars from Tri-State destined for the Ajax Mine at CB");
 #
-insert into `9381/3982 | Narranderra Flour` values("2","6","T","T","");
+insert into `21` values("20","5","T","F","Pick up cars for TC and CB");
 #
-insert into `9381/3982 | Narranderra Flour` values("3","5","F","T","");
+insert into `21` values("30","11","T","T","Spot cars for customers; Pick up cars for CB");
+#
+insert into `21` values("40","12","T","T","Spot cars for customers; Tie up");
 #
 
 #
-drop table `Manildra Plant Shunter`;
+drop table `22`;
 #
-CREATE TABLE `Manildra Plant Shunter` (
+CREATE TABLE `22` (
   `step_number` int(11) NOT NULL,
   `station` int(11) DEFAULT NULL,
   `pickup` char(1) DEFAULT NULL,
   `setout` char(1) DEFAULT NULL,
   `remarks` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`step_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `Manildra Plant Shunter` values("1","6","T","T","Leave any cars destined for regional areas in Shoalhaven Starches Yard.");
+insert into `22` values("10","12","T","F","Pick up all outbound cars");
 #
-insert into `Manildra Plant Shunter` values("2","1","T","T","Leave any cars destined for metropolitan destinations in Nowra.");
+insert into `22` values("20","11","T","T","Spot cars for customers; Pick up all outbound cars");
 #
-
+insert into `22` values("30","5","F","T","Set out all cars except those for Tri-State at PW");
 #
-drop table `blocks`;
-#
-CREATE TABLE `blocks` (
-  `id` int(11) DEFAULT NULL,
-  `job_id` int(11) DEFAULT NULL,
-  `seq_nbr` int(11) DEFAULT NULL,
-  `code` varchar(256) DEFAULT NULL,
-  `description` varchar(256) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+insert into `22` values("40","4","T","T","Spot cars for Tri-State");
 #
 
 #
@@ -167,50 +171,26 @@ drop table `car_codes`;
 CREATE TABLE `car_codes` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `code` tinytext NOT NULL,
-  `description` tinytext DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
+  `description` tinytext,
+  `remarks` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 #
-insert into `car_codes` values("1","NGPF","47\' Grain Hopper","");
+insert into `car_codes` values("1","F","Flat car","");
 #
-insert into `car_codes` values("2","CQBY","64\' Intermodal Wagon","");
+insert into `car_codes` values("2","G","Gondola car","");
 #
-insert into `car_codes` values("3","SQKF","60\' Intermodal Flat","");
+insert into `car_codes` values("3","H","Open top hopper car","");
 #
-insert into `car_codes` values("4","NDFF","39\' Pneumatic Discharge Ballast Hopper","");
+insert into `car_codes` values("4","LO","Covered hopper car","");
 #
-insert into `car_codes` values("5","MHGX","50\' Flour Hopper","");
+insert into `car_codes` values("5","N","Caboose","");
 #
-insert into `car_codes` values("6","NPRF","42\' Cement Hopper","");
+insert into `car_codes` values("6","R","Refrigerator car","");
 #
-insert into `car_codes` values("7","NGVF","50\' Sugar Hopper","");
+insert into `car_codes` values("7","T","Tank car","");
 #
-insert into `car_codes` values("8","NTAF","60\' Fuel Tanker","");
-#
-insert into `car_codes` values("9","NQYY","50\' Intermodal Wagon","");
-#
-insert into `car_codes` values("10","ATMF","60\' Fuel Tanker","");
-#
-insert into `car_codes` values("11","RQIW","48\' Intermodal Wagon","");
-#
-insert into `car_codes` values("12","NPRY","42\' Cement Hopper","");
-#
-insert into `car_codes` values("13","MH*","MGFH / MHGX Wagons","");
-#
-insert into `car_codes` values("14","MGFH","55\' Flour Hopper","");
-#
-insert into `car_codes` values("15","M*","MGFH/MHGX Pool Wagons","");
-#
-insert into `car_codes` values("16","*","Intermodal Flats - Pooled","");
-#
-insert into `car_codes` values("17","MBAX","55\' Box Van","");
-#
-insert into `car_codes` values("18","NP*","Catch-All for Cement Hoppers","");
-#
-insert into `car_codes` values("19","NG*","Grain Hoppers","");
-#
-insert into `car_codes` values("20","NPHH","47\' Cement Hopper","");
+insert into `car_codes` values("8","X","Box car","");
 #
 
 #
@@ -221,81 +201,33 @@ CREATE TABLE `car_orders` (
   `shipment` int(11) NOT NULL,
   `car` int(11) NOT NULL,
   PRIMARY KEY (`waybill_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `car_orders` values("003-074","15","156");
+insert into `car_orders` values("003-008","34","681");
 #
-insert into `car_orders` values("003-075","15","158");
+insert into `car_orders` values("004-001","5","684");
 #
-insert into `car_orders` values("003-076","15","159");
+insert into `car_orders` values("004-002","17","690");
 #
-insert into `car_orders` values("003-M19","15","157");
+insert into `car_orders` values("004-003","18","680");
 #
-insert into `car_orders` values("003-M20","15","94");
+insert into `car_orders` values("004-004","21","637");
 #
-insert into `car_orders` values("003-M21","16","95");
+insert into `car_orders` values("004-005","21","639");
 #
-insert into `car_orders` values("003-M22","16","96");
+insert into `car_orders` values("004-009","31","693");
 #
-insert into `car_orders` values("003-M23","16","97");
+insert into `car_orders` values("004-010","37","683");
 #
-insert into `car_orders` values("003-M24","16","98");
+insert into `car_orders` values("005-001","4","679");
 #
-insert into `car_orders` values("003-M25","16","153");
+insert into `car_orders` values("005-002","6","695");
 #
-insert into `car_orders` values("003-M62","12","148");
+insert into `car_orders` values("005-004","23","697");
 #
-insert into `car_orders` values("003-M63","12","149");
+insert into `car_orders` values("005-005","24","641");
 #
-insert into `car_orders` values("003-M64","12","100");
-#
-insert into `car_orders` values("003-M65","12","120");
-#
-insert into `car_orders` values("003-M66","2","33");
-#
-insert into `car_orders` values("003-M67","2","34");
-#
-insert into `car_orders` values("003-M68","2","35");
-#
-insert into `car_orders` values("003-M69","2","36");
-#
-insert into `car_orders` values("003-M70","2","37");
-#
-insert into `car_orders` values("003-M71","2","38");
-#
-insert into `car_orders` values("003-M72","2","39");
-#
-insert into `car_orders` values("003-M73","2","40");
-#
-insert into `car_orders` values("003-M74","2","41");
-#
-insert into `car_orders` values("003-M75","2","42");
-#
-insert into `car_orders` values("003-M76","2","43");
-#
-insert into `car_orders` values("003-M77","2","45");
-#
-insert into `car_orders` values("003-M78","2","46");
-#
-insert into `car_orders` values("003-M79","2","47");
-#
-insert into `car_orders` values("003-M80","2","48");
-#
-insert into `car_orders` values("003-M81","2","49");
-#
-insert into `car_orders` values("003-M82","2","50");
-#
-insert into `car_orders` values("003-M83","2","51");
-#
-insert into `car_orders` values("003-M84","2","52");
-#
-insert into `car_orders` values("003-M85","2","53");
-#
-insert into `car_orders` values("003-M86","2","54");
-#
-insert into `car_orders` values("003-M87","2","32");
-#
-insert into `car_orders` values("003-M88","2","44");
+insert into `car_orders` values("005-006","29","686");
 #
 
 #
@@ -309,316 +241,200 @@ CREATE TABLE `cars` (
   `position` int(11) DEFAULT NULL,
   `status` varchar(256) NOT NULL,
   `handled_by_job_id` int(11) DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
+  `remarks` text,
   `load_count` int(11) NOT NULL,
   `home_location` int(11) DEFAULT NULL,
   `RFID_code` char(255) DEFAULT NULL,
-  `block_id` int(11) DEFAULT NULL,
-  `last_spotted` int(11) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=763 DEFAULT CHARSET=latin1;
 #
-insert into `cars` values("1","104-F","5","13","0","Empty","0","","6","13","041AF3987005","0","3");
+insert into `cars` values("636","DEMO9875","1","2","0","Empty","0","Flat  50ft","0","2","");
 #
-insert into `cars` values("2","107-J","5","13","0","Empty","0","","6","13","041AF1D7CEF6","0","3");
+insert into `cars` values("637","DEMO9876","1","2","0","Loaded","0","Flat  50ft","1","37","");
 #
-insert into `cars` values("3","111-J","5","13","0","Empty","0","","6","13","041AF1D3C4F8","0","3");
+insert into `cars` values("638","DEMO9877","1","2","0","Empty","0","Flat  50ft","0","2","");
 #
-insert into `cars` values("4","13-U","5","13","0","Empty","0","","6","13","041AF3B74E14","0","3");
+insert into `cars` values("639","DEMO9878","1","2","0","Loaded","0","Flat  50ft","1","37","");
 #
-insert into `cars` values("5","131-C","5","13","0","Empty","0","","6","13","041AF1CE7756","0","3");
+insert into `cars` values("640","DEMO9879","1","2","0","Empty","0","Flat  50ft","0","2","");
 #
-insert into `cars` values("6","50-C","5","13","0","Empty","0","","6","13","041AF37661FA","0","3");
+insert into `cars` values("641","DEMO9880","1","21","0","Loaded","0","Flat  50ft","1","37","");
 #
-insert into `cars` values("7","18-T","5","13","0","Empty","0","","6","13","041AF1CFB292","0","3");
+insert into `cars` values("642","DEMO9881","1","2","0","Empty","0","Flat  50ft","0","2","");
 #
-insert into `cars` values("8","41-D","5","13","0","Empty","0","","6","13","041AF3AB0640","0","3");
+insert into `cars` values("643","DEMO9882","1","37","0","Empty","0","Flat  50ft","0","37","");
 #
-insert into `cars` values("9","45-Q","5","13","0","Empty","0","","6","13","041AF1DB5A6E","0","3");
+insert into `cars` values("644","DEMO9883","1","2","0","Empty","0","Flat  50ft","0","2","");
 #
-insert into `cars` values("10","5-H","5","13","0","Empty","0","","6","13","041AF399F88C","0","3");
+insert into `cars` values("645","DEMO24680","2","37","0","Empty","0","Gondola  42ft","0","37","");
 #
-insert into `cars` values("11","80-D","5","13","0","Empty","0","","6","13","041AF39D82F2","0","3");
+insert into `cars` values("646","DEMO24681","2","27","0","Empty","0","Gondola  42ft","1","2","");
 #
-insert into `cars` values("12","62-F","5","13","0","Empty","0","","6","13","041AF3AC80C1","0","3");
+insert into `cars` values("647","DEMO24682","2","37","0","Empty","0","Gondola  42ft","0","37","");
 #
-insert into `cars` values("13","71-E","5","13","0","Empty","0","","6","13","041AF388D4B1","0","3");
+insert into `cars` values("648","DEMO24683","2","2","0","Empty","0","Gondola  42ft","0","2","");
 #
-insert into `cars` values("14","78-V","5","13","0","Empty","0","","6","13","041AF3B2ADF2","0","3");
+insert into `cars` values("649","DEMO24684","2","37","0","Empty","0","Gondola  42ft","0","37","");
 #
-insert into `cars` values("15","8-L","5","13","0","Empty","0","","6","13","041AF1F19987","0","3");
+insert into `cars` values("650","DEMO123456","3","9","0","Empty","0","Hopper  45ft","2","2","");
 #
-insert into `cars` values("32","20261F","9","0","0","Loaded","24","","8","15","","0","0");
+insert into `cars` values("651","DEMO123457","3","2","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("33","20290U","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("652","DEMO123458","3","9","0","Empty","0","Hopper  45ft","2","2","");
 #
-insert into `cars` values("34","20373P","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("653","DEMO123459","3","2","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("35","20379A","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("654","DEMO123460","3","9","0","Empty","0","Hopper  45ft","2","2","");
 #
-insert into `cars` values("36","20444H","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("655","DEMO123461","3","2","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("37","20446C","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("656","DEMO123462","3","9","0","Empty","0","Hopper  45ft","1","2","");
 #
-insert into `cars` values("38","20897K","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("657","DEMO123463","3","2","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("39","85118M","9","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("658","DEMO123464","3","9","0","Empty","0","Hopper  45ft","1","2","");
 #
-insert into `cars` values("40","60291-U","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("659","DEMO123465","3","2","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("41","60294-B","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("660","DEMO123466","3","9","0","Empty","0","Hopper  45ft","1","2","");
 #
-insert into `cars` values("42","60295-K","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("661","DEMO123467","3","37","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("43","60302-K","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("662","DEMO123468","3","9","0","Empty","0","Hopper  45ft","1","2","");
 #
-insert into `cars` values("44","60305-Y","11","0","0","Loaded","24","","8","15","","0","0");
+insert into `cars` values("663","DEMO123469","3","37","0","Empty","0","Hopper  45ft","0","37","");
 #
-insert into `cars` values("45","60308-S","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("664","DEMO123470","3","9","0","Empty","0","Hopper  45ft","1","2","");
 #
-insert into `cars` values("46","60309-E","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("665","DEMO135","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("47","60310-A","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("666","DEMO136","4","24","0","Empty","0","Hopper  Centerflow  50ft","1","2","");
 #
-insert into `cars` values("48","60313-E","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("667","DEMO137","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("49","60318-D","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("668","DEMO138","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("50","60326-Q","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("669","DEMO139","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("51","60329-U","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("670","DEMO140","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("52","60330-Q","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("671","DEMO141","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("53","60333-U","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("672","DEMO142","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("54","60336-B","11","0","0","Loaded","24","","7","15","","0","0");
+insert into `cars` values("673","DEMO143","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("63","2210G","4","1","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("674","DEMO144","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("64","2230W","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("675","DEMO145","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("65","2240H","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("676","DEMO146","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("66","3016G","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("677","DEMO147","4","37","0","Empty","0","Hopper  Centerflow  50ft","0","37","");
 #
-insert into `cars` values("67","3022B","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("678","DEMO148","4","2","0","Empty","0","Hopper  Centerflow  50ft","0","2","");
 #
-insert into `cars` values("68","3027A","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("679","DEMO357","6","2","0","Ordered","0","Reefer  50ft","1","37","");
 #
-insert into `cars` values("69","3029S","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("680","DEMO358","6","2","0","Loaded","0","Reefer  50ft","1","2","");
 #
-insert into `cars` values("70","3032J","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("681","UTLX8642","7","18","0","Loaded","0","Tank  65ft","1","37","");
 #
-insert into `cars` values("71","3038R","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("682","UTLX8643","7","4","0","Empty","0","Tank  65ft","1","2","");
 #
-insert into `cars` values("72","3044M","4","18","0","Empty","0","","4","1","","0","0");
+insert into `cars` values("683","UTLX8644","7","37","0","Loaded","0","Tank  65ft","1","37","");
 #
-insert into `cars` values("73","3044M","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("684","UTLX8645","7","2","0","Loaded","0","Tank  55ft","1","2","");
 #
-insert into `cars` values("74","2201H","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("685","UTLX8646","7","37","0","Empty","0","Tank  55ft","0","37","");
 #
-insert into `cars` values("75","2204L","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("686","UTLX8647","7","2","0","Ordered","0","Tank  55ft","1","2","");
 #
-insert into `cars` values("76","2212B","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("687","UTLX8648","7","37","0","Empty","0","Tank  55ft","0","37","");
 #
-insert into `cars` values("77","2216Y","4","18","0","Empty","0","","3","1","","0","0");
+insert into `cars` values("688","UTLX8649","7","2","0","Empty","0","Tank  55ft","0","2","");
 #
-insert into `cars` values("78","2237Q","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("689","UTLX8650","7","37","0","Empty","0","Tank  55ft","0","37","");
 #
-insert into `cars` values("79","2249T","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("690","DEMO5263","8","2","0","Loaded","0","Box  40ft","1","2","");
 #
-insert into `cars` values("80","2258S","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("691","DEMO5264","8","3","0","Empty","0","Box  40ft","1","37","");
 #
-insert into `cars` values("81","2266X","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("692","DEMO5265","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("82","2280Q","4","1","0","Empty","0","","2","1","","0","0");
+insert into `cars` values("693","DEMO5266","8","37","0","Loaded","0","Box  40ft","1","37","");
 #
-insert into `cars` values("94","82045A","6","19","0","Loaded","22","","2","19","","0","0");
+insert into `cars` values("694","DEMO5267","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("95","18206W","12","19","0","Loaded","22","","2","19","","0","0");
+insert into `cars` values("695","DEMO5268","8","2","0","Ordered","0","Box  40ft","1","37","");
 #
-insert into `cars` values("96","18220H","12","7","0","Ordered","22","","3","19","","0","0");
+insert into `cars` values("696","DEMO5269","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("97","18210W","12","7","0","Ordered","22","","3","19","","0","0");
+insert into `cars` values("697","DEMO5270","8","21","0","Loaded","0","Box  40ft","1","37","");
 #
-insert into `cars` values("98","18207X","12","7","0","Ordered","22","","3","19","","0","0");
+insert into `cars` values("698","DEMO5271","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("99","18217Q","12","5","0","Empty","0","","2","19","","0","0");
+insert into `cars` values("699","DEMO5272","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("100","35955R","1","19","0","Loaded","22","","3","7","","0","0");
+insert into `cars` values("700","DEMO5273","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("101","36103B","1","7","0","Empty","0","","1","7","","0","0");
+insert into `cars` values("701","DEMO5274","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("102","36167Q","1","7","0","Empty","0","","1","7","","0","0");
+insert into `cars` values("702","DEMO5275","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("103","5170","10","3","0","Empty","0","","3","7","","0","0");
+insert into `cars` values("703","DEMO5276","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("104","0105-L-1","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("704","DEMO5277","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("105","0105-L","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("705","DEMO5278","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("106","0106-U","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("706","DEMO5279","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("107","0106-U-1","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("707","DEMO5280","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("108","0110-U","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("708","DEMO5281","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("109","0113-B-1","2","24","0","Unavailable","0","","3","24","","0","0");
+insert into `cars` values("709","DEMO5282","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("110","0113-B","2","4","0","Empty","0","","4","24","","0","0");
+insert into `cars` values("710","DEMO5283","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("111","0114-K","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("711","DEMO5284","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("112","0123-J","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("712","DEMO5285","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("113","0127-W","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("713","DEMO5286","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("114","0134-D-1","2","24","0","Unavailable","0","","2","24","","0","0");
+insert into `cars` values("714","DEMO5287","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("115","0134-D","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("715","DEMO5288","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("116","0135-M","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("716","DEMO5289","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("117","0140-V-1","2","24","0","Unavailable","0","","2","24","","0","0");
+insert into `cars` values("717","DEMO5290","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("118","0140-V","2","4","0","Empty","0","","3","24","","0","0");
+insert into `cars` values("718","DEMO5291","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("119","30915R","17","16","0","Empty","0","","4","16","","0","0");
+insert into `cars` values("719","DEMO5292","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("120","36275X","7","19","0","Loaded","22","","4","7","","0","0");
+insert into `cars` values("720","DEMO5293","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("121","36375P","7","7","0","Empty","0","","3","7","","0","0");
+insert into `cars` values("721","DEMO5294","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("122","36377K","7","7","0","Empty","0","","2","7","","0","0");
+insert into `cars` values("722","DEMO5295","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("123","36408Q","7","7","0","Empty","0","","2","7","","0","0");
+insert into `cars` values("723","DEMO5296","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("124","82054W","6","5","0","Empty","0","","2","19","","0","0");
+insert into `cars` values("724","DEMO5297","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("125","12125J","12","7","0","Empty","0","","2","19","","0","0");
+insert into `cars` values("725","DEMO5298","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("126","4020G","8","3","0","Empty","0","","4","7","","0","0");
+insert into `cars` values("726","DEMO5299","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("127","4022B","8","12","0","Empty","0","","3","7","","0","0");
+insert into `cars` values("727","DEMO5300","8","37","0","Empty","0","Box  40ft","0","37","");
 #
-insert into `cars` values("128","4517E","8","12","0","Empty","0","","3","7","","0","0");
+insert into `cars` values("728","DEMO5301","8","2","0","Empty","0","Box  40ft","0","2","");
 #
-insert into `cars` values("129","4517F","8","7","0","Empty","0","","3","7","","0","0");
-#
-insert into `cars` values("130","5020M","8","12","0","Empty","0","","3","7","","0","0");
-#
-insert into `cars` values("131","5021V","8","3","0","Empty","0","","3","7","","0","0");
-#
-insert into `cars` values("132","4014L","8","12","0","Empty","0","","2","7","","0","0");
-#
-insert into `cars` values("133","30852J","17","16","0","Empty","0","","4","16","","0","0");
-#
-insert into `cars` values("134","30869E","17","16","0","Empty","0","","5","16","","0","0");
-#
-insert into `cars` values("135","30879C","17","16","0","Empty","0","","3","16","","0","0");
-#
-insert into `cars` values("136","30886G","17","16","0","Empty","0","","3","16","","0","0");
-#
-insert into `cars` values("137","30888L","17","16","0","Empty","0","","3","16","","0","0");
-#
-insert into `cars` values("140","60261-E","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("141","60251T","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("142","60264X","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("143","60225X","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("144","60268V","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("145","60246K","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("146","60245B","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("147","60232-M","3","24","0","Empty","0","","4","24","","0","0");
-#
-insert into `cars` values("148","35907S","1","19","0","Loaded","22","","2","7","","0","0");
-#
-insert into `cars` values("149","35915X","1","19","0","Loaded","22","","2","7","","0","0");
-#
-insert into `cars` values("151","36067J","1","2","0","Empty","0","","1","7","","0","0");
-#
-insert into `cars` values("152","36008Q","1","2","0","Empty","0","","1","7","","0","0");
-#
-insert into `cars` values("153","82116Q","20","6","0","Ordered","21","","2","19","","0","0");
-#
-insert into `cars` values("154","82104N","20","6","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("155","82108D","20","6","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("156","82109M","20","6","0","Unloading","0","","1","19","","0","3");
-#
-insert into `cars` values("157","82106X","20","19","0","Loaded","22","","1","19","","0","0");
-#
-insert into `cars` values("158","82123U","20","6","0","Unloading","0","","1","19","","0","3");
-#
-insert into `cars` values("159","82113M","20","6","0","Unloading","0","","1","19","","0","3");
-#
-insert into `cars` values("160","82118L","20","5","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("161","12101D","12","5","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("162","82044Y","6","7","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("163","18204E","12","5","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("164","12145C","12","5","0","Empty","0","","1","19","","0","0");
-#
-insert into `cars` values("165","1713G","14","13","0","Empty","0","","3","13","041AF3A05A17","0","3");
-#
-insert into `cars` values("166","1707L","14","13","0","Empty","0","","3","13","041AF1E40803","0","3");
-#
-insert into `cars` values("167","1724A","14","13","0","Empty","0","","3","13","041AF3842C45","0","3");
-#
-insert into `cars` values("168","1763A","14","13","0","Empty","0","","3","13","041AF3BD6D3D","0","3");
-#
-insert into `cars` values("169","30900K","17","16","0","Empty","0","","1","16","","0","0");
-#
-insert into `cars` values("170","15-D","5","13","0","Empty","0","","1","13","041AF21150AD","0","3");
-#
-insert into `cars` values("171","1709G","14","21","0","Empty","0","","2","21","041AF1C49AB1","0","0");
-#
-insert into `cars` values("172","1726S","14","21","0","Empty","0","","2","21","041AF2003AD6","0","0");
-#
-insert into `cars` values("173","1704H","14","21","0","Empty","0","","2","21","041AF1FACADF","0","0");
-#
-insert into `cars` values("174","1758Y","14","21","0","Empty","0","","2","21","041AF3B74812","0","0");
-#
-insert into `cars` values("175","1743H","14","21","0","Empty","0","","2","21","041AF1DABB8E","0","0");
-#
-insert into `cars` values("176","1728N","14","21","0","Empty","0","","2","21","041AF1D06857","0","0");
-#
-insert into `cars` values("177","1767N","14","21","0","Empty","0","","2","21","041AF3882B4E","0","0");
-#
-insert into `cars` values("178","1748G","14","21","0","Empty","0","","2","21","041AF3A05815","0","0");
-#
-insert into `cars` values("179","1770E","14","21","0","Empty","0","","2","21","041AF381B2DE","0","0");
-#
-insert into `cars` values("180","1702M","14","21","0","Empty","0","","2","21","041AF3A6BEF5","0","0");
-#
-insert into `cars` values("181","1760T","14","21","0","Empty","0","","2","21","041AF1D9E3D5","0","0");
-#
-insert into `cars` values("182","1747U","14","21","0","Empty","0","","2","21","041AF3913C40","0","0");
-#
-insert into `cars` values("183","1757F","14","21","0","Empty","0","","2","21","041AF38AE186","0","0");
-#
-insert into `cars` values("184","1712U","14","21","0","Empty","0","","2","21","041AF38987E3","0","0");
-#
-insert into `cars` values("185","1744Q","14","21","0","Empty","0","","2","21","041AF38C4223","0","0");
-#
-insert into `cars` values("186","1738V","14","21","0","Empty","0","","2","21","041AF1DE3203","0","0");
-#
-insert into `cars` values("187","1746L","14","21","0","Empty","0","","2","21","041AF20045A9","0","0");
-#
-insert into `cars` values("188","1731E","14","21","0","Empty","0","","1","21","041AF3C4A58C","0","0");
-#
-insert into `cars` values("189","1717T","14","21","0","Empty","0","","1","21","","0","0");
+insert into `cars` values("729","DEMO5302","8","37","0","Empty","0","Box  40ft","0","37","");
 #
 
 #
@@ -627,34 +443,64 @@ drop table `commodities`;
 CREATE TABLE `commodities` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Code` tinytext NOT NULL,
-  `Description` tinytext DEFAULT NULL,
-  `Remarks` text DEFAULT NULL,
+  `Description` tinytext,
+  `Remarks` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 #
-insert into `commodities` values("1","Palletised Bagged Flour","","");
+insert into `commodities` values("1","LUMBER","Dimensional lumber","");
 #
-insert into `commodities` values("2","Fuel","","");
+insert into `commodities` values("2","HARDWARE","Construction Hardware","");
 #
-insert into `commodities` values("3","Ballast","","");
+insert into `commodities` values("3","CABINETS","Kitchen cabinets","");
 #
-insert into `commodities` values("4","Flour","","");
+insert into `commodities` values("4","GROCERY","Packaged grocery items","");
 #
-insert into `commodities` values("5","Cement","","");
+insert into `commodities` values("5","FRZFOOD","Frozen food items","");
 #
-insert into `commodities` values("6","Sugar","","");
+insert into `commodities` values("6","LP GAS","Compressed liquid gas","");
 #
-insert into `commodities` values("7","Export Goods","","");
+insert into `commodities` values("7","DIESEL","Diesel fuel","");
 #
-insert into `commodities` values("8","Glucose","","");
+insert into `commodities` values("8","GASOLINE","Gasoline","");
 #
-insert into `commodities` values("9","DDG","","");
+insert into `commodities` values("9","FUELOIL","Heating oil","");
 #
-insert into `commodities` values("10","Gluten","","");
+insert into `commodities` values("10","BUTTER","Packaged butter","");
 #
-insert into `commodities` values("11","Grain","","");
+insert into `commodities` values("11","CHEESE","Bulk cheese","");
 #
-insert into `commodities` values("12","Mill Feed","","");
+insert into `commodities` values("12","FERTILIZER","Agricultural fertilizer","");
+#
+insert into `commodities` values("13","SOYBEANS","Bulk soybeans","");
+#
+insert into `commodities` values("14","CORN","Bulk corn","");
+#
+insert into `commodities` values("15","WHEAT","Bulk wheat","");
+#
+insert into `commodities` values("16","COAL","Bulk coal","");
+#
+insert into `commodities` values("17","ASH","Coal ash","");
+#
+insert into `commodities` values("18","CINDERS","Coal cinders","");
+#
+insert into `commodities` values("19","LOCOSAND","Locomotive sand","");
+#
+insert into `commodities` values("20","COMTL","Company Material","");
+#
+insert into `commodities` values("21","AGIMPL","Farm Implements","");
+#
+insert into `commodities` values("22","BAGCEMENT","Bagged cement","");
+#
+insert into `commodities` values("23","BULKCEMENT","Bulk cement","");
+#
+insert into `commodities` values("24","MACH","Mining machinery","");
+#
+insert into `commodities` values("25","SCRAPMETAL","Scrap metal","");
+#
+insert into `commodities` values("26","AGGREGATE","Gravel or crushed rock","");
+#
+insert into `commodities` values("27","HOUSEGOODS","Household goods","");
 #
 
 #
@@ -665,541 +511,26 @@ CREATE TABLE `empty_locations` (
   `priority` int(11) NOT NULL,
   `location` int(11) NOT NULL,
   PRIMARY KEY (`shipment`,`priority`,`location`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
 
 #
-drop table `history`;
+drop table `ev switcher`;
 #
-CREATE TABLE `history` (
-  `car_id` int(11) DEFAULT NULL,
-  `session_nbr` int(11) DEFAULT NULL,
-  `event_date` datetime DEFAULT NULL,
-  `event` varchar(256) DEFAULT NULL,
-  `location` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `ev switcher` (
+  `step_number` int(11) NOT NULL,
+  `station` int(11) DEFAULT NULL,
+  `pickup` char(1) DEFAULT NULL,
+  `setout` char(1) DEFAULT NULL,
+  `remarks` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`step_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
-insert into `history` values("33","3","2025-03-23 06:27:03","Filled car order 003-M66","20");
+insert into `ev switcher` values("10","2","T","F","Pick up cars for EAST");
 #
-insert into `history` values("34","3","2025-03-23 06:27:06","Filled car order 003-M67","20");
+insert into `ev switcher` values("20","1","T","T","Spot cars for customers; Pick up all westbound cars");
 #
-insert into `history` values("35","3","2025-03-23 06:27:08","Filled car order 003-M68","20");
-#
-insert into `history` values("36","3","2025-03-23 06:27:10","Filled car order 003-M69","20");
-#
-insert into `history` values("37","3","2025-03-23 06:27:12","Filled car order 003-M70","20");
-#
-insert into `history` values("38","3","2025-03-23 06:27:14","Filled car order 003-M71","20");
-#
-insert into `history` values("39","3","2025-03-23 06:27:16","Filled car order 003-M72","20");
-#
-insert into `history` values("40","3","2025-03-23 06:27:18","Filled car order 003-M73","20");
-#
-insert into `history` values("41","3","2025-03-23 06:27:19","Filled car order 003-M74","20");
-#
-insert into `history` values("42","3","2025-03-23 06:27:22","Filled car order 003-M75","20");
-#
-insert into `history` values("43","3","2025-03-23 06:27:26","Filled car order 003-M76","20");
-#
-insert into `history` values("45","3","2025-03-23 06:27:30","Filled car order 003-M77","20");
-#
-insert into `history` values("46","3","2025-03-23 06:27:31","Filled car order 003-M78","20");
-#
-insert into `history` values("47","3","2025-03-23 06:27:33","Filled car order 003-M79","20");
-#
-insert into `history` values("48","3","2025-03-23 06:27:35","Filled car order 003-M80","20");
-#
-insert into `history` values("49","3","2025-03-23 06:27:37","Filled car order 003-M81","20");
-#
-insert into `history` values("50","3","2025-03-23 06:27:39","Filled car order 003-M82","20");
-#
-insert into `history` values("51","3","2025-03-23 06:27:41","Filled car order 003-M83","20");
-#
-insert into `history` values("52","3","2025-03-23 06:27:43","Filled car order 003-M84","20");
-#
-insert into `history` values("53","3","2025-03-23 06:27:44","Filled car order 003-M85","20");
-#
-insert into `history` values("54","3","2025-03-23 06:27:46","Filled car order 003-M86","20");
-#
-insert into `history` values("32","3","2025-03-23 06:27:48","Filled car order 003-M87","20");
-#
-insert into `history` values("44","3","2025-03-23 06:27:49","Filled car order 003-M88","20");
-#
-insert into `history` values("32","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("33","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("34","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("35","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("36","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("37","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("38","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("40","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("41","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("42","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("43","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("44","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("45","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("46","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("47","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("48","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("49","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("50","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("51","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("52","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("53","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("54","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("39","3","2025-03-23 06:28:30","Picked up by Job 1981/9182 | Rozelle Containers","20");
-#
-insert into `history` values("32","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("33","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("34","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("35","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("36","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("37","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("38","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("40","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("41","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("42","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("43","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("44","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("45","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("46","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("47","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("48","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("49","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("50","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("51","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("52","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("53","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("54","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("39","3","2025-03-23 06:28:42","Set out by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("189","3","2025-03-23 07:09:09","Filled car order 003-M100","21");
-#
-insert into `history` values("171","3","2025-03-23 07:09:12","Filled car order 003-M101","21");
-#
-insert into `history` values("172","3","2025-03-23 07:09:13","Filled car order 003-M102","21");
-#
-insert into `history` values("173","3","2025-03-23 07:09:15","Filled car order 003-M103","21");
-#
-insert into `history` values("174","3","2025-03-23 07:09:16","Filled car order 003-M104","21");
-#
-insert into `history` values("175","3","2025-03-23 07:09:18","Filled car order 003-M105","21");
-#
-insert into `history` values("176","3","2025-03-23 07:09:19","Filled car order 003-M106","21");
-#
-insert into `history` values("177","3","2025-03-23 07:09:21","Filled car order 003-M89","21");
-#
-insert into `history` values("178","3","2025-03-23 07:09:23","Filled car order 003-M90","21");
-#
-insert into `history` values("179","3","2025-03-23 07:09:25","Filled car order 003-M91","21");
-#
-insert into `history` values("180","3","2025-03-23 07:09:27","Filled car order 003-M92","21");
-#
-insert into `history` values("181","3","2025-03-23 07:09:29","Filled car order 003-M93","21");
-#
-insert into `history` values("182","3","2025-03-23 07:09:30","Filled car order 003-M94","21");
-#
-insert into `history` values("183","3","2025-03-23 07:09:32","Filled car order 003-M95","21");
-#
-insert into `history` values("184","3","2025-03-23 07:09:34","Filled car order 003-M96","21");
-#
-insert into `history` values("185","3","2025-03-23 07:09:35","Filled car order 003-M97","21");
-#
-insert into `history` values("186","3","2025-03-23 07:09:37","Filled car order 003-M98","21");
-#
-insert into `history` values("187","3","2025-03-23 07:09:38","Filled car order 003-M99","21");
-#
-insert into `history` values("180","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("173","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("171","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("184","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("189","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("172","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("176","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("186","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("175","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("185","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("187","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("182","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("178","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("183","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("174","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("181","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("177","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("179","3","2025-03-23 07:10:11","Picked up by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("180","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("173","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("171","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("184","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("189","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("172","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("176","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("186","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("175","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("185","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("187","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("182","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("178","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("183","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("174","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("181","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("177","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("179","3","2025-03-23 07:11:25","Set out by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("174","3","2025-03-23 07:12:57","Repositioned to Narranderra","17");
-#
-insert into `history` values("181","3","2025-03-23 07:14:19","Repositioned to Narranderra","17");
-#
-insert into `history` values("177","3","2025-03-23 07:14:54","Repositioned to Narranderra","17");
-#
-insert into `history` values("179","3","2025-03-23 07:16:51","Repositioned to Narranderra","17");
-#
-insert into `history` values("133","3","2025-03-23 10:26:00","Assigned to Job Manildra Plant Shunter","16");
-#
-insert into `history` values("135","3","2025-03-23 10:26:00","Assigned to Job Manildra Plant Shunter","16");
-#
-insert into `history` values("136","3","2025-03-23 10:26:00","Assigned to Job Manildra Plant Shunter","16");
-#
-insert into `history` values("174","3","2025-03-23 10:26:00","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("181","3","2025-03-23 10:26:00","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("177","3","2025-03-23 10:26:00","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("179","3","2025-03-23 10:26:00","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("33","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("34","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("35","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("36","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("37","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("38","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("39","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("40","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("41","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("42","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("43","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("45","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("46","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("47","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("48","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("49","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("50","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("51","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("52","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("53","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("54","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("32","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("44","3","2025-03-23 10:26:00","Assigned to Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("157","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("94","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("95","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("148","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("149","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("100","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("120","3","2025-03-23 10:26:30","Assigned to Job 1921/9122 | Nowra Mixed Goods","19");
-#
-insert into `history` values("153","3","2025-03-23 10:26:42","Assigned to Job 1124/1123 | Kembla Heights Pickup Goods","6");
-#
-insert into `history` values("96","3","2025-03-23 10:26:52","Assigned to Job 1921/9122 | Nowra Mixed Goods","7");
-#
-insert into `history` values("97","3","2025-03-23 10:26:52","Assigned to Job 1921/9122 | Nowra Mixed Goods","7");
-#
-insert into `history` values("98","3","2025-03-23 10:26:52","Assigned to Job 1921/9122 | Nowra Mixed Goods","7");
-#
-insert into `history` values("174","3","2025-03-23 10:27:27","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("181","3","2025-03-23 10:27:27","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("177","3","2025-03-23 10:27:27","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("179","3","2025-03-23 10:27:27","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("174","3","2025-03-23 10:27:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("181","3","2025-03-23 10:27:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("177","3","2025-03-23 10:27:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("179","3","2025-03-23 10:27:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("32","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("33","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("34","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("35","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("36","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("37","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("38","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("40","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("41","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("42","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("43","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("44","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("45","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("46","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("47","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("48","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("49","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("50","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("51","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("52","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("53","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("54","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("39","3","2025-03-23 10:28:04","Picked up by Job 1981/9182 | Rozelle Containers","15");
-#
-insert into `history` values("133","3","2025-03-23 10:28:17","Picked up by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("135","3","2025-03-23 10:28:18","Picked up by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("136","3","2025-03-23 10:28:18","Picked up by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("133","3","2025-03-23 10:28:38","Set out by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("135","3","2025-03-23 10:28:38","Set out by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("136","3","2025-03-23 10:28:38","Set out by Job Manildra Plant Shunter","16");
-#
-insert into `history` values("180","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("173","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("171","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("184","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("189","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("172","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("176","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("186","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("175","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("185","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("187","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("182","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("178","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("183","3","2025-03-23 10:31:43","Repositioned to Narranderra","17");
-#
-insert into `history` values("180","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("173","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("171","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("184","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("189","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("172","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("176","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("186","3","2025-03-23 10:32:58","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("175","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("185","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("187","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("182","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("178","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("183","3","2025-03-23 10:32:59","Assigned to Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("180","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("173","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("171","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("184","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("189","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("172","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("176","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("186","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("175","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("185","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("187","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("182","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("178","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("183","3","2025-03-23 10:33:23","Picked up by Job 9381/3982 | Narranderra Flour","17");
-#
-insert into `history` values("180","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("173","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("171","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("184","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("189","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("172","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("176","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("186","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("175","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("185","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("187","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("182","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("178","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
-#
-insert into `history` values("183","3","2025-03-23 10:33:38","Set out by Job 9381/3982 | Narranderra Flour","21");
+insert into `ev switcher` values("30","2","F","T","Set out cars pulled from EAST customers");
 #
 
 #
@@ -1208,34 +539,81 @@ drop table `jobs`;
 CREATE TABLE `jobs` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `name` tinytext NOT NULL,
-  `description` text DEFAULT NULL,
+  `description` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 #
-insert into `jobs` values("11","Manildra Plant Shunter","Yard Transfer Job between Shoalhaven Starches and Nowra Yard.");
+insert into `jobs` values("1","1","Train No. 1 is an Eastville to Westerly westward manifest freight.
+- At EV/Eastville: Pick up cars for MD/Middleton, BT/Blacktail, ES/Essex, WS/Westerly, and WEST
+- At MD/Middleton: Set out cars for MD/Middleton, BT/Blacktail, and ES/Essex; Pick up cars for WS/Westerly and WEST
+- At WS/Westerly: Set out remaining cars; Tie up");
 #
-insert into `jobs` values("20","1121/1122 | Kembla Heights Trip Train","<p><u>1121 | Down Trip Train from Rozelle to Kembla Heights</u></p><p><em>Scheduled Departure Time: 1330 </em></p><p><strong>Staging (Rozelle)<br /></strong></p><ul><li>Ensure train complete and EOT Device present</li><li>Dispatcher will contact you for path shortly before scheduled departure time</li></ul><p><strong>Kembla Junction<br /></strong></p><ul><li>Dispatcher will handle shunt signals to run around train </li></ul><p><strong>Kembla Heights</strong></p><ul><li>Yard working location within signal limits</li><li>Contact Dispatcher if you require Signal KH1 to shunt onto the main line.</li><li>Use chocks to stable your train on the grade if necessary.</li></ul><p><strong>Forms 1122 at 1805<br /></strong></p>
-<p><u>1122 | Up Trip Train from Kembla Heights to Rozelle</u></p><p><em>Scheduled Departure Time: 1805 </em></p><p><strong>Kembla Heights</strong></p><ul><li>Ensure train complete and EOT Device present</li><li>Dispatcher will contact you for path shortly before scheduled departure time</li></ul><p><strong>Kembla Junction<br /></strong></p><ul><li>Dispatcher will handle shunt signals to run around train </li></ul><p><strong>Staging (Rozelle)</strong></p><ul><li>Stable in Dead-End Siding in Staging</li></ul><p><strong>Train does not form a new service<br /></strong></p>");
-#
-insert into `jobs` values("21","1124/1123 | Kembla Heights Pickup Goods","<p><u>1124 | Pickup Goods from Nowra to Kembla Heights</u></p><p><em>Scheduled Departure Time: 0400 </em></p><p><strong>Nowra<br /></strong></p><ul><li>Assemble your train for departure. Review your assigned cars and make up your train.</li><li>Contact Dispatcher when ready to depart. Request permission to retrieve staff at Nowra</li><li>Cars destined for Berry via 1123 should also be attached</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to sink staff at Kiama</li></ul><p><strong>Kembla Heights</strong></p><ul><li>Yard working location within signal limits</li><li>Contact Dispatcher if you require Signal KH1 to shunt onto the main line.</li><li>Use chocks to stable your train on the grade if necessary.</li><li>Drop any wagons destined for Berry in STS at Kembla Heights Yard. These will be picked up by 1123.</li></ul><p><strong>Form 1123 at 1150 hours</strong></p>
-<p><u>1123 | Pickup Goods from Kembla Heights to Nowra</u></p><p><em>Scheduled Departure Time: 1150</em></p><p><strong>Kembla Heights</strong></p><ul><li>Retrieve any cars from Kembla Heights. This will include cars destined for Berry, which should have been dropped off by 1124 in Kembla Heights Yard.</li><li>Contact Dispatcher 5 mins before scheduled departure to confirm path.</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to retrieve staff at Kiama</li></ul><h4>Berry</h4><ul><li>Switch any cars for Berry Cement Siding.</li><li>Request permission to sink/retrieve staffs at Berry</li></ul><h4>Nowra</h4><ul><li>Do not stable in the loop.</li><li>Shunt any cars destined for Nowra to their respective sidings</li><li>Leave any cars destined for Clyde in a siding ready for pickup.</li><li>Shutdown the engine in the same siding.</li></ul><p><strong>Train does not form a new service</strong></p>");
-#
-insert into `jobs` values("22","1921/9122 | Nowra Mixed Goods","<p><u>1921 | Down Goods train from Clyde Yard to Nowra</u></p><p><em>Scheduled Departure Time: 0600</em></p><p><strong>Clyde Yard (Staging)</strong></p><ul><li>Acquire train in Balloon loop staging yard</li><li>Ensure train complete and EOT Device present</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to retrieve staff at Kiama</li></ul><h4>Berry</h4><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><h4>Nowra</h4><ul><li>Nowra is a Yard Working location.</li><li>Drop any cars destined for Kembla Heights or Berry to the No. 2 Goods Siding</li><li>Pickup any cars destined for Clyde Yard within Nowra Yard</li><li>Once work is complete, stable train in No. 1 Goods Siding</li></ul><p><strong>Forms 9122 at 1530<br /></strong></p>
-<p><u>9122 | Up Goods train from Nowra to Clyde Yard</u></p><p><em>Scheduled Departure Time: 1530</em></p><h4>Nowra</h4><ul><li>Nowra is a Yard Working location.</li><li>Pickup Train in No.1 Goods Siding</li><li>Ensure train complete and EOT Device present</li><li>Contact Dispatcher to request staff</li></ul><h4>Berry</h4><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to sink staff at Kiama</li></ul><p><strong>Clyde Yard (Staging)</strong></p><ul><li>Stable train in Balloon Loop Staging Yard</li></ul><p><strong>Train does not form a new service</strong></p>
+insert into `jobs` values("2","11","Train No. 11 is an Eastville to Middleton westward wayfreight, first half of Eastville-Middleton Turn
+- At EV/Eastville: Pick up cars for BB/Burbia, PW/Powers, TC/Tunnel City, and CB/Cambria
+- At BB/Burbia: Spot cars for customers; Pick up all westbound cars
+- At PW/Powers: Spot cars for customers; Pick up all westbound cars except those in the Ajax Mine / Tri-State pool
+- At JC/Junction City: Set out cars for TC/Tunnel City and CB/Cambria; Pick up all westbound cars
+- At MD/Middleton: Spot cars for customers; Make up westbound pickup for No. 1
 
-");
+Note: Spot off-spot cars at BB, PW, and MD if necessary");
 #
-insert into `jobs` values("23","1907/9108 | Bombo Ballast","<p><u>1907 | Ballast train from Chullora to Bombo</u></p><p><em>Scheduled Departure Time: 1000 </em></p><p><strong>Chullora (Staging)<br /></strong></p><ul><li>Pickup your train from the down staging yard.</li><li>Contact Dispatcher when ready to depart.</li></ul><p><strong>Bombo</strong></p><ul><li>Contact Dispatcher to operate loop and quarry siding points</li><li>Stable loaded train in loop, ready for departure once shunting complete.</li></ul><p><strong>Form 9108 at 1400 hours</strong></p>
-<p><u>9108 | Ballast train from Bombo to Chullora</u></p><p><em>Scheduled Departure Time: 1400 </em></p><p><strong>Bombo<br /></strong></p><ul><li>Depart Bombo Loop when path is available</li></ul><p><strong>Staging</strong></p><ul><li>Road to staging will be provided by dispatcher.</li><li>Tie down train in Yard</li></ul><p><strong>Train does not form a new service</strong></p>");
+insert into `jobs` values("3","12","Train No. 12 is a Middleton to Eastville eastward wayfreight, second half of Eastville-Middleton Turn
+- At MD/Middleton: Pick up cars for CB/Cambria, TC/Tunnel City, PW/Powers, and BB/Burbia
+- At JC/Junction City: Set out cars for CB/Cambria and TC/Tunnel City; Pick up all eastbound cars
+- At PW/Powers: Spot cars for customers; Pick up all eastbound cars
+- At BB/Burbia: Spot cars for customers; Pick up all eastbound cars
+- At EV/Eastville: Set out remaining cars; Tie up
+
+Note: Spot off-spot cars at PW and BB if necessary");
 #
-insert into `jobs` values("24","1981/9182 | Rozelle Containers","<p><u>1981 | Manildra Mills Container Train From Rozelle to Nowra</u></p><p><em>Scheduled Departure Time: 0430 </em></p><p><strong>Staging<br /></strong></p><ul><li>Acquire train in Balloon loop staging yard</li><li>Ensure train complete and EOT Device present</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to retrieve staff at Kiama</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working location</li><li>Ensure switch is lined to Manildra facility</li><li>Set Out all Cars in STS to the Intermodal Siding</li><li>Use <a href=\'http://192.168.0.101:12080/prefs/container_load.html\'>Container Loader</a> to load all containers</li><li>Assign and Pickup Containers for 9182 return service</li></ul><p><strong>Form 9182 at 1430<br /></strong></p>
-<p><u>9182 | Manildra Mills Container Train From Nowra to Rozelle</u></p><p><em>Scheduled Departure Time: 1430 </em></p><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working Location</li><li>Assign and Pickup Containers for 9182 return service in STS</li><li>Ensure train complete and EOT Device present</li><li>Dispatcher will contact you for path shortly before scheduled departure time</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to sink staff at Kiama</li></ul><p><strong>Rozelle (Staging)</strong></p><ul><li>Stable in Balloon Loop staging yard.</li></ul><p><strong>Train does not form a new service</strong></p>");
+insert into `jobs` values("4","13","Train No. 13 is a Middleton to Westerly westward wayfreight, first half of Middleton-Westerly Turn
+- At MD/Middleton: Pick up cars for BT/Blacktail and ES/Essex
+- At BT/Blacktail: Spot cars for Forest Products; Pick up all westbound cars
+- At ES/Essex: Spot cars for customers; Pick up all westbound cars
+- At WS/Westerly: Set out remaining cars
+
+Note: Spot off-spot cars at ES if necessary");
 #
-insert into `jobs` values("25","9381/3982 | Narranderra Flour","<p><u>9381 | Down Flour Train from Narranderra to Nowra (Shoalhaven Starches Facility)</u></p><p><em>Scheduled Departure Time: xxxx</em></p><p><strong>Staging (Narranderra)<br /></strong></p><ul><li>Acquire train in Balloon loop staging yard</li><li>Ensure train complete and EOT Device present</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to retrieve staff at Kiama</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working location</li><li>Ensure switch is lined to Manildra facility</li><li>Set Out all Cars in STS to the Flour Dump Road</li><li>Use <a href=\'http://192.168.0.101:12080/prefs/wagon_unloader.html\'>Wagon Unloader</a> to empty flour hoppers</li><li>Assign and Pickup Flour Hoppers to 3982 Outbound service in STS</li></ul><p><strong>Form 3982 at xxxx<br /></strong></p>
-<p><u>3982 | Up Empty Flour Train from Nowra to Narranderra</u></p><p><em>Scheduled Departure Time: xxxx<br /></em></p><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working location</li><li>Assign and Pickup Flour Hoppers to 3982 Outbound service in STS</li><li>Ensure train complete and EOT Device present</li><li>Control will contact you for path shortly before scheduled departure time</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to sink staff at Kiama</li></ul><p><strong>Narranderra (Staging)</strong></p><ul><li>Stable in Balloon Loop staging yard.</li></ul><p><strong>Train does not form a new service</strong></p>");
+insert into `jobs` values("5","14","Train No. 14 is a Westerly to Middleton eastward wayfreight, second half of Middleton-Westerly Turn
+At WS/Westerly: Pick up cars for ES/Essex and BT/Blacktail
+At ES/Essex: Spot cars for customers; Pick up all eastbound cars
+At BT/Blacktail: Spot cars for Forest Products; Pick up all eastbound cars
+At MD/Middleton: Spot cars for customers; Make up eastbound pickup for No. 2; Tie up
+
+Note: Spot off-spot cars at ES and BT if necessary");
 #
-insert into `jobs` values("26","5981/9582 | Gunnedah Flour","<p><u>5981 | Down Flour Train from Gunnedah to Nowra (Shoalhaven Starches Facility)</u></p><p><em>Scheduled Departure Time: 0745</em></p><p><strong>Staging (Gunnedah)<br /></strong></p><ul><li>Acquire train in Balloon loop staging yard</li><li>Ensure train complete and EOT Device present</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to retrieve staff at Kiama</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working location</li><li>Ensure switch is lined to Manildra facility</li><li>Set Out all Cars in STS to the Flour Dump Road</li><li>Use <a href=\'http://192.168.0.101:12080/prefs/wagon_unloader.html\'>Wagon Unloader</a> to empty flour hoppers</li><li>Assign and Pickup Flour Hoppers to 9582 Outbound service in STS</li></ul><p><strong>Form 9582 at 1830<br /></strong></p>
-<p><u>9582 | Up Empty Flour Train from Nowra to Gunnedah</u></p><p><em>Scheduled Departure Time: 1830<br /></em></p><p><strong>Nowra</strong></p><ul><li>Nowra is a Yard Working location</li><li>Assign and Pickup Flour Hoppers to 9582 Outbound service in STS</li><li>Ensure train complete and EOT Device present</li><li>Dispatcher will contact you for path shortly before scheduled departure time</li></ul><p><strong>Berry</strong></p><ul><li>Request permission to sink/retrieve staffs at Berry</li></ul><p><strong>Kiama</strong></p><ul><li>Request permission to sink staff at Kiama</li></ul><p><strong>Gunnedah (Staging)</strong></p><ul><li>Stable in Balloon Loop staging yard.</li></ul><p><strong>Train does not form a new service</strong></p>");
+insert into `jobs` values("6","2","Train No. 2 is a Westerly to Eastville eastward manifest freight
+At WS/Westerly: Pick up cars for CB/Cambria, TC/Tunnel City, MD/Middleton, PW/Powers, BB/Burbia, EV/Eastville, and EAST
+At MD/Middleton: Set out cars for CB/Cambria, TC/Tunnel City, MD/Middleton, PW/Powers, and BB/Burbia; Pick up cars for EV/Eastville and EAST
+At EV/Eastville: Set out remaining cars; Tie up");
+#
+insert into `jobs` values("7","21","Train No. 21 is a Powers to Cambria wayfreight, second half of the Cambria-Powers Turn
+At PW/Powers: Pick up empty cars from Tri-State destined for the Ajax Mine at Cambria
+At JC/Junction City: Pick up cars for customers at TC/Tunnel City and CB/Cambria
+At TC/Tunnel City: Spot cars for customers; Pick up any cars for CB/Cambria
+At CB/Cambria: Spot cars for customers; Tie up
+
+Note: Spot off-spot cars at TC and CB if necessary");
+#
+insert into `jobs` values("8","22","Train No. 22 is a Cambria to Powers wayfreight, first half of the Cambria - Powers Turn
+At CB/Cambria: Pick up all outbound cars
+At TC/Tunnel City: Spot cars for customers; Pick up all outbound cars
+At JC/Junction City: Set out all cars except those for Tri-State at Powers
+At PW/Powers: Spot cars for Tri-State");
+#
+insert into `jobs` values("9","EV Switcher","The Eastville Yard Switcher is a staging yard job that handles all traffic for EAST customers and builds consists for trains 1 and 11
+- At EV: Pick up all cars for customers at EAST
+- At EAST: Set out cars for customers; Pick up all outbound cars
+- At EV: Set out cars pulled from EAST customers; Build outbound trains No. 1 and No. 11
+
+Note: Use of the 0-5-0 switcher is authorized.");
+#
+insert into `jobs` values("10","WS Switcher","The Westerly Yard Switcher is a staging yard job that handles all traffic for WEST customers and builds consists for trains 2 and 14
+- At WS: Pick up all cars for customers at WEST
+- At WEST: Set out cars for customers; Pick up all outbound cars
+- At WS: Set out cars pulled from WEST customers; Build outbound trains No. 2 and No. 14
+
+Note: Use of the 0-5-0 switcher is authorized.");
 #
 
 #
@@ -1245,332 +623,89 @@ CREATE TABLE `locations` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `code` tinytext NOT NULL,
   `station` int(11) NOT NULL,
-  `track` tinytext DEFAULT NULL,
-  `spot` tinytext DEFAULT NULL,
-  `rpt_station` tinytext DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
-  `color` tinytext DEFAULT NULL,
+  `track` tinytext,
+  `spot` tinytext,
+  `rpt_station` tinytext,
+  `remarks` text,
+  `color` tinytext,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
 #
-insert into `locations` values("1","Ballast Siding","3","","","","","None");
+insert into `locations` values("1","EAST","1","N/A","N/A","EAST","All customers east of Eastville","pink");
 #
-insert into `locations` values("2","CSR Sugar","2","","","","","None");
+insert into `locations` values("2","EV","2","ALL","N/A","EASTVILLE YARD","Eastville yard","pink");
 #
-insert into `locations` values("3","Ampol Depot","2","","","","","None");
+insert into `locations` values("3","BB-ACME","3","ACME","N/A","BURBIA","Acme Cabinetry","red");
 #
-insert into `locations` values("4","Intermodal Siding","2","","","","","None");
+insert into `locations` values("4","BB-FUEL","3","FUEL","N/A","BURBIA","City Bulk Fuel","red");
 #
-insert into `locations` values("5","Cement Siding","2","","","","","None");
+insert into `locations` values("5","BB-PASS","3","RUNAROUND","N/A","N/A","Runaround track","red");
 #
-insert into `locations` values("6","Cement Siding","4","","","","","None");
+insert into `locations` values("6","BB*","3","ALL","ALL","BURBIA","Wild card for shipper use only","red");
 #
-insert into `locations` values("7","Yard","1","","","","","None");
+insert into `locations` values("7","PW-ELEV","4","INDUSTRY","ELEV","POWERS","Farmer\'s Elevator","orange");
 #
-insert into `locations` values("12","Endeavour Siding","1","","","","","None");
+insert into `locations` values("8","PW-TEAM","4","INDUSTRY","TEAM","POWERS","Team track","orange");
 #
-insert into `locations` values("13","Gunnedah","5","","","","","None");
+insert into `locations` values("9","PW-TRI","4","POWERPLANT","N/A","POWERS","Tri-State Power & Light","orange");
 #
-insert into `locations` values("14","Yard","6","","","","","None");
+insert into `locations` values("10","PW-PASS","4","PASS","N/A","POWERS","Passing track","orange");
 #
-insert into `locations` values("15","Intermodal Sidings","6","","","","","None");
+insert into `locations` values("11","PW*","4","ALL","ALL","POWERS","Wild card for shipper use only","orange");
 #
-insert into `locations` values("16","Boxcar Siding","6","","","","","None");
+insert into `locations` values("12","JC-SPUR","5","SPUR","N/A","JUNCTION CITY","Set out track for branch line cars","yellow");
 #
-insert into `locations` values("17","Flour Dump Road","6","","","","","None");
+insert into `locations` values("13","MD-ELEV","6","ELEVATOR","N/A","MIDDLETON","Valley Grain Elevator","green");
 #
-insert into `locations` values("18","Chullora Yard","5","","","","","None");
+insert into `locations` values("14","MD-OIL","6","OIL","N/A","MIDDLETON","Co-op Oil Company","green");
 #
-insert into `locations` values("19","Clyde Yard","5","","","","","None");
+insert into `locations` values("15","MD-ENG1","6","ENGINE-1","N/A","MIDDLETON","Engine svc track 1","green");
 #
-insert into `locations` values("20","Rozelle Yard","5","","","","","None");
+insert into `locations` values("16","MD-ENG2","6","ENGINE-2","N/A","MIDDLETON","Engine svc track 2","green");
 #
-insert into `locations` values("21","Narranderra","5","","","","","None");
+insert into `locations` values("17","MD-PASS","6","PASS","N/A","MIDDLETON","Passing track","green");
 #
-insert into `locations` values("22","Manildra","5","","","","","None");
+insert into `locations` values("18","MD-YD1","6","YARD 1","N/A","MIDDLETON","Yard track 1","green");
 #
-insert into `locations` values("23","Yard","2","","","","","None");
+insert into `locations` values("19","MD-YD2","6","YARD 2","N/A","MIDDLETON","Yard track 2","green");
 #
-insert into `locations` values("24","Rozelle (White Bay)","5"," ","","","","None");
+insert into `locations` values("20","MD*","6","ALL","ALL","MIDDLETON","Wild card for shipper use only","green");
 #
-
+insert into `locations` values("21","BT-FP","7","FOREST PROD","N/A","BLACKTAIL","Black Tail Forest Products","lightblue");
 #
-drop table `owners`;
+insert into `locations` values("22","ES-EVANS","8","INDUSTRY","EVANS","ESSEX","Evans Implements","mediumblue");
 #
-CREATE TABLE `owners` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(256) DEFAULT NULL,
-  `remarks` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+insert into `locations` values("23","ES-LLOYD","8","INDUSTRY","LLOYD LP","ESSEX","Lloyd LP gas","mediumblue");
 #
-
+insert into `locations` values("24","ES-TEAM","8","INDUSTRY","TEAM","ESSEX","Team Track","mediumblue");
 #
-drop table `ownership`;
+insert into `locations` values("25","ES-PASS","8","PASS","N/A","ESSEX","Passing track","mediumblue");
 #
-CREATE TABLE `ownership` (
-  `car_id` int(11) NOT NULL,
-  `owner_id` int(11) NOT NULL,
-  `on_off_rr` varchar(256) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+insert into `locations` values("26","ES*","8","ALL","ALL","ESSEX","Wild card for shipper use only","mediumblue");
 #
-
+insert into `locations` values("27","TC-COMTL","11","COMTL","N/A","TUNNEL CITY","Company Material Yard","purple");
 #
-drop table `pool`;
+insert into `locations` values("28","TC-JONES","11","JONES","N/A","TUNNEL CITY","Jones Mining Equipment","purple");
 #
-CREATE TABLE `pool` (
-  `car_id` int(11) NOT NULL,
-  `shipment_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+insert into `locations` values("29","TC-PASS","11","PASS","N/A","TUNNEL CITY","Runaround track","purple");
 #
-insert into `pool` values("2","1");
+insert into `locations` values("30","TC*","11","ALL","ALL","TUNNEL CITY","Wild card for shipper use only","purple");
 #
-insert into `pool` values("1","1");
+insert into `locations` values("31","CB-AJAX","12","AJAX","N/A","CAMBRIA","Ajax Mining","purple");
 #
-insert into `pool` values("3","1");
+insert into `locations` values("32","CB-ENG","12","ENGSVC","N/A","CAMBRIA","Engine service track","purple");
 #
-insert into `pool` values("4","1");
+insert into `locations` values("33","CB-PASS","12","PASS","N/A","CAMBRIA","Runaround track","purple");
 #
-insert into `pool` values("5","1");
+insert into `locations` values("34","CB-TEAM","12","INDUSTRY","TEAM","CAMBRIA","Team track","purple");
 #
-insert into `pool` values("6","1");
+insert into `locations` values("35","CB-WOERST","12","INDUSTRY","WOERST","CAMBRIA","Woerst Mercantile Co","purple");
 #
-insert into `pool` values("7","1");
+insert into `locations` values("36","CB*","12","ALL","ALL","CAMBRIA","Wild card for shipper use only","purple");
 #
-insert into `pool` values("8","1");
+insert into `locations` values("37","WS","9","ALL","N/A","WESTERLY YARD","Westerly Yard","lightgrey");
 #
-insert into `pool` values("9","1");
-#
-insert into `pool` values("10","1");
-#
-insert into `pool` values("11","1");
-#
-insert into `pool` values("12","1");
-#
-insert into `pool` values("13","1");
-#
-insert into `pool` values("14","1");
-#
-insert into `pool` values("15","1");
-#
-insert into `pool` values("16","1");
-#
-insert into `pool` values("32","2");
-#
-insert into `pool` values("33","2");
-#
-insert into `pool` values("34","2");
-#
-insert into `pool` values("35","2");
-#
-insert into `pool` values("36","2");
-#
-insert into `pool` values("37","2");
-#
-insert into `pool` values("38","2");
-#
-insert into `pool` values("39","2");
-#
-insert into `pool` values("40","2");
-#
-insert into `pool` values("41","2");
-#
-insert into `pool` values("42","2");
-#
-insert into `pool` values("43","2");
-#
-insert into `pool` values("44","2");
-#
-insert into `pool` values("45","2");
-#
-insert into `pool` values("46","2");
-#
-insert into `pool` values("47","2");
-#
-insert into `pool` values("48","2");
-#
-insert into `pool` values("49","2");
-#
-insert into `pool` values("50","2");
-#
-insert into `pool` values("51","2");
-#
-insert into `pool` values("52","2");
-#
-insert into `pool` values("53","2");
-#
-insert into `pool` values("54","2");
-#
-insert into `pool` values("103","4");
-#
-insert into `pool` values("103","5");
-#
-insert into `pool` values("132","4");
-#
-insert into `pool` values("132","5");
-#
-insert into `pool` values("126","4");
-#
-insert into `pool` values("126","5");
-#
-insert into `pool` values("127","4");
-#
-insert into `pool` values("127","5");
-#
-insert into `pool` values("128","4");
-#
-insert into `pool` values("128","5");
-#
-insert into `pool` values("129","4");
-#
-insert into `pool` values("129","5");
-#
-insert into `pool` values("130","4");
-#
-insert into `pool` values("130","5");
-#
-insert into `pool` values("131","4");
-#
-insert into `pool` values("131","5");
-#
-insert into `pool` values("168","1");
-#
-insert into `pool` values("167","1");
-#
-insert into `pool` values("165","1");
-#
-insert into `pool` values("166","1");
-#
-insert into `pool` values("170","1");
-#
-insert into `pool` values("105","20");
-#
-insert into `pool` values("105","19");
-#
-insert into `pool` values("104","20");
-#
-insert into `pool` values("104","19");
-#
-insert into `pool` values("106","20");
-#
-insert into `pool` values("106","19");
-#
-insert into `pool` values("107","20");
-#
-insert into `pool` values("107","19");
-#
-insert into `pool` values("108","20");
-#
-insert into `pool` values("108","19");
-#
-insert into `pool` values("110","20");
-#
-insert into `pool` values("110","19");
-#
-insert into `pool` values("109","19");
-#
-insert into `pool` values("109","20");
-#
-insert into `pool` values("111","20");
-#
-insert into `pool` values("111","19");
-#
-insert into `pool` values("112","20");
-#
-insert into `pool` values("112","19");
-#
-insert into `pool` values("113","20");
-#
-insert into `pool` values("113","19");
-#
-insert into `pool` values("115","19");
-#
-insert into `pool` values("115","20");
-#
-insert into `pool` values("114","20");
-#
-insert into `pool` values("114","19");
-#
-insert into `pool` values("116","20");
-#
-insert into `pool` values("116","19");
-#
-insert into `pool` values("118","20");
-#
-insert into `pool` values("118","19");
-#
-insert into `pool` values("117","20");
-#
-insert into `pool` values("117","19");
-#
-insert into `pool` values("143","20");
-#
-insert into `pool` values("143","19");
-#
-insert into `pool` values("147","20");
-#
-insert into `pool` values("147","19");
-#
-insert into `pool` values("146","20");
-#
-insert into `pool` values("146","19");
-#
-insert into `pool` values("145","20");
-#
-insert into `pool` values("145","19");
-#
-insert into `pool` values("141","20");
-#
-insert into `pool` values("141","19");
-#
-insert into `pool` values("140","20");
-#
-insert into `pool` values("140","19");
-#
-insert into `pool` values("142","20");
-#
-insert into `pool` values("142","19");
-#
-insert into `pool` values("144","20");
-#
-insert into `pool` values("144","19");
-#
-
-#
-drop table `pu_criteria`;
-#
-CREATE TABLE `pu_criteria` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `job_id` int(11) DEFAULT NULL,
-  `step_nbr` int(11) DEFAULT NULL,
-  `car_status` varchar(256) DEFAULT NULL,
-  `commodity_id` int(11) DEFAULT NULL,
-  `car_code_id` int(11) DEFAULT NULL,
-  `dest_station_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-#
-insert into `pu_criteria` values("17","1121","1","Empty","7","0","2");
-#
-insert into `pu_criteria` values("18","1121","2","Loaded","7","0","5");
-#
-insert into `pu_criteria` values("19","1907","1","Empty","3","4","3");
-#
-insert into `pu_criteria` values("20","1907","2","Loaded","3","4","5");
-#
-insert into `pu_criteria` values("21","1921","1","","0","0","1");
-#
-insert into `pu_criteria` values("22","1981","1","Empty","0","0","6");
-#
-insert into `pu_criteria` values("23","1981","2","Loaded","1","0","5");
-#
-insert into `pu_criteria` values("24","5981","1","Loaded","4","0","6");
-#
-insert into `pu_criteria` values("25","5981","2","Empty","0","0","5");
-#
-insert into `pu_criteria` values("26","9381","1","Loaded","1","0","6");
-#
-insert into `pu_criteria` values("27","9381","3","Empty","0","0","5");
+insert into `locations` values("38","WEST","10","N/A","N/A","WEST","All customers west of Westerly","lightgrey");
 #
 
 #
@@ -1580,24 +715,51 @@ CREATE TABLE `routing` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `station` tinytext NOT NULL,
   `station_nbr` int(11) DEFAULT NULL,
-  `instructions` text DEFAULT NULL,
+  `instructions` text,
   `sort_seq` int(11) DEFAULT NULL,
   `color1` int(11) DEFAULT NULL,
   `color2` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 #
-insert into `routing` values("1","Nowra","0","","4","0","0");
+insert into `routing` values("1","EAST","000","All outbound cars - EV Yard Switcher","0","0","0");
 #
-insert into `routing` values("2","Kembla Heights","0","","1","0","0");
+insert into `routing` values("2","EV","500","Cars for EAST: EV Yard Switcher / 
+Cars for MD, BT, ES, WS, and WEST: No. 1 / 
+Cars for BB, PW, TC, and CB: No. 11","10","0","0");
 #
-insert into `routing` values("3","Bombo","0"," ","2","0","0");
+insert into `routing` values("3","BB","501","Westward cars: No. 11 / 
+Eastward cars: No. 12","20","0","0");
 #
-insert into `routing` values("4","Berry","0","Cement Siding accessible to Down trains only.","3","0","0");
+insert into `routing` values("4","PW","502","Westward cars except those for Ajax Mine: No. 11 / 
+Cars for Ajax Mine: No. 21 / 
+Eastward cars: No 12.","30","0","0");
 #
-insert into `routing` values("5","Staging","0","4 Road staging beneath layout.","0","0","0");
+insert into `routing` values("5","JC","503","Cars for TC and CB: No. 21 / 
+Westward cars: No. 11 / 
+Eastward cars: No. 12","40","0","0");
 #
-insert into `routing` values("6","Shoalhaven Starches","0","","0","0","0");
+insert into `routing` values("6","MD","504","Cars for WS and West: No. 1 / 
+Cars for EV and East: No. 2 / 
+Cars for CB, TC, PW, and BB: No. 12 / 
+Cars for BT and ES: No. 13","50","0","0");
+#
+insert into `routing` values("7","BT","505","Westbound cars: No. 13 / 
+Eastbound cars: No. 14","60","0","0");
+#
+insert into `routing` values("8","ES","506","Westbound cars: No. 13 / 
+Eastbound cars: No. 14","70","0","0");
+#
+insert into `routing` values("9","WS","600","Cars for WEST: WS Yard Switcher / 
+Cars for MD, PW, BB, TC, CB, EV, and EAST: No. 2 / 
+Cars for ES and BT: No. 14","80","0","0");
+#
+insert into `routing` values("10","WEST","900","All outbound cars - WS Yard Switcher","90","0","0");
+#
+insert into `routing` values("11","TC","550","Cars for CB: No. 21 / 
+All other cars: No. 22","100","0","0");
+#
+insert into `routing` values("12","CB","551","All outbound cars: No. 22","110","0","0");
 #
 
 #
@@ -1608,17 +770,15 @@ CREATE TABLE `settings` (
   `setting_desc` varchar(256) NOT NULL,
   `setting_value` varchar(256) NOT NULL,
   PRIMARY KEY (`setting_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-#
-insert into `settings` values("max_history","Max History Entries Per Car","24");
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 #
 insert into `settings` values("print_width","Print Width","7.5in");
 #
-insert into `settings` values("railroad_initials","Initials of the railroad","");
+insert into `settings` values("railroad_initials","Initials of the railroad","DEMO");
 #
-insert into `settings` values("railroad_name","Name of the railroad","The Illawarra Line");
+insert into `settings` values("railroad_name","Name of the railroad","Decatur, Estherville, Mobridge & Ontario	");
 #
-insert into `settings` values("session_nbr","Session Number","3");
+insert into `settings` values("session_nbr","Session Number","5");
 #
 
 #
@@ -1637,46 +797,109 @@ CREATE TABLE `shipments` (
   `max_interval` int(11) NOT NULL,
   `min_amount` int(11) NOT NULL,
   `max_amount` int(11) NOT NULL,
-  `special_instructions` tinytext DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
-  `min_load_time` int(11) DEFAULT NULL,
-  `max_load_time` int(11) DEFAULT NULL,
-  `min_unload_time` int(11) DEFAULT NULL,
-  `max_unload_time` int(11) DEFAULT NULL,
+  `special_instructions` tinytext,
+  `remarks` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
 #
-insert into `shipments` values("1","Gunnedah Flour","Flour ex. Gunnedah","4","15","13","17","3","0","0","21","21","","","0","0","0","0");
+insert into `shipments` values("1","EAST-BB-GAS","Texaco to City Bulk Buel","8","7","1","4","3","3","5","1","1","","");
 #
-insert into `shipments` values("2","Shoalhaven Starches Export Goods","Export Goods to Rozelle","7","16","15","20","3","0","0","23","23","","","0","0","0","0");
+insert into `shipments` values("2","EAST-BB-HARDWARE","National Hardware to Acme Cabinets","2","8","1","3","0","4","7","1","1","","");
 #
-insert into `shipments` values("3","Bombo Ballast","Loaded Ballast from Bombo to Chullora","3","4","1","18","3","0","0","10","10","","","0","0","0","0");
+insert into `shipments` values("3","EAST-PW-GROC","General Mills to Powers Grocery","4","8","1","8","0","5","8","1","1","","");
 #
-insert into `shipments` values("4","Nowra Fuel","Loaded Fuel to Nowra (Endeavour Siding)","2","16","19","12","3","0","1","1","3","","","0","0","0","0");
+insert into `shipments` values("4","EAST-PW-FROZ","Blue Bunny to Powers Grocery","5","6","1","8","5","5","6","1","1","","");
 #
-insert into `shipments` values("5","Kembla Heights Fuel","Loaded Fuel to Kembla Heights Ex. Clyde","2","16","19","3","3","0","1","1","2","via Nowra Yard","","0","0","0","0");
+insert into `shipments` values("5","EAST-MD-GAS","Shell Oil to Middleton Co-op Oil","8","7","1","14","4","3","5","1","1","","");
 #
-insert into `shipments` values("8","Clyde Flour","Bagged Flour to Clyde","1","17","16","19","3","1","1","2","3","via Nowra Yard","","0","0","0","0");
+insert into `shipments` values("6","EAST-ES-CEMENT1","Portland Cement to Essex Readi-Mix","22","8","1","24","5","4","6","1","1","","");
 #
-insert into `shipments` values("9","Kembla Heights Intermodal","Intermodal (CQBY)","7","2","4","24","1000003","0","1","7","7","","","0","0","0","0");
+insert into `shipments` values("7","EAST-ES-CEMENT2","Portland Cement to Essex Readi-Mix","23","4","1","24","3","3","4","1","2","","");
 #
-insert into `shipments` values("12","Kembla Heights Sugar","Sugar from Clyde Yard","6","19","19","2","1000003","0","1","1","3","via Nowra Yard","","0","0","0","0");
+insert into `shipments` values("8","EAST-ES-HARDWARE","Zippo Fasteners to Western Lumber Co.","2","8","1","24","0","5","7","1","1","","");
 #
-insert into `shipments` values("13","Kembla Heights Bagged Flour","Palletised Bagged Flour for Domestic Use","1","17","16","2","3","1","2","1","3","","","0","0","0","0");
+insert into `shipments` values("9","EAST-ES-IMPL","John Deere to Evans Implements","21","1","1","22","0","7","9","1","2","","");
 #
-insert into `shipments` values("14","Kembla Heights Intermodal","Intermodal Traffic","7","3","4","24","1000003","0","1","8","8","","","0","0","0","0");
+insert into `shipments` values("10","EAST-TC-MACH","Caterpillar to Jones Mining Equip.","24","8","1","28","0","6","8","1","1","","");
 #
-insert into `shipments` values("15","Clyde to Berry Cement","Cement from Clyde (Berrima) to Berry Cement Depot","5","18","19","6","3","0","0","2","4","","","0","0","1","1");
+insert into `shipments` values("11","EAST-CB-FURN","Columbia Furniture to Woerst Merc.","27","8","1","35","0","7","14","1","1","","");
 #
-insert into `shipments` values("16","Clyde to Kembla Heights Cement","Cement from Clyde (Berrima) to Kembla Heights Cement Depot","5","18","19","5","3","0","0","2","4","via Nowra Yard","","0","0","0","0");
+insert into `shipments` values("12","EV-MD-FUEL","Eastville Eng Svc to Middleton Eng Svc","7","7","2","16","0","7","7","1","1","","");
 #
-insert into `shipments` values("17","Narranderra Flour","Flour ex. Narranderra","4","14","21","17","3","0","0","18","18","","","0","0","0","0");
+insert into `shipments` values("13","EV-MD-SAND","	Eastville Eng Svc to Middleton Eng Svc","19","4","2","16","0","10","11","1","1","","");
 #
-insert into `shipments` values("18","Clyde DDG","Dried Distilled Grains for Regional Distribution","9","19","14","19","0","1","3","3","6","","","0","0","0","0");
+insert into `shipments` values("14","EV-TC-COMTL","Eastville co material to Tunnel City co material","20","2","2","27","5","4","10","1","2","","");
 #
-insert into `shipments` values("19","Kembla Heights Gluten","Gluten for Domestic Use","10","16","15","15","0","0","3","1","4","","","0","0","0","0");
+insert into `shipments` values("15","EV-CB-FUEL","Eastville Eng Svc to Cambria Eng Svc","7","7","2","32","0","14","16","1","1","","");
 #
-insert into `shipments` values("20","Kembla Heights Glucose","Glucose for Domestic Use","8","16","15","4","0","0","3","1","4","","","0","0","0","0");
+insert into `shipments` values("16","EV-CB-SAND","Eastville Eng Svc to Cambria Eng Svc","19","4","2","32","0","12","16","1","1","","");
+#
+insert into `shipments` values("17","BB-EAST-CABINETS","Acme Cabinets to Home Depot","3","8","3","1","4","4","7","1","1","","");
+#
+insert into `shipments` values("18","PW-EAST-BUTTER","Powers County Dairy to Super Value","10","6","8","1","4","3","6","1","1","","");
+#
+insert into `shipments` values("19","PW-EAST-SOYBEANS","Farmer\'s Elevator to ADM","13","4","7","1","0","10","12","3","5","","");
+#
+insert into `shipments` values("20","MD-EAST-CORN","Valley Grain to Cargill","14","4","13","1","0","15","16","4","5","","");
+#
+insert into `shipments` values("21","BT-EAST-LUMBER","Blacktail Forest Products to Menards	","1","1","21","1","4","4","5","2","2","","");
+#
+insert into `shipments` values("22","BT-BB-LUMBER","Blacktail Forest Products to Acme Cabinets","1","8","21","3","3","3","5","1","1","","");
+#
+insert into `shipments` values("23","BT-CB-LUMBER","Blacktail Forest Products to Cambria Lumber","1","8","21","34","5","4","9","1","1","","");
+#
+insert into `shipments` values("24","BT-WEST-LUMBER","Blacktail Forest Products to Mills Fleet Farm","1","1","21","38","5","4","5","1","2","","");
+#
+insert into `shipments` values("25","TC-EAST-SCRAP","Jones Mining Equip to North Star Steel","25","2","28","1","0","5","7","1","1","","");
+#
+insert into `shipments` values("26","TC-EV-COMTL","Tunnel City co material to Eastville co material","20","2","27","2","0","5","14","1","2","","");
+#
+insert into `shipments` values("27","CB-EV-BALLAST","Mountain Aggregates to Eastville co material","26","3","34","2","0","5","15","4","5","","");
+#
+insert into `shipments` values("28","CB-PW-COAL","Ajax Mine to Tri-State Power & Light","16","3","31","9","4","1","2","3","5","","");
+#
+insert into `shipments` values("29","WEST-BB-DIESEL","Amoco to City Bulk Fuel","7","7","38","4","5","4","8","1","1","","");
+#
+insert into `shipments` values("30","WEST-BB-LP","Blue Flame Gas to City Bulk Fuel","6","7","38","4","0","4","7","1","1","","");
+#
+insert into `shipments` values("31","WEST-BB-LUMBER","Weyerhaeuser to Acme Cabinets","1","8","38","3","4","2","4","1","1","","");
+#
+insert into `shipments` values("32","WEST-BB-OIL","Amoco to City Bulk Fuel","9","7","38","4","0","5","8","1","1","","");
+#
+insert into `shipments` values("33","WEST-PW-FERT","Potash Corp to Farmer\'s Elevator","12","4","38","7","0","10","12","1","1","","");
+#
+insert into `shipments` values("34","WEST-MD-DIESEL","Valero to Middleton Co-op Oil","7","7","38","14","3","3","5","1","1","","");
+#
+insert into `shipments` values("35","WEST-MD-FERT","Potash Corp to Valley Grain","12","4","38","13","0","10","14","1","2","","");
+#
+insert into `shipments` values("36","WEST-MD-OIL","Valero to Middleton Co-op Oil","9","7","38","14","0","3","7","1","1","","");
+#
+insert into `shipments` values("37","WEST-ES-LP","Valero to Lloyd LP","6","7","38","23","4","4","5","1","2","","");
+#
+insert into `shipments` values("38","WEST-ES-LUMBER","Potlach Co. to Western Lumber Co.","1","1","38","24","0","4","8","1","1","","");
+#
+insert into `shipments` values("39","WEST-CB-FURNITURE","Oriental Specialties to Woerst Merc","27","8","38","35","0","4","8","1","2","","");
+#
+insert into `shipments` values("40","WEST-CB-LUMBER","Weyerhaeuser to Cambria Lumber","19","1","38","34","0","5","9","1","1","","");
+#
+
+#
+drop table `ws switcher`;
+#
+CREATE TABLE `ws switcher` (
+  `step_number` int(11) NOT NULL,
+  `station` int(11) DEFAULT NULL,
+  `pickup` char(1) DEFAULT NULL,
+  `setout` char(1) DEFAULT NULL,
+  `remarks` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`step_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+#
+insert into `ws switcher` values("10","9","T","F","Pick up cars for WEST customers");
+#
+insert into `ws switcher` values("20","10","T","T","Spot cars for customers; Pick up all eastbound cars");
+#
+insert into `ws switcher` values("30","9","F","T","Set out all cars");
 #
 
 #
