@@ -454,7 +454,7 @@
             // Header with logo and form title - modified to include logo
             print '<table style="width: 100%; border-collapse: collapse;">';
             print '<tr>';
-            print '<td style="width: 30%;"><img src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 50px; width: auto;"></td>';
+            print '<td style="width: 30%;"><img src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 100px; width: auto;"></td>';
             print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
             print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
