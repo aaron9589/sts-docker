@@ -615,7 +615,7 @@
   }
   .clear-strikes-button {
     display: inline-block;
-    margin-top: 10px;
+    margin: 10px 0 15px 0; /* top, right/left, bottom */
     padding: 5px 10px;
     font-size: 14px;
     background-color: #f44336;
@@ -693,12 +693,9 @@
       }
   
       // Find Train Radio Number cell
-      cells.forEach(cell => {
-        if (cell.innerText.trim() === "Train Radio Number" && clearButton) {
-          cell.appendChild(clearButton);
-        }
-      });
-  
+      if (consistTable && clearButton) {
+        consistTable.parentNode.insertBefore(clearButton, consistTable);
+      }
     });
   
   });
