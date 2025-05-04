@@ -607,6 +607,103 @@
 
 
   ?>
+  <!-- Begin Strikeout Table Script -->
+  <style>
+  .strikethrough {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  .clear-strikes-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .clear-strikes-button:hover {
+    background-color: #d32f2f;
+  }
+  </style>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let consistTable = null;
+    let clearButton = null;
+  
+    const tables = document.querySelectorAll("table");
+  
+    tables.forEach(table => {
+      const headers = table.querySelectorAll("th");
+      const cells = table.querySelectorAll("td");
+  
+      // Find consist table (Sl. No)
+      if (!consistTable && headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
+        consistTable = table;
+  
+        const rows = table.querySelectorAll("tbody tr");
+  
+        rows.forEach((row, index) => {
+          const firstCell = row.querySelector("td:first-child");
+          if (firstCell) {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.style.marginRight = "5px";
+  
+            const rowId = "row-" + index;
+            row.setAttribute("data-row-id", rowId);
+  
+            if (localStorage.getItem(rowId) === "striked") {
+              row.classList.add("strikethrough");
+              checkbox.checked = true;
+            }
+  
+            checkbox.addEventListener("change", function() {
+              if (this.checked) {
+                row.classList.add("strikethrough");
+                localStorage.setItem(rowId, "striked");
+              } else {
+                row.classList.remove("strikethrough");
+                localStorage.removeItem(rowId);
+              }
+            });
+  
+            firstCell.prepend(checkbox);
+          }
+        });
+  
+        // Create the Clear Button
+        clearButton = document.createElement("button");
+        clearButton.textContent = "Clear Strikes";
+        clearButton.className = "clear-strikes-button noprint";
+        clearButton.addEventListener("click", function() {
+          rows.forEach(row => {
+            row.classList.remove("strikethrough");
+            const checkbox = row.querySelector("td:first-child input[type='checkbox']");
+            if (checkbox) {
+              checkbox.checked = false;
+            }
+            const rowId = row.getAttribute("data-row-id");
+            localStorage.removeItem(rowId);
+          });
+        });
+      }
+  
+      // Find Train Radio Number cell
+      cells.forEach(cell => {
+        if (cell.innerText.trim() === "Train Radio Number" && clearButton) {
+          cell.appendChild(clearButton);
+        }
+      });
+  
+    });
+  
+  });
+  </script>
+  <!-- End Strikeout Table Script -->
   <div class="noprint">
     <br /><a href="display_switchlist.php">Return to Display Switchlist page</a>
     <br />
