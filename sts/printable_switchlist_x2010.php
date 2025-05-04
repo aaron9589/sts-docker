@@ -627,6 +627,11 @@
   .clear-strikes-button:hover {
     background-color: #d32f2f;
   }
+  @media print {
+  .noprint {
+    display: none !important;
+  }
+  }
   </style>
   
   <script>
