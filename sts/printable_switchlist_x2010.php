@@ -640,32 +640,29 @@
     let clearButton = null;
   
     const tables = document.querySelectorAll("table");
-  
-    tables.forEach(table => {
+    
+    tables.forEach((table, tableIndex) => {
       const headers = table.querySelectorAll("th");
       const cells = table.querySelectorAll("td");
-  
-      // Find consist table (Sl. No)
-      if if (headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
-        consistTable = table;
-  
+    
+      if (headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
         const rows = table.querySelectorAll("tbody tr");
-  
+    
         rows.forEach((row, index) => {
           const firstCell = row.querySelector("td:first-child");
           if (firstCell) {
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.style.marginRight = "5px";
-  
-            const rowId = "row-" + tableIndex + "-" + index;
+    
+            const rowId = `row-${tableIndex}-${index}`;
             row.setAttribute("data-row-id", rowId);
-  
+    
             if (localStorage.getItem(rowId) === "striked") {
               row.classList.add("strikethrough");
               checkbox.checked = true;
             }
-  
+    
             checkbox.addEventListener("change", function() {
               if (this.checked) {
                 row.classList.add("strikethrough");
@@ -675,10 +672,13 @@
                 localStorage.removeItem(rowId);
               }
             });
-  
+    
             firstCell.prepend(checkbox);
           }
         });
+      }
+    });
+
   
         // Create the Clear Button
         clearButton = document.createElement("button");
