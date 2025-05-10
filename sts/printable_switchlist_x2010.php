@@ -646,7 +646,7 @@
       const cells = table.querySelectorAll("td");
   
       // Find consist table (Sl. No)
-      if (!consistTable && headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
+      if if (headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
         consistTable = table;
   
         const rows = table.querySelectorAll("tbody tr");
@@ -658,7 +658,7 @@
             checkbox.type = "checkbox";
             checkbox.style.marginRight = "5px";
   
-            const rowId = "row-" + index;
+            const rowId = "row-" + tableIndex + "-" + index;
             row.setAttribute("data-row-id", rowId);
   
             if (localStorage.getItem(rowId) === "striked") {
