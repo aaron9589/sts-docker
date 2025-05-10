@@ -607,105 +607,97 @@
 
 
   ?>
-  <!-- Begin Strikeout Table Script -->
-  <style>
-  .strikethrough {
-    text-decoration: line-through;
-    opacity: 0.5;
-  }
-  .clear-strikes-button {
-    display: inline-block;
-    margin: 10px 0 15px 0; /* top, right/left, bottom */
-    padding: 5px 10px;
-    font-size: 14px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .clear-strikes-button:hover {
-    background-color: #d32f2f;
-  }
-  @media print {
+<!-- Begin Strikeout Table Script -->
+<style>
+.strikethrough {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+.clear-strikes-button {
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.clear-strikes-button:hover {
+  background-color: #d32f2f;
+}
+@media print {
   .noprint {
     display: none !important;
   }
-  }
-  </style>
-  
-  <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    let consistTable = null;
-    let clearButton = null;
-  
-    const tables = document.querySelectorAll("table");
-    
-    tables.forEach((table, tableIndex) => {
-      const headers = table.querySelectorAll("th");
-      const cells = table.querySelectorAll("td");
-    
-      if (headers.length > 0 && headers[0].innerText.includes("Sl.") && headers[0].innerText.includes("No")) {
-        const rows = table.querySelectorAll("tbody tr");
-    
-        rows.forEach((row, index) => {
-          const firstCell = row.querySelector("td:first-child");
-          if (firstCell) {
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.style.marginRight = "5px";
-    
-            const rowId = `row-${tableIndex}-${index}`;
-            row.setAttribute("data-row-id", rowId);
-    
-            if (localStorage.getItem(rowId) === "striked") {
-              row.classList.add("strikethrough");
-              checkbox.checked = true;
-            }
-    
-            checkbox.addEventListener("change", function() {
-              if (this.checked) {
-                row.classList.add("strikethrough");
-                localStorage.setItem(rowId, "striked");
-              } else {
-                row.classList.remove("strikethrough");
-                localStorage.removeItem(rowId);
-              }
-            });
-    
-            firstCell.prepend(checkbox);
-          }
-        });
-      }
-    });
+}
+</style>
 
-  
-        // Create the Clear Button
-        clearButton = document.createElement("button");
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const tables = document.querySelectorAll("table");
+  let clearButtonInserted = false; // only add button once
+
+  tables.forEach((table, tableIndex) => {
+    const headers = table.querySelectorAll("th");
+    if (headers.length > 0 && headers[0].innerText.trim().startsWith("Sl.")) {
+      const rows = table.querySelectorAll("tbody tr");
+
+      rows.forEach((row, rowIndex) => {
+        const firstCell = row.querySelector("td:first-child");
+        if (firstCell) {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.style.marginRight = "5px";
+
+          const rowId = `row-${tableIndex}-${rowIndex}`;
+          row.setAttribute("data-row-id", rowId);
+
+          if (localStorage.getItem(rowId) === "striked") {
+            row.classList.add("strikethrough");
+            checkbox.checked = true;
+          }
+
+          checkbox.addEventListener("change", function () {
+            if (this.checked) {
+              row.classList.add("strikethrough");
+              localStorage.setItem(rowId, "striked");
+            } else {
+              row.classList.remove("strikethrough");
+              localStorage.removeItem(rowId);
+            }
+          });
+
+          firstCell.prepend(checkbox);
+        }
+      });
+
+      // Insert clear button once above the first consist table
+      if (!clearButtonInserted) {
+        const clearButton = document.createElement("button");
         clearButton.textContent = "Clear Strikes";
         clearButton.className = "clear-strikes-button noprint";
-        clearButton.addEventListener("click", function() {
-          rows.forEach(row => {
+        clearButton.addEventListener("click", function () {
+          document.querySelectorAll("tr[data-row-id]").forEach((row) => {
             row.classList.remove("strikethrough");
-            const checkbox = row.querySelector("td:first-child input[type='checkbox']");
-            if (checkbox) {
-              checkbox.checked = false;
-            }
-            const rowId = row.getAttribute("data-row-id");
-            localStorage.removeItem(rowId);
+            const checkbox = row.querySelector("input[type='checkbox']");
+            if (checkbox) checkbox.checked = false;
+            localStorage.removeItem(row.getAttribute("data-row-id"));
           });
         });
+
+        table.parentNode.insertBefore(clearButton, table);
+        clearButtonInserted = true;
       }
-  
-      // Find Train Radio Number cell
-      if (consistTable && clearButton) {
-        consistTable.parentNode.insertBefore(clearButton, consistTable);
-      }
-    });
-  
+    }
   });
-  </script>
-  <!-- End Strikeout Table Script -->
+});
+</script>
+<!-- End Strikeout Table Script -->
+
+
+  
   <div class="noprint">
     <br /><a href="display_switchlist.php">Return to Display Switchlist page</a>
     <br />
