@@ -231,7 +231,15 @@
     }
 
     // set a variable for the number of pages
-    $page_count = count($car_list) > 13 ? 2 : 1;
+    $car_count = count($car_list);
+
+    if ($car_count > 25) {
+      $page_count = 3;
+    } elseif ($car_count > 13) {
+      $page_count = 2;
+    } else {
+      $page_count = 1;
+    }
 
     // run the query again to build the switchlist table
     $rs = mysqli_query($dbc, $sql);
@@ -277,7 +285,7 @@
         print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
         print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF '. $page_count .'</div>
+                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF ' . $page_count . '</div>
                     </td>';
         print '</tr>';
         print '</table>';
@@ -447,7 +455,7 @@
 
           print '</tr>';
           $row_num++;
-          if ($row_num == 14 && count($car_list) > 13) { //only generate next page if it will spill over to another page
+          if (($row_num == 14 || $row_num == 25) && count($car_list) > 13) { //only generate next page if it will spill over to another page
             $serial_number++; //generate the next page serial
             // generate a page break
             print '</table>';
@@ -458,7 +466,7 @@
             print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
             print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 2 OF ' .$page_count .'</div>
+                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 2 OF ' . $page_count . '</div>
                     </td>';
             print '</tr>';
             print '</table>';
@@ -607,97 +615,100 @@
 
 
   ?>
-<!-- Begin Strikeout Table Script -->
-<style>
-.strikethrough {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-.clear-strikes-button {
-  display: inline-block;
-  margin: 10px 0 15px 0;
-  padding: 5px 10px;
-  font-size: 14px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.clear-strikes-button:hover {
-  background-color: #d32f2f;
-}
-@media print {
-  .noprint {
-    display: none !important;
-  }
-}
-</style>
+  <!-- Begin Strikeout Table Script -->
+  <style>
+    .strikethrough {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const tables = document.querySelectorAll("table");
-  let clearButtonInserted = false; // only add button once
+    .clear-strikes-button {
+      display: inline-block;
+      margin: 10px 0 15px 0;
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-  tables.forEach((table, tableIndex) => {
-    const headers = table.querySelectorAll("th");
-    if (headers.length > 0 && headers[0].innerText.trim().startsWith("Sl.")) {
-      const rows = table.querySelectorAll("tbody tr");
+    .clear-strikes-button:hover {
+      background-color: #d32f2f;
+    }
 
-      rows.forEach((row, rowIndex) => {
-        const firstCell = row.querySelector("td:first-child");
-        if (firstCell) {
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.style.marginRight = "5px";
+    @media print {
+      .noprint {
+        display: none !important;
+      }
+    }
+  </style>
 
-          const rowId = `row-${tableIndex}-${rowIndex}`;
-          row.setAttribute("data-row-id", rowId);
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const tables = document.querySelectorAll("table");
+      let clearButtonInserted = false; // only add button once
 
-          if (localStorage.getItem(rowId) === "striked") {
-            row.classList.add("strikethrough");
-            checkbox.checked = true;
-          }
+      tables.forEach((table, tableIndex) => {
+        const headers = table.querySelectorAll("th");
+        if (headers.length > 0 && headers[0].innerText.trim().startsWith("Sl.")) {
+          const rows = table.querySelectorAll("tbody tr");
 
-          checkbox.addEventListener("change", function () {
-            if (this.checked) {
-              row.classList.add("strikethrough");
-              localStorage.setItem(rowId, "striked");
-            } else {
-              row.classList.remove("strikethrough");
-              localStorage.removeItem(rowId);
+          rows.forEach((row, rowIndex) => {
+            const firstCell = row.querySelector("td:first-child");
+            if (firstCell) {
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.style.marginRight = "5px";
+
+              const rowId = `row-${tableIndex}-${rowIndex}`;
+              row.setAttribute("data-row-id", rowId);
+
+              if (localStorage.getItem(rowId) === "striked") {
+                row.classList.add("strikethrough");
+                checkbox.checked = true;
+              }
+
+              checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                  row.classList.add("strikethrough");
+                  localStorage.setItem(rowId, "striked");
+                } else {
+                  row.classList.remove("strikethrough");
+                  localStorage.removeItem(rowId);
+                }
+              });
+
+              firstCell.prepend(checkbox);
             }
           });
 
-          firstCell.prepend(checkbox);
+          // Insert clear button once above the first consist table
+          if (!clearButtonInserted) {
+            const clearButton = document.createElement("button");
+            clearButton.textContent = "Clear Strikes";
+            clearButton.className = "clear-strikes-button noprint";
+            clearButton.addEventListener("click", function () {
+              document.querySelectorAll("tr[data-row-id]").forEach((row) => {
+                row.classList.remove("strikethrough");
+                const checkbox = row.querySelector("input[type='checkbox']");
+                if (checkbox) checkbox.checked = false;
+                localStorage.removeItem(row.getAttribute("data-row-id"));
+              });
+            });
+
+            table.parentNode.insertBefore(clearButton, table);
+            clearButtonInserted = true;
+          }
         }
       });
-
-      // Insert clear button once above the first consist table
-      if (!clearButtonInserted) {
-        const clearButton = document.createElement("button");
-        clearButton.textContent = "Clear Strikes";
-        clearButton.className = "clear-strikes-button noprint";
-        clearButton.addEventListener("click", function () {
-          document.querySelectorAll("tr[data-row-id]").forEach((row) => {
-            row.classList.remove("strikethrough");
-            const checkbox = row.querySelector("input[type='checkbox']");
-            if (checkbox) checkbox.checked = false;
-            localStorage.removeItem(row.getAttribute("data-row-id"));
-          });
-        });
-
-        table.parentNode.insertBefore(clearButton, table);
-        clearButtonInserted = true;
-      }
-    }
-  });
-});
-</script>
-<!-- End Strikeout Table Script -->
+    });
+  </script>
+  <!-- End Strikeout Table Script -->
 
 
-  
+
   <div class="noprint">
     <br /><a href="display_switchlist.php">Return to Display Switchlist page</a>
     <br />
