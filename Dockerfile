@@ -5,6 +5,11 @@ FROM php:8.0-apache-buster
 # Expose port 80
 EXPOSE 80
 
+# Add archive sources
+RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
+    sed -i '/security.debian.org/d' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y mariadb-client
+
 # Install MariaDB client
 # hadolint ignore=DL3008,DL3009,DL3015
 RUN apt-get update && \
