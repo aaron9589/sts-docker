@@ -457,8 +457,9 @@
           $row_num++;
           if (($row_num == 14 || $row_num == 25) && count($car_list) > 13) { //only generate next page if it will spill over to another page
             $serial_number++; //generate the next page serial
-            // generate a page break
             print '</table>';
+            // generate a page break
+            print '<p style="page-break-after: always;">&nbsp;</p>';
             // Header with logo and form title - modified to include logo
             print '<table style="width: 100%; border-collapse: collapse;">';
             print '<tr>';
@@ -466,7 +467,7 @@
             print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
             print '<td style="width: 25%; text-align: right; position: relative;">
                       <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 2 OF ' . $page_count . '</div>
+                      <div style="position: absolute; bottom: 0; left: 0;">PAGE ' . ($row_num == 14 ? 2 : 3) . ' OF ' . $page_count . '</div>
                     </td>';
             print '</tr>';
             print '</table>';
@@ -716,3 +717,4 @@
 </body>
 
 </html>
+
