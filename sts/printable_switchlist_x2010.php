@@ -268,6 +268,7 @@
           '0' => 'railcorp',
           '2' => 'pn',
           '8' => 'arg',
+          '5' => 'sct',
           '4' => 'ssr',
           'n' => 'manildra',
           default => 'nswgr'
