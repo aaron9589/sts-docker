@@ -44,7 +44,10 @@ RUN mkdir /var/www/html/sts/temp && \
     chmod -R 757 /var/www/html/sts/ImageStore && \
     chmod 757 /var/www/html/sts/temp && \
     chmod 757 /var/www/html/sts/uploads && \
-    chmod 757 /var/www/html/sts/cargo_list.txt
+    chmod 757 /var/www/html/sts/cargo_list.txt && \
+    chown -R www-data:www-data /var/www/html/sts/backups && \
+    chown -R www-data:www-data /var/www/html/sts/temp && \
+    chown -R www-data:www-data /var/www/html/sts/uploads
 
 # Copy start script
 COPY start.sh /usr/local/bin/
