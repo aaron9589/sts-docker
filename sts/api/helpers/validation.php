@@ -8,7 +8,7 @@
  */
 function validateRequired($payload, $requiredFields) {
     $missing = [];
-    
+
     foreach ($requiredFields as $field) {
         if (!isset($payload[$field]) || $payload[$field] === '' || $payload[$field] === null) {
             $missing[] = $field;
