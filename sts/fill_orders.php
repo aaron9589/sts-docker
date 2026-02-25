@@ -1,315 +1,442 @@
-<!-- include the HTML table sort scripts -->
-<script src="sorttable.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
+<?php
+require 'open_db.php';
+require 'drop_down_list_functions.php';
+
+$dbc = open_db();
+
+// Pull in all open car orders
+$sql = 'SELECT co.waybill_number as waybill_number,
+               co.shipment as shipment_id,
+               shipments.code as shipment,
+               shipments.description as description,
+               shipments.consignment as consignment_id,
+               shipments.car_code as car_code_id,
+               shipments.loading_location as loading_location_id,
+               shipments.unloading_location as unloading_location_id,
+               shipments.remarks,
+               commodities.code as consignment,
+               car_codes.code as car_code,
+               loc01.code as loading_location,
+               loc02.code as unloading_location,
+               sta01.station as loading_station,
+               sta02.station as unloading_station,
+               (SELECT COUNT(*) FROM pool WHERE shipment_id = co.shipment) as pool_count
+        FROM (
+          SELECT DISTINCT waybill_number, shipment
+          FROM car_orders
+          WHERE car = "" OR car IS NULL
+        ) as co
+        LEFT JOIN shipments ON shipments.id = co.shipment
+        LEFT JOIN commodities ON commodities.id = shipments.consignment
+        LEFT JOIN car_codes ON car_codes.id = shipments.car_code
+        LEFT JOIN locations loc01 ON loc01.id = shipments.loading_location
+        LEFT JOIN locations loc02 ON loc02.id = shipments.unloading_location
+        LEFT JOIN routing sta01 ON sta01.id = loc01.station
+        LEFT JOIN routing sta02 ON sta02.id = loc02.station
+        ORDER BY co.waybill_number';
+
+$rs = mysqli_query($dbc, $sql);
+
+?>
+
+<!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>STS - Fill Car Orders</title>
     <style>
-      body {font: normal 20px Verdana, Arial, sans-serif;}
-      table {border-collapse: collapse;}
-      tr {vertical-align: top}
-      th {border: 1px solid black; padding: 10px}
-      td {border: 1px solid black; padding: 10px}
+        body {
+            font: normal 20px Verdana, Arial, sans-serif;
+            margin-left: 50px;
+        }
+        .nav-header {
+            margin-bottom: 1rem;
+        }
+        .nav-header img {
+            display: block;
+            margin-bottom: 1rem;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .page-description {
+            font: normal 15px Verdana, Arial, sans-serif;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .color-legend {
+            margin: 1rem 0;
+        }
+        .color-legend li {
+            margin-bottom: 0.5rem;
+        }
+        .legend-box {
+            display: inline-block;
+            padding: 2px 6px;
+            margin-right: 0.5rem;
+            color: white;
+        }
+        .legend-pool {
+            color: white;
+            background-color: Gray;
+        }
+        .legend-station {
+            background-color: DarkGray;
+        }
+        .legend-priority {
+            background-color: LightGray;
+            color: black;
+        }
+        .legend-system {
+            background-color: White;
+            color: black;
+            border: 1px solid black;
+        }
+        .order-card {
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+        }
+        .order-card.pool {
+            background-color: #ffff80;
+        }
+        .order-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        .order-header:hover {
+            background-color: #e9ecef;
+        }
+        .order-details {
+            padding: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .car-row {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .car-row:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+        .car-row.pool {
+            background-color: rgba(128, 128, 128, 0.3);
+            color: white;
+            background-color: gray;
+        }
+        .car-row.station {
+            background-color: rgba(169, 169, 169, 0.3);
+            background-color: darkgray;
+            color: white;
+        }
+        .car-row.priority {
+            background-color: rgba(211, 211, 211, 0.3);
+            background-color: lightgray;
+        }
+        .car-row.system {
+            background-color: white;
+            border: 1px solid #dee2e6;
+        }
+        .car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 0.5rem;
+        }
+        .load-count {
+            background-color: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: black;
+        }
+        .badge-category {
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+        }
+        .cars-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .order-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .order-info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .order-info-value {
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+        .spinner-container {
+            text-align: center;
+            padding: 2rem;
+        }
     </style>
-  </head>
-  <body style="margin-left: 50px;">
-    <img src="ImageStore/GUI/Menu/operations.jpg" width="716" height="145" border="0" usemap="#Map2">
-    <map name="Map2">
-      <area shape="rect" coords="568,5,712,46" href="index.html">
-      <area shape="rect" coords="570,97,710,138" href="index-t.html">
-      <area shape="rect" coords="568,52,717,93" href="operations.html">
-    </map>
-    <h2>Simulation Operations</h2>
-    <h3>Fill Car Orders</h3>
-    <div style="font: normal 15px Verdana, Arial, sans-serif;">
-    Select the car order to fill by clicking on the order's <b>FILL</b> button. All empty cars that fit the order's<br />
-    requirements will be displayed on a new page. On the new page assign the desired car to the car order<br />
-    by clicking first on it's radio button and then on the <b>ASSIGN</b> button.<br /><br />
-    Filters can be used to hide rows.  Click on column titles shown in italics to sort the table.<br /><br />
-    Empty cars that meet the shipment's car code requirement be displayed with color codes and as follows:
-    <ol>
-      <li><span  style="color:white; background-color: Gray;">Cars</span> in this shipment's pool, regardless of their current location. Car orders associated with shipments<br />
-      that are in car/shipment pooling arrangements are <span style="background-color:#ffff80;">highlighted.</span><br /><br /></li>
-      <li><span  style="background-color: DarkGray;">Cars</span> currently at the same station as the shipper. If there are multiple eligible cars at the shipper's<br />
-      station, they will be sorted by least used first. (Lowest load count)<br /><br /></li>
-      <li><span  style="background-color: LightGray;">Cars</span> at locations that have been prioritized for this shipment, sorted in order of location priority and<br />
-      then by least used first.<br /><br /></li>
-      <li>All remaining eligible cars on the system will be displayed sorted by the least used first.</li>
-    </ol>
-    If there aren't any cars available that meet the shipment requirements, a message to that effect will be displayed.
+</head>
+<body class="p-4">
+    <div class="container-fluid">
+        <!-- Navigation Header -->
+        <div class="nav-header">
+            <img src="ImageStore/GUI/Menu/fill.jpg" width="716" height="145" border="0" usemap="#Map2" alt="Navigation Menu">
+            <map name="Map2">
+                <area shape="rect" coords="568,5,712,46" href="index.html" alt="Main">
+                <area shape="rect" coords="570,97,710,138" href="index-t.html" alt="Timetable">
+                <area shape="rect" coords="568,52,717,93" href="operations.html" alt="Operations">
+            </map>
+        </div>
+
+        <div class="page-title">Fill Orders</div>
+        <div class="page-description">Select an order to see available cars, then click a car to assign it.</div>
+
+        <?php if (mysqli_num_rows($rs) > 0) { ?>
+            <div class="mb-4 p-3 bg-light border rounded">
+                <p class="mb-0">
+                    <strong><?php echo mysqli_num_rows($rs); ?> open car orders</strong><br/>
+                    Click on any order below to see available cars. Click on a car to assign it to the order.
+                </p>
+            </div>
+
+            <div id="ordersContainer">
+                <?php
+                $row_count = 0;
+                while ($row = mysqli_fetch_array($rs)) {
+                    $is_pool = $row['pool_count'] > 0 ? true : false;
+                    $pool_class = $is_pool ? 'pool' : '';
+                    ?>
+                    <div class="order-card <?php echo $pool_class; ?>" data-waybill="<?php echo htmlspecialchars($row['waybill_number']); ?>">
+                        <div class="order-header" onclick="toggleOrder(this)">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">
+                                    <?php echo htmlspecialchars($row['waybill_number']); ?>
+                                    <?php if ($is_pool) echo '<span class="badge bg-warning text-dark ms-2">Pool</span>'; ?>
+                                </div>
+                                <div style="font-size: 0.9rem; color: #666;">
+                                    <?php echo htmlspecialchars($row['shipment']) . ' - ' . htmlspecialchars($row['description']); ?>
+                                </div>
+                            </div>
+                            <div style="font-size: 1.2rem;">
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <div class="order-details" style="display: none;">
+                            <div class="order-info-grid">
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Consignment</span>
+                                    <span class="order-info-value"><?php echo htmlspecialchars($row['consignment'] ?: '(none)'); ?></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Car Code</span>
+                                    <span class="order-info-value"><?php echo htmlspecialchars($row['car_code']); ?></span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Loading</span>
+                                    <span class="order-info-value">
+                                        <u><?php echo htmlspecialchars($row['loading_station']); ?></u><br/>
+                                        <?php echo htmlspecialchars($row['loading_location']); ?>
+                                    </span>
+                                </div>
+                                <div class="order-info-item">
+                                    <span class="order-info-label">Unloading</span>
+                                    <span class="order-info-value">
+                                        <u><?php echo htmlspecialchars($row['unloading_station']); ?></u><br/>
+                                        <?php echo htmlspecialchars($row['unloading_location']); ?>
+                                    </span>
+                                </div>
+                                <?php if ($row['remarks']) { ?>
+                                    <div class="order-info-item" style="grid-column: 1/-1;">
+                                        <span class="order-info-label">Remarks</span>
+                                        <span class="order-info-value"><?php echo htmlspecialchars($row['remarks']); ?></span>
+                                    </div>
+                                <?php } ?>
+                            </div>
+
+                            <div class="mt-3">
+                                <h6>Available Cars:</h6>
+                                <div class="cars-container">
+                                    <div class="spinner-container">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading available cars...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                    $row_count++;
+                }
+                mysqli_close($dbc);
+                ?>
+            </div>
+        <?php } else { ?>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> There are no car orders that need to be filled.
+            </div>
+        <?php } ?>
     </div>
-    <br />
-    <form>
 
-    <?php
-    // generate some javascript that will hide rows
-    // - filter_rows() is called to hide cars that don't have the selected property
-    print '<script type="text/javascript">
-             function filter_rows(tbl_col, needle)
-             {
-               // confirm that a non-blank option has been selected
-               if (needle.length > 0)
-               {
-                 // convert drop-down locations (station - location) to table locations (station\nlocation)
-                 var hyphen_loc = needle.search(" - ");
-                 if (hyphen_loc >= 0)
-                 {
-                   var new_needle = needle.substr(0, hyphen_loc) + "\n" + needle.substr(hyphen_loc + 3, needle.length);
-                   needle = new_needle;
-                 }
+    <script>
+        function toggleOrder(headerElement) {
+            const card = headerElement.closest('.order-card');
+            const details = card.querySelector('.order-details');
+            const chevron = headerElement.querySelector('i');
 
-                 var table = document.getElementById("wb_tbl");
-                 
-                 //iterate through rows
-                 for (var i = 2, row; row = table.rows[i]; i++)
-                 {
-                   // hide all car orders except the type specified (A = Automatic, E = Reposition, M = Manual)
-                   if ((tbl_col == 1) && (needle == "A"))
-                   {
-                     if((row.cells[tbl_col].innerText.substr(4,1) == "E") || (row.cells[tbl_col].innerText.substr(4,1)) == "M")
-                     {
-                       row.style.display = "none";
-                     }
-                   }
-                   else if((tbl_col == 1) && ((needle == "E") || (needle == "M")))
-                   {
-                     if (row.cells[tbl_col].innerText.substr(4,1) != needle)
-                     {
-                       row.style.display = "none";
-                     }
-                   }
-                   else
-                   {
-                     var haystack_length = row.cells[tbl_col].innerText.length;
-                     var needle_length = needle.length;
-                     var match_start = haystack_length - needle_length;
-                     
-                     var haystack = row.cells[tbl_col].innerText.substr(match_start);
-                     
-                     if (haystack != needle)
-                     {
-                       row.style.display = "none"
-                     }
-                   }
-                 }
-               }
-             }
-           </script>';
+            if (details.style.display === 'none') {
+                // Expanding - load cars
+                details.style.display = 'block';
+                chevron.classList.remove('bi-chevron-down');
+                chevron.classList.add('bi-chevron-up');
 
-      // bring in the function files
-      require 'open_db.php';
-      require 'drop_down_list_functions.php';
-
-      // get a database connection
-      $dbc = open_db();
-
-      // did we get here when a car was assigned to a car order?
-      if (isset($_POST['car_id']))
-      {
-        // assign the selected car to the specified car order
-        $sql = 'update car_orders
-                set car = "' . $_POST['car_id'] . '"
-                where waybill_number = "' . $_POST['wbnbr'] . '"';
-
-        if (!mysqli_query($dbc, $sql))
-        {
-          print 'Update error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
+                const waybill = card.getAttribute('data-waybill');
+                loadAvailableCars(card, waybill);
+            } else {
+                // Collapsing
+                details.style.display = 'none';
+                chevron.classList.add('bi-chevron-down');
+                chevron.classList.remove('bi-chevron-up');
+            }
         }
 
-        // get the info that the history table needs
-        $sql = 'select setting_value from settings where setting_name = "session_nbr"';
-        $rs = mysqli_query($dbc, $sql);
-        $row = mysqli_fetch_array($rs);
-        $session_nbr = $row['setting_value'];
-        
-        $sql = 'select current_location_id from cars where id = "' . $_POST['car_id'] . '"';
-        $rs = mysqli_query($dbc, $sql);
-        $row = mysqli_fetch_array($rs);
-        $location = $row['current_location_id'];
-//print 'SQL: ' . $sql . ' Location: ' . $location . '<br /><br />';        
-        // insert a car history record
-        $sql = 'insert into history(car_id, session_nbr, event_date, event, location)
-                values ("' . $_POST['car_id'] . '", 
-                        "' . $session_nbr . '", 
-                        "' . date("Y-m-d H:i:s") . '", 
-                        "Filled car order ' . $_POST['wbnbr'] . '", 
-                        "' . $location . '")';
-                        
-        if (!mysqli_query($dbc, $sql))
-        {
-          print 'Insert error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
+        function loadAvailableCars(card, waybill) {
+            const carsContainer = card.querySelector('.cars-container');
+
+            $.ajax({
+                url: 'get_available_cars_ajax.php',
+                type: 'GET',
+                data: { waybill_number: waybill },
+                dataType: 'json',
+                success: function(data) {
+                    let html = '';
+
+                    if (data.total_cars_found === 0) {
+                        html = '<div class="alert alert-warning">No eligible cars found on the system</div>';
+                    } else {
+                        html = `<div class="mb-3 text-muted">
+                            <small>
+                                <strong>${data.total_cars_found} eligible cars found:</strong><br/>
+                                <span class="badge" style="background-color: gray; color: white;">Pool: ${data.pool_count}</span>
+                                <span class="badge" style="background-color: darkgray; color: white;">Station: ${data.station_count}</span>
+                                <span class="badge" style="background-color: lightgray; color: black;">Priority: ${data.priority_count}</span>
+                                <span class="badge bg-secondary">System: ${data.system_count}</span>
+                            </small>
+                        </div>`;
+
+                        html += '<div class="car-grid">';
+                        data.cars.forEach(car => {
+                            const categoryClass = car.category;
+                            const categoryLabel = {
+                                'pool': 'Pool',
+                                'station': 'Station',
+                                'priority': 'Priority',
+                                'system': 'System'
+                            }[car.category] || 'System';
+
+                            html += `<div class="car-row ${categoryClass}" onclick="assignCar('${waybill}', ${car.car_id}, this)">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${car.reporting_marks}</strong>
+                                        <small class="badge-category badge bg-secondary">${categoryLabel}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="load-count">Load: ${car.load_count}</div>
+                                    </div>
+                                </div>
+                                <small style="display: block; margin-top: 0.5rem;">
+                                    <strong>Code:</strong> ${car.car_code}<br/>
+                                    <strong>Location:</strong> <u>${car.current_station}</u> / ${car.current_location}
+                                </small>
+                                ${car.remarks ? `<small style="display: block; margin-top: 0.25rem; color: #666;"><strong>Remarks:</strong> ${car.remarks}</small>` : ''}
+                            </div>`;
+                        });
+                        html += '</div>';
+                    }
+
+                    carsContainer.innerHTML = html;
+                },
+                error: function(error) {
+                    carsContainer.innerHTML = '<div class="alert alert-danger">Error loading available cars. Please try again.</div>';
+                    console.error('Error:', error);
+                }
+            });
         }
 
-        // check to see if the car is at it's loading location
-        $sql = 'select count(*)
-                from cars, shipments, car_orders
-                where car_orders.waybill_number = "' . $_POST['wbnbr'] . '"
-                  and shipments.id = car_orders.shipment
-                  and cars.id = "' . $_POST['car_id'] . '"
-                  and cars.current_location_id = shipments.loading_location
-                  and cars.status = "Empty"';
-// print 'SQL: ' . $sql . '<br /><br />';
-        $rs = mysqli_query($dbc, $sql);
-        $row = mysqli_fetch_row($rs);
-// print 'count: ' . $row[0] . '<br /><br />';
-        if ($row[0] > 0)
-        {
-          // if it's at it's loading location, mark the car as "Loaded" and increment it's load count by 1
-          $sql = 'update cars
-                  set status = "Loaded",
-                      load_count = load_count + 1
-                  where id = "' . $_POST['car_id'] . '"';  // print 'Already loaded SQL: ' . $sql . '<br /><br />';
-        }
-        else
-        {
-          // otherwise, mark the assigned car as "Ordered" and increment it's load count by 1
-          $sql = 'update cars
-                  set status = "Ordered",
-                      load_count = load_count + 1
-                  where id = "' . $_POST['car_id'] . '"';  // print 'Ordering SQL: ' . $sql . '<br /><br />';
-        }
-        
-        if (!mysqli_query($dbc, $sql))
-        {
-          print 'Update error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
-        }
-      }
+        function assignCar(waybill, carId, clickedElement) {
+            // Show loading indicator
+            const originalHtml = clickedElement.innerHTML;
+            clickedElement.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Assigning...</span></div>';
+            clickedElement.style.pointerEvents = 'none';
 
-      // pull in all of the car orders that do not have a car assigned
-      $sql = 'select car_orders.waybill_number as waybill_number,
-                     car_orders.shipment as shipment_id,
-                     shipments.code as shipment,
-                     shipments.description as description,
-                     shipments.consignment as consignment_id,
-                     shipments.car_code as car_code_id, 
-                     shipments.loading_location as loading_location_id,
-                     shipments.unloading_location as unloading_location_id,
-                     shipments.remarks,
-                     commodities.code as consignment,
-                     car_codes.code as car_code,
-                     loc01.code as loading_location,
-                     loc02.code as unloading_location,
-                     sta01.station as loading_station,
-                     sta02.station as unloading_station
-              from car_orders
-              left join shipments on shipments.id = car_orders.shipment
-              left join commodities on commodities.id = shipments.consignment
-              left join car_codes on car_codes.id = shipments.car_code
-              left join locations loc01 on loc01.id = shipments.loading_location
-              left join locations loc02 on loc02.id = shipments.unloading_location
-              left join routing sta01 on sta01.id = loc01.station
-              left join routing sta02 on sta02.id = loc02.station
-              where (car_orders.shipment = shipments.id
-              and ((car_orders.car = "") or (car_orders.car is null)))
-              order by car_orders.waybill_number';
-      $rs = mysqli_query($dbc, $sql);
+            $.ajax({
+                url: 'assign_car_ajax.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    waybill_number: waybill,
+                    car_id: carId
+                }),
+                dataType: 'json',
+                success: function(response) {
+                    // Remove the order card with fade out
+                    const card = document.querySelector(`[data-waybill="${waybill}"]`);
+                    card.style.transition = 'opacity 0.3s';
+                    card.style.opacity = '0';
 
-      // generate a table of the eligible car orders
-      if (mysqli_num_rows($rs) > 0)
-      {
-        print '<table id="wb_tbl" class="sortable" style="white-space: nowrap;">
-                 <caption style="font: bold 15px Verdana, Arial, sans-serif; text-align:left;">Row Filters</caption>
-                 <thead>
-                   <tr>
-                     <th style="border-bottom:0px; border-right:0px;">
-                       <button tabindex="4" type="submit" id="clear_filters_btn" name="clear_filters_btn"
-                       onclick="location.reload();" style="font: bold 10px Verdana, Arial, sans-serif; text-align:center; background-color: #ffff00; font-size: 12px">
-                         CLEAR<br />FILTERS
-                       </button>
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(1, document.getElementById(\'wb_type_filter\').options[document.getElementById(\'wb_type_filter\').selectedIndex].value);
-                         document.getElementById(\'wb_type_filter\').disabled=true;">
-                         <select id="wb_type_filter" name="wb_type_filter" tabindex="5">
-                           <option value=""></option>
-                           <option value="A">Automatic</option>
-                           <option value="M">Manual</option>
-                           <option value="E">Reposition</option>
-                         </select>
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(2, document.getElementById(\'shipment_filter\').options[document.getElementById(\'shipment_filter\').selectedIndex].text);
-                                   document.getElementById(\'shipment_filter\').disabled=true;">' .
-                                   drop_down_shipments('shipment_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(4, document.getElementById(\'commodity_filter\').options[document.getElementById(\'commodity_filter\').selectedIndex].text);
-                                   document.getElementById(\'commodity_filter\').disabled=true;">' .
-                                   drop_down_commodities('commodity_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(5, document.getElementById(\'car_code_filter\').options[document.getElementById(\'car_code_filter\').selectedIndex].text);
-                                   document.getElementById(\'car_code_filter\').disabled=true;">' .
-                                   drop_down_car_codes('car_code_filter', '', 'no_wild') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(6, document.getElementById(\'loading_loc_filter\').options[document.getElementById(\'loading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'loading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('loading_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(7, document.getElementById(\'unloading_loc_filter\').options[document.getElementById(\'unloading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'unloading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('unloading_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px">
-                     </th>
-                   </tr>                  
-                  <tr style="position: sticky; top: 0; background-color: #F5F5F5">
-                    <th class="sorttable_nosort">Click to<br />fill Car<br />Order</th>
-                    <th><i>Waybill<br />Number</i></th>
-                    <th><i>Shipment Code</i></th>
-                    <th><i>Shipment Description</i></th>
-                    <th><i>Consignment</i></th>
-                    <th><i>Car<br />Code</i></th>
-                    <th><i>Loading<br /><u>Station</u><br/>Location</i></th>
-                    <th><i>Unloading<br /><u>Station</u><br />Location</i></th>
-                    <th><i>Remarks</i></th>
-                  </tr>
-                </thead>';
+                    setTimeout(() => {
+                        card.remove();
 
-        $row_count = 0;
-        while ($row = mysqli_fetch_array($rs))
-        {
-          // if a car order / waybill is associated with a shipment that is in a pool arrangement with certain cars,
-          // highlight the background-color
-          $sql_pool = 'select count(*) from pool where shipment_id = "' . $row['shipment_id'] . '"';
-          $rs_pool = mysqli_query($dbc, $sql_pool);
-          $row_pool = mysqli_fetch_array($rs_pool);
-          if ($row_pool[0] > 0)
-          {
-            $background = '#ffff80';
-          }
-          else
-          {
-            $background = 'White';
-          }
-          
-          print '<tr style="background-color:' . $background . ';">
-                  <td style="text-align: center; vertical-align: middle;">
-                    <input name="fill' . $row_count . '" type="submit" value="FILL" formmethod="post" formaction="assign_car.php"
-                     style="background-color: #80ff00; font-size: 24px;">
-                  </td>
-                  <td>' . $row['waybill_number'] . '<input name="wbnbr' . $row_count . '" type="hidden" value="' . $row['waybill_number'] . '"</td>
-                  <td>' . $row['shipment'] . '</td>
-                  <td>' . $row['description'] . '</td>
-                  <td>' . $row['consignment'] . '</td>
-                  <td>' . $row['car_code'] . '</td>
-                  <td><u>' . $row['loading_station'] . '</u><br />' . $row['loading_location'] . '</td>
-                  <td><u>' . $row['unloading_station'] . '</u><br />' . $row['unloading_location'] . '</td>
-                  <td>' . $row['remarks'] . '</td>
-                </tr>';
-          $row_count++;
+                        // Check if there are any orders left
+                        if (document.querySelectorAll('.order-card').length === 0) {
+                            document.getElementById('ordersContainer').innerHTML =
+                                '<div class="alert alert-success"><i class="bi bi-check-circle"></i> All car orders have been filled!</div>';
+                        }
+                    }, 300);
+                },
+                error: function(error) {
+                    clickedElement.innerHTML = originalHtml;
+                    clickedElement.style.pointerEvents = 'auto';
+                    alert('Error assigning car. Please try again.');
+                    console.error('Error:', error);
+                }
+            });
         }
-        print '<input name="row_count" type="hidden" value="' . $row_count . '">';
-      }
-      else
-      {
-        print '<h3>There are no car orders that need to be filled.</h3>';
-      }
-    ?>
-    </form>
-  </body>
+    </script>
+
+    <style>
+        .bi-chevron-down::before, .bi-chevron-up::before {
+            font-size: 1.5rem;
+        }
+    </style>
+</body>
 </html>
