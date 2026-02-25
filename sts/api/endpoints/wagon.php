@@ -10,7 +10,7 @@ require_once __DIR__ . '/helpers/validation.php';
 
 function handleWagonEndpoint($method, $pathParts) {
     global $connection;
-    
+
     if (empty($pathParts)) {
         return jsonError('Invalid wagon endpoint', 400);
     }
@@ -65,13 +65,13 @@ function handleWagonEndpoint($method, $pathParts) {
  */
 function handleCargoLookup($pathParts) {
     global $connection;
-    
+
     if (count($pathParts) < 2 || $pathParts[0] !== 'id') {
         return jsonError('Invalid cargo lookup format', 400);
     }
 
     $tagName = $pathParts[1];
-    
+
     // Check if incoming code is a car ID delimited by "-" (convert to reporting marks)
     if (substr($tagName, 0, 1) === '-' && substr($tagName, -1, 1)) {
         $carId = substr($tagName, 1, strlen($tagName) - 2);
@@ -87,7 +87,7 @@ function handleCargoLookup($pathParts) {
             return jsonError('Car not found', 404);
         }
     }
-    
+
     // Replicate scan_car.php query exactly
     $query = "SELECT cars.id, cars.reporting_marks, cars.car_code_id, cars.current_location_id,
                      cars.status, cars.RFID_code, cars.remarks, cars.load_count,
@@ -111,12 +111,12 @@ function handleCargoLookup($pathParts) {
               LEFT JOIN locations loc01 ON cars.current_location_id = loc01.id
               LEFT JOIN locations loc02 ON shipments.loading_location = loc02.id
               LEFT JOIN locations loc03 ON shipments.unloading_location = loc03.id
-              LEFT JOIN routing sta01 ON sta01.id = loc01.station_id
-              LEFT JOIN routing sta02 ON sta02.id = loc02.station_id
-              LEFT JOIN routing sta03 ON sta03.id = loc03.station_id
+              LEFT JOIN routing sta01 ON sta01.id = loc01.station
+              LEFT JOIN routing sta02 ON sta02.id = loc02.station
+              LEFT JOIN routing sta03 ON sta03.id = loc03.station
               WHERE (cars.reporting_marks = ? OR cars.RFID_code = ?)
               LIMIT 1";
-    
+
     $stmt = $connection->prepare($query);
     if (!$stmt) {
         return jsonError('Database error: ' . $connection->error, 500);
@@ -132,7 +132,7 @@ function handleCargoLookup($pathParts) {
     }
 
     $car = $result->fetch_assoc();
-    
+
     return jsonResponse([
         'id' => intval($car['id']),
         'reportingMarks' => $car['reporting_marks'],
@@ -163,9 +163,9 @@ function handleCargoLookup($pathParts) {
  */
 function handleLocationLookup($pathParts) {
     global $connection;
-    
+
     $locationName = !empty($pathParts) ? $pathParts[0] : '';
-    
+
     if (empty($locationName)) {
         return jsonError('Location name is required', 400);
     }
@@ -185,16 +185,16 @@ function handleLocationLookup($pathParts) {
             return jsonError('Location not found', 404);
         }
     }
-    
+
     // Get location details (replicates scan_location.php)
-    $query = "SELECT locations.id, locations.code, locations.station_id,
+    $query = "SELECT locations.id, locations.code, locations.station,
                      locations.track, locations.spot, locations.remarks,
                      routing.station
               FROM locations
-              LEFT JOIN routing ON locations.station_id = routing.id
+              LEFT JOIN routing ON locations.station = routing.id
               WHERE locations.code = ?
               LIMIT 1";
-    
+
     $stmt = $connection->prepare($query);
     if (!$stmt) {
         return jsonError('Database error: ' . $connection->error, 500);
@@ -210,7 +210,7 @@ function handleLocationLookup($pathParts) {
 
     $location = $result->fetch_assoc();
     $locationId = $location['id'];
-    
+
     // Find all cars at this location
     $carsQuery = "SELECT cars.position, cars.reporting_marks, cars.car_code_id,
                          cars.status, car_codes.code as car_code
@@ -218,7 +218,7 @@ function handleLocationLookup($pathParts) {
                   LEFT JOIN car_codes ON cars.car_code_id = car_codes.id
                   WHERE cars.current_location_id = ?
                   ORDER BY cars.position, cars.reporting_marks";
-    
+
     $carsStmt = $connection->prepare($carsQuery);
     if (!$carsStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
@@ -242,7 +242,7 @@ function handleLocationLookup($pathParts) {
         'location' => [
             'id' => intval($location['id']),
             'code' => $location['code'],
-            'stationId' => intval($location['station_id']),
+            'stationId' => intval($location['station']),
             'station' => $location['station'],
             'track' => $location['track'],
             'spot' => $location['spot'],
@@ -261,9 +261,9 @@ function handleLocationLookup($pathParts) {
  */
 function handleWagonUnload() {
     global $connection;
-    
+
     $payload = getJsonPayload();
-    
+
     // Validate required fields
     $validation = validateRequired($payload, ['wagonId', 'reportingMarks', 'status']);
     if (!$validation['valid']) {
@@ -273,14 +273,14 @@ function handleWagonUnload() {
     $wagonId = intval($payload['wagonId']);
     $reportingMarks = $payload['reportingMarks'];
     $currentStatus = $payload['status'];
-    
+
     // Validate status is Loading or Unloading
     if ($currentStatus !== 'Loading' && $currentStatus !== 'Unloading') {
         return jsonError('Car must be in Loading or Unloading status', 400);
     }
 
     // Verify car exists with correct reporting marks AND has valid status for load_unload page
-    $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ? 
+    $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ?
               AND (status = 'Loading' OR status = 'Unloading')";
     $stmt = $connection->prepare($query);
     if (!$stmt) {
@@ -296,20 +296,20 @@ function handleWagonUnload() {
     }
 
     $car = $result->fetch_assoc();
-    
+
     // Determine new status based on current status
     if ($car['status'] === 'Loading') {
         $newStatus = 'Loaded';
     } else { // Unloading
         $newStatus = 'Empty';
-        
+
         // Delete car orders for unloading cars
         $deleteQuery = "DELETE FROM car_orders WHERE car = ?";
         $deleteStmt = $connection->prepare($deleteQuery);
         if (!$deleteStmt) {
             return jsonError('Database error: ' . $connection->error, 500);
         }
-        
+
         $deleteStmt->bind_param('i', $wagonId);
         if (!$deleteStmt->execute()) {
             return jsonError('Failed to delete car orders', 500);
@@ -344,9 +344,9 @@ function handleWagonUnload() {
  */
 function handleWagonLoad() {
     global $connection;
-    
+
     $payload = getJsonPayload();
-    
+
     // Validate required fields
     $validation = validateRequired($payload, ['wagonId', 'reportingMarks', 'status']);
     if (!$validation['valid']) {
@@ -356,14 +356,14 @@ function handleWagonLoad() {
     $wagonId = intval($payload['wagonId']);
     $reportingMarks = $payload['reportingMarks'];
     $currentStatus = $payload['status'];
-    
+
     // Validate status is Loading or Unloading
     if ($currentStatus !== 'Loading' && $currentStatus !== 'Unloading') {
         return jsonError('Car must be in Loading or Unloading status', 400);
     }
 
     // Verify car exists with correct reporting marks AND has valid status for load_unload page
-    $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ? 
+    $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ?
               AND (status = 'Loading' OR status = 'Unloading')";
     $stmt = $connection->prepare($query);
     if (!$stmt) {
@@ -379,20 +379,20 @@ function handleWagonLoad() {
     }
 
     $car = $result->fetch_assoc();
-    
+
     // Determine new status based on current status
     if ($car['status'] === 'Loading') {
         $newStatus = 'Loaded';
     } else { // Unloading
         $newStatus = 'Empty';
-        
+
         // Delete car orders for unloading cars
         $deleteQuery = "DELETE FROM car_orders WHERE car = ?";
         $deleteStmt = $connection->prepare($deleteQuery);
         if (!$deleteStmt) {
             return jsonError('Database error: ' . $connection->error, 500);
         }
-        
+
         $deleteStmt->bind_param('i', $wagonId);
         if (!$deleteStmt->execute()) {
             return jsonError('Failed to delete car orders', 500);
@@ -428,9 +428,9 @@ function handleWagonLoad() {
  */
 function handleWagonReposition() {
     global $connection;
-    
+
     $payload = getJsonPayload();
-    
+
     // Validate required fields
     $validation = validateRequired($payload, ['wagonId', 'reportingMarks', 'locationId']);
     if (!$validation['valid']) {
@@ -457,7 +457,7 @@ function handleWagonReposition() {
     if ($result->num_rows === 0) {
         return jsonError('Car not available for repositioning (must be Empty with no orders)', 404);
     }
-    
+
     $car = $result->fetch_assoc();
     $currentLocationId = $car['current_location_id'];
 
@@ -475,7 +475,7 @@ function handleWagonReposition() {
     if ($locResult->num_rows === 0) {
         return jsonError('Destination location not found', 404);
     }
-    
+
     $destLocation = $locResult->fetch_assoc();
     $destinationCode = $destLocation['code'];
 
@@ -485,7 +485,7 @@ function handleWagonReposition() {
     if (!$sessionStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
     }
-    
+
     $sessionStmt->execute();
     $sessionResult = $sessionStmt->get_result();
     $sessionNumber = 0;
@@ -493,36 +493,36 @@ function handleWagonReposition() {
         $row = $sessionResult->fetch_assoc();
         $sessionNumber = intval($row['setting_value']);
     }
-    
+
     // Get next E-series waybill number
     $waybillLike = str_pad($sessionNumber, 3, '0', STR_PAD_LEFT) . '-E__';
-    $waybillQuery = "SELECT waybill_number FROM car_orders 
+    $waybillQuery = "SELECT waybill_number FROM car_orders
                      WHERE waybill_number LIKE ?
                      ORDER BY waybill_number DESC LIMIT 1";
     $waybillStmt = $connection->prepare($waybillQuery);
     if (!$waybillStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
     }
-    
+
     $waybillStmt->bind_param('s', $waybillLike);
     $waybillStmt->execute();
     $waybillResult = $waybillStmt->get_result();
-    
+
     $waybillCounter = 1;
     if ($waybillResult->num_rows > 0) {
         $row = $waybillResult->fetch_assoc();
         $waybillCounter = intval(substr($row['waybill_number'], -2, 2)) + 1;
     }
-    
+
     $waybillNumber = str_pad($sessionNumber, 3, '0', STR_PAD_LEFT) . '-E' . str_pad($waybillCounter, 2, '0', STR_PAD_LEFT);
 
-    // Insert empty car waybill
-    $insertQuery = "INSERT INTO car_orders (waybill_number, destination, car) VALUES (?, ?, ?)";
+    // Insert empty car waybill (shipment field holds destination location ID for reposition orders)
+    $insertQuery = "INSERT INTO car_orders (waybill_number, shipment, car) VALUES (?, ?, ?)";
     $insertStmt = $connection->prepare($insertQuery);
     if (!$insertStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
     }
-    
+
     $insertStmt->bind_param('sii', $waybillNumber, $locationId, $wagonId);
     if (!$insertStmt->execute()) {
         return jsonError('Failed to create reposition order', 500);
@@ -534,7 +534,7 @@ function handleWagonReposition() {
     if (!$updateStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
     }
-    
+
     $updateStmt->bind_param('i', $wagonId);
     if (!$updateStmt->execute()) {
         return jsonError('Failed to update car status', 500);
@@ -547,7 +547,7 @@ function handleWagonReposition() {
     if (!$historyStmt) {
         return jsonError('Database error: ' . $connection->error, 500);
     }
-    
+
     $event = 'Repositioned to ' . $destinationCode;
     $historyStmt->bind_param('iisi', $wagonId, $sessionNumber, $event, $currentLocationId);
     if (!$historyStmt->execute()) {
