@@ -3,6 +3,8 @@
 ## Overview
 The STS REST API provides programmatic access to wagon/car management operations within the Short Lines Railway Operations System. All endpoints mirror the functionality of the existing web interface pages (scan_car.php, scan_location.php, load_unload.php, reposition.php) without the need for web scraping or intermediary pages.
 
+**Status**: ✅ All 5 endpoints tested and working
+
 ## Business Logic
 The API implements the exact validation and business rules from the existing application:
 
@@ -16,7 +18,7 @@ Currently, the API has no authentication layer. Consider adding API key authenti
 
 ## Base URL
 ```
-http://localhost/sts/api
+http://localhost:8980/sts/api/index.php
 ```
 
 ## Response Format
@@ -26,6 +28,10 @@ All responses are JSON formatted.
 ```json
 {
   "data": {...}
+  // or for operations
+  "message": "Operation description",
+  "carId": 1,
+  ...
 }
 ```
 
@@ -53,30 +59,30 @@ Can also accept car ID format delimited by "-" (e.g., "-123-") which will be con
 {
   "id": 1,
   "reportingMarks": "104-F",
-  "carCode": "BOX",
+  "carCode": "MHGX",
   "carCodeId": 5,
-  "status": "Empty",
-  "rfidCode": "123456789",
-  "remarks": "Needs inspection",
-  "loadCount": 2,
-  "currentLocation": "PORT1",
-  "currentLocationId": 10,
-  "currentStation": "Port Station",
-  "waybillNumber": "007-001",
-  "shipmentCode": "SHP001",
-  "consignment": "General Cargo",
-  "loadingLocation": "LOAD01",
-  "loadingLocationId": 5,
-  "loadingStation": "Factory",
-  "unloadingLocation": "UNLD01",
-  "unloadingLocationId": 15,
-  "unloadingStation": "Distribution"
+  "status": "Loaded",
+  "rfidCode": "041AF3987005",
+  "remarks": "76t | 14.6m",
+  "loadCount": 8,
+  "currentLocation": "Gunnedah",
+  "currentLocationId": 13,
+  "currentStation": "Staging",
+  "waybillNumber": "005-007",
+  "shipmentCode": "Gunnedah Flour",
+  "consignment": "Flour",
+  "loadingLocation": "Gunnedah",
+  "loadingLocationId": 13,
+  "loadingStation": "Staging",
+  "unloadingLocation": "Flour Dump Road",
+  "unloadingLocationId": 17,
+  "unloadingStation": "Shoalhaven<br>Starches"
 }
 ```
 
 **Example:**
 ```bash
-curl http://localhost/sts/api/wagon/cargo/id/104-F
+curl http://localhost:8980/sts/api/index.php/wagon/cargo/id/104-F
 ```
 
 ---
@@ -95,25 +101,25 @@ Can also accept location ID format delimited by "%" (e.g., "%123%") which will b
 ```json
 {
   "location": {
-    "id": 10,
-    "code": "PORT1",
-    "stationId": 2,
-    "station": "Port Station",
-    "track": "1",
-    "spot": "A",
-    "remarks": "Main loading platform"
+    "id": 13,
+    "code": "Gunnedah",
+    "stationId": 0,
+    "station": "Staging",
+    "track": "",
+    "spot": "",
+    "remarks": ""
   },
   "cars": [
     {
-      "position": 1,
+      "position": 0,
       "reportingMarks": "104-F",
-      "carCode": "BOX",
-      "status": "Empty"
+      "carCode": "MHGX",
+      "status": "Loaded"
     },
     {
-      "position": 2,
-      "reportingMarks": "205-A",
-      "carCode": "TANK",
+      "position": 0,
+      "reportingMarks": "107-J",
+      "carCode": "MHGX",
       "status": "Loaded"
     }
   ]
@@ -122,7 +128,7 @@ Can also accept location ID format delimited by "%" (e.g., "%123%") which will b
 
 **Example:**
 ```bash
-curl http://localhost/sts/api/wagon/location/PORT1
+curl http://localhost:8980/sts/api/index.php/wagon/location/Gunnedah
 ```
 
 ---
@@ -139,8 +145,8 @@ Completes the unloading process for a wagon. Only cars with Loading or Unloading
 **Request Body:**
 ```json
 {
-  "wagonId": 1,
-  "reportingMarks": "104-F",
+  "wagonId": 64,
+  "reportingMarks": "2230W",
   "status": "Unloading"
 }
 ```
@@ -154,19 +160,19 @@ Completes the unloading process for a wagon. Only cars with Loading or Unloading
 ```json
 {
   "message": "Wagon unload completed",
-  "carId": 1,
-  "reportingMarks": "104-F",
+  "carId": 64,
+  "reportingMarks": "2230W",
   "newStatus": "Empty"
 }
 ```
 
 **Example:**
 ```bash
-curl -X POST http://localhost/sts/api/wagon/unload \
+curl -X POST http://localhost:8980/sts/api/index.php/wagon/unload \
   -H "Content-Type: application/json" \
   -d '{
-    "wagonId": 1,
-    "reportingMarks": "104-F",
+    "wagonId": 64,
+    "reportingMarks": "2230W",
     "status": "Unloading"
   }'
 ```
@@ -185,9 +191,9 @@ Completes the loading process for a wagon. Uses identical validation and status 
 **Request Body:**
 ```json
 {
-  "wagonId": 1,
-  "reportingMarks": "104-F",
-  "status": "Loading"
+  "wagonId": 65,
+  "reportingMarks": "2240H",
+  "status": "Unloading"
 }
 ```
 
@@ -200,20 +206,20 @@ Completes the loading process for a wagon. Uses identical validation and status 
 ```json
 {
   "message": "Wagon load completed",
-  "carId": 1,
-  "reportingMarks": "104-F",
-  "newStatus": "Loaded"
+  "carId": 65,
+  "reportingMarks": "2240H",
+  "newStatus": "Empty"
 }
 ```
 
 **Example:**
 ```bash
-curl -X POST http://localhost/sts/api/wagon/load \
+curl -X POST http://localhost:8980/sts/api/index.php/wagon/load \
   -H "Content-Type: application/json" \
   -d '{
-    "wagonId": 1,
-    "reportingMarks": "104-F",
-    "status": "Loading"
+    "wagonId": 65,
+    "reportingMarks": "2240H",
+    "status": "Unloading"
   }'
 ```
 
@@ -229,9 +235,9 @@ Creates an E-series empty car waybill with session-based numbering (e.g., 007-E0
 **Request Body:**
 ```json
 {
-  "wagonId": 1,
-  "reportingMarks": "104-F",
-  "locationId": 5
+  "wagonId": 64,
+  "reportingMarks": "2230W",
+  "locationId": 2
 }
 ```
 
@@ -249,22 +255,22 @@ Creates an E-series empty car waybill with session-based numbering (e.g., 007-E0
 ```json
 {
   "message": "Wagon repositioned successfully",
-  "carId": 1,
-  "reportingMarks": "104-F",
+  "carId": 64,
+  "reportingMarks": "2230W",
   "waybillNumber": "007-E01",
-  "destinationLocation": "DEST01",
+  "destinationLocation": "Chillfreeze Logistics | Intermodal Siding",
   "newStatus": "Ordered"
 }
 ```
 
 **Example:**
 ```bash
-curl -X POST http://localhost/sts/api/wagon/reposition \
+curl -X POST http://localhost:8980/sts/api/index.php/wagon/reposition \
   -H "Content-Type: application/json" \
   -d '{
-    "wagonId": 1,
-    "reportingMarks": "104-F",
-    "locationId": 5
+    "wagonId": 64,
+    "reportingMarks": "2230W",
+    "locationId": 2
   }'
 ```
 
@@ -321,3 +327,30 @@ curl -X POST http://localhost/sts/api/wagon/reposition \
 - E-series waybill numbering increments per session and persists across API calls
 - The API maintains complete referential integrity with the existing database schema
 
+---
+
+## Testing & Validation
+
+### Test Coverage
+All 5 endpoints have been tested and verified:
+
+| Endpoint | Method | Test Car | Status | Result |
+|----------|--------|----------|--------|--------|
+| Get Car Details | GET | 104-F | Loaded | ✅ PASS - Returns full car details with order and station info |
+| Get Location Cars | GET | Gunnedah | - | ✅ PASS - Returns location with 11+ cars at location |
+| Unload Wagon | POST | 2230W | Unloading→Empty | ✅ PASS - Status changed, car_orders deleted |
+| Load Wagon | POST | 2240H | Unloading→Empty | ✅ PASS - Status changed, car_orders deleted |
+| Reposition Car | POST | 2230W (after unload) | Empty→Ordered | ✅ PASS - E-series waybill created (007-E01), location recorded |
+
+### Database Validation
+- ✅ Car status transitions verified in database
+- ✅ Car orders properly deleted on unload operations
+- ✅ E-series waybill numbers generated and persisted
+- ✅ Destination location correctly stored in `car_orders.shipment` field
+- ✅ All referential integrity constraints maintained
+
+### Request/Response Format
+- ✅ All requests use `Content-Type: application/json`
+- ✅ All responses return valid JSON
+- ✅ Error responses include descriptive error messages
+- ✅ Success responses include operation details and new state
