@@ -14,6 +14,7 @@ ini_set('display_errors', 0);
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = str_replace('/sts/api', '', $path);
+$path = str_replace('index.php', '', $path);
 
 // Parse the path to extract endpoint and parameters
 $pathParts = array_filter(explode('/', $path));

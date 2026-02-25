@@ -4,12 +4,13 @@
  * Routes wagon-related requests to specific operations
  */
 
-require_once dirname(__DIR__) . '/open_db.php';
-require_once __DIR__ . '/helpers/response.php';
-require_once __DIR__ . '/helpers/validation.php';
+require_once dirname(dirname(__DIR__)) . '/open_db.php';
+require_once dirname(__DIR__) . '/helpers/response.php';
+require_once dirname(__DIR__) . '/helpers/validation.php';
 
 function handleWagonEndpoint($method, $pathParts) {
     global $connection;
+    $connection = open_db();
 
     if (empty($pathParts)) {
         return jsonError('Invalid wagon endpoint', 400);
