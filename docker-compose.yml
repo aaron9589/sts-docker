@@ -18,8 +18,8 @@ services:
 
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
-    #volumes:
-      #- /volume1/docker/sts/backups:/var/www/html/sts/backups
+    volumes:
+      - ~/sts-backups:/var/www/html/sts/backups
 
     depends_on:
       db:
@@ -43,8 +43,8 @@ services:
 
     # Uncomment below and change the path you with to store your backups for STS in. format is <Source Path on PC>:<Path on Container>
     # You only want to change the <Source Path on PC> Variable.
-    #volumes:
-      #- /volume1/docker/sts/backups:/var/www/html/sts/backups
+    volumes:
+      - ~/sts-backups:/var/www/html/sts/backups
 
     depends_on:
       db:
