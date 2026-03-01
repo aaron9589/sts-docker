@@ -165,7 +165,7 @@ function handleCargoLookup($pathParts) {
 function handleLocationLookup($pathParts) {
     global $connection;
 
-    $locationName = !empty($pathParts) ? $pathParts[0] : '';
+    $locationName = !empty($pathParts) ? urldecode($pathParts[0]) : '';
 
     if (empty($locationName)) {
         return jsonError('Location name is required', 400);
