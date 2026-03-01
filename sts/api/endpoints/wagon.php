@@ -243,19 +243,13 @@ function handleWagonUnload() {
     $payload = getJsonPayload();
 
     // Validate required fields
-    $validation = validateRequired($payload, ['wagonId', 'reportingMarks', 'status']);
+    $validation = validateRequired($payload, ['wagonId', 'reportingMarks']);
     if (!$validation['valid']) {
         return jsonError($validation['message'], 400);
     }
 
     $wagonId = intval($payload['wagonId']);
     $reportingMarks = $payload['reportingMarks'];
-    $currentStatus = $payload['status'];
-
-    // Validate status is Loading or Unloading
-    if ($currentStatus !== 'Loading' && $currentStatus !== 'Unloading') {
-        return jsonError('Car must be in Loading or Unloading status', 400);
-    }
 
     // Verify car exists with correct reporting marks AND has valid status for load_unload page
     $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ?
@@ -326,19 +320,13 @@ function handleWagonLoad() {
     $payload = getJsonPayload();
 
     // Validate required fields
-    $validation = validateRequired($payload, ['wagonId', 'reportingMarks', 'status']);
+    $validation = validateRequired($payload, ['wagonId', 'reportingMarks']);
     if (!$validation['valid']) {
         return jsonError($validation['message'], 400);
     }
 
     $wagonId = intval($payload['wagonId']);
     $reportingMarks = $payload['reportingMarks'];
-    $currentStatus = $payload['status'];
-
-    // Validate status is Loading or Unloading
-    if ($currentStatus !== 'Loading' && $currentStatus !== 'Unloading') {
-        return jsonError('Car must be in Loading or Unloading status', 400);
-    }
 
     // Verify car exists with correct reporting marks AND has valid status for load_unload page
     $query = "SELECT id, status FROM cars WHERE id = ? AND reporting_marks = ?
