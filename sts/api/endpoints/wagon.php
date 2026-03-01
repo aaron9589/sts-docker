@@ -135,26 +135,15 @@ function handleCargoLookup($pathParts) {
     $car = $result->fetch_assoc();
 
     return jsonResponse([
-        'id' => intval($car['id']),
         'reportingMarks' => $car['reporting_marks'],
+        'id' => strval($car['id']),
         'carCode' => $car['car_code'],
-        'carCodeId' => intval($car['car_code_id']),
         'status' => $car['status'],
-        'rfidCode' => $car['RFID_code'],
-        'remarks' => $car['remarks'],
-        'loadCount' => intval($car['load_count']),
-        'currentLocation' => $car['current_location'],
-        'currentLocationId' => intval($car['current_location_id']),
-        'currentStation' => $car['current_station'],
-        'waybillNumber' => $car['waybill_number'],
-        'shipmentCode' => $car['shipment'],
-        'consignment' => $car['consignment'],
-        'loadingLocation' => $car['loading_location'],
-        'loadingLocationId' => intval($car['loading_location_id']),
-        'loadingStation' => $car['loading_station'],
-        'unloadingLocation' => $car['unloading_location'],
-        'unloadingLocationId' => intval($car['unloading_location_id']),
-        'unloadingStation' => $car['unloading_station']
+        'shipmentCode' => $car['shipment'] ?? '',
+        'loadingStation' => $car['loading_station'] ?? '',
+        'loadingLocation' => $car['loading_location'] ?? '',
+        'unloadingStation' => $car['unloading_station'] ?? '',
+        'unloadingLocation' => $car['unloading_location'] ?? ''
     ], 200);
 }
 
@@ -213,7 +202,7 @@ function handleLocationLookup($pathParts) {
     $locationId = $location['id'];
 
     // Find all cars at this location
-    $carsQuery = "SELECT cars.position, cars.reporting_marks, cars.car_code_id,
+    $carsQuery = "SELECT cars.reporting_marks, cars.car_code_id,
                          cars.status, car_codes.code as car_code
                   FROM cars
                   LEFT JOIN car_codes ON cars.car_code_id = car_codes.id
@@ -232,25 +221,13 @@ function handleLocationLookup($pathParts) {
     $cars = [];
     while ($row = $carsResult->fetch_assoc()) {
         $cars[] = [
-            'position' => intval($row['position']),
             'reportingMarks' => $row['reporting_marks'],
-            'carCode' => $row['car_code'],
+            'carType' => $row['car_code'],
             'status' => $row['status']
         ];
     }
 
-    return jsonResponse([
-        'location' => [
-            'id' => intval($location['id']),
-            'code' => $location['code'],
-            'stationId' => intval($location['station']),
-            'station' => $location['station'],
-            'track' => $location['track'],
-            'spot' => $location['spot'],
-            'remarks' => $location['remarks']
-        ],
-        'cars' => $cars
-    ], 200);
+    return jsonResponse($cars, 200);
 }
 
 /**
