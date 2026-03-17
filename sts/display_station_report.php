@@ -67,6 +67,20 @@ if (isset($_GET['generate_report'])) {
 
     $rs = mysqli_query($dbc, $sql);
     if (mysqli_num_rows($rs) > 0) {
+      // Collect all rows; pre-fetch destinations for non-revenue cars
+      $rows = [];
+      while ($row = mysqli_fetch_array($rs)) {
+        if (substr($row['waybill_number'], 4, 1) == "E") {
+          $sql2 = 'select locations.code as code, routing.station as station
+                   from locations, routing
+                   where locations.id = "' . $row['shipment_id'] . '" and locations.station = routing.id';
+          $rs2 = mysqli_query($dbc, $sql2);
+          $row2 = mysqli_fetch_array($rs2);
+          $row['dest_code']    = $row2['code']    ?? '';
+          $row['dest_station'] = $row2['station'] ?? '';
+        }
+        $rows[] = $row;
+      }
       ?>
       <div class="print-header">
         <h2><?php echo htmlspecialchars($rr_name); ?></h2>
@@ -75,24 +89,86 @@ if (isset($_GET['generate_report'])) {
         <small><em>If a car is enroute, the next destination in the route is shown in <strong>Bold</strong> letters.</em></small>
       </div>
 
+      <?php
+      // Pickup summary — grouped by service; shown first (and is what prints)
+      $handled_rows = array_filter($rows, fn($r) => !empty($r['job_name']));
+      if (!empty($handled_rows)) {
+        $by_job = [];
+        foreach ($handled_rows as $r) { $by_job[$r['job_name']][] = $r; }
+        ksort($by_job);
+        ?>
+        <div class="pickup-summary-section">
+          <h4><i class="bi bi-arrow-up-circle"></i> Cars to be Picked Up by Service</h4>
+          <?php foreach ($by_job as $job_name => $job_rows): ?>
+          <div class="job-group-header"><?= htmlspecialchars($job_name) ?></div>
+          <div class="table-responsive">
+          <table class="table table-sm report-table mb-3">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Reporting Marks</th>
+                <th>Car Code</th>
+                <th>Status</th>
+                <th>Consignment</th>
+                <th>Destination</th>
+                <th>Handled by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($job_rows as $r):
+                if ($r['status'] == "Ordered") {
+                  $dest       = htmlspecialchars($r['loading_station']) . '<br/>' . htmlspecialchars($r['loading_location']);
+                  $dest_style = set_colors($dbc, $r['loading_location']);
+                } elseif (in_array($r['status'], ["Loading", "Loaded", "Unloading"])) {
+                  $dest       = htmlspecialchars($r['unloading_station']) . '<br/>' . htmlspecialchars($r['unloading_location']);
+                  $dest_style = set_colors($dbc, $r['unloading_location']);
+                } elseif (substr($r['waybill_number'], 4, 1) == "E") {
+                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
+                  $dest_style = set_colors($dbc, $r['dest_code']);
+                } else {
+                  $dest = ''; $dest_style = '';
+                }
+              ?>
+              <tr>
+                <td><?= htmlspecialchars($r['current_location']) ?></td>
+                <td><?= htmlspecialchars($r['reporting_marks']) ?></td>
+                <td><?= htmlspecialchars($r['car_code']) ?></td>
+                <td><span class="status-<?= strtolower($r['status']) ?>"><?= htmlspecialchars($r['status']) ?></span></td>
+                <td><?= (substr($r['waybill_number'], 4, 1) == "E") ? 'Non-Revenue' : htmlspecialchars($r['consignment']) ?></td>
+                <td style="<?= $dest_style ?>" class="<?= $dest ? 'destination-highlight' : '' ?>"><?= $dest ?></td>
+                <td><?= htmlspecialchars($r['job_name']) ?></td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <?php
+      }
+      ?>
+
+      <div class="no-print-section">
+      <div class="on-hand-section-header">All Cars On Hand</div>
+      <div class="table-responsive">
       <table class="table table-sm report-table">
         <thead>
           <tr>
-            <th>Station<br/>Location</th>
-            <th>Reporting<br/>Marks</th>
-            <th>Car<br/>Code</th>
+            <th>Location</th>
+            <th>Reporting Marks</th>
+            <th>Car Code</th>
             <th>Status</th>
             <th>Consignment</th>
-            <th>Loading<br/>Station<br/>Location</th>
-            <th>Unloading<br/>Station<br/>Location</th>
+            <th>Loading Station / Location</th>
+            <th>Unloading Station / Location</th>
             <th>Remarks</th>
-            <th>To be<br/>handled by</th>
+            <th>Handled by</th>
           </tr>
         </thead>
         <tbody>
           <?php
           $prev_location = '';
-          while ($row = mysqli_fetch_array($rs)) {
+          foreach ($rows as $row) {
             // Add location separator
             if ($row['current_location'] != $prev_location && $prev_location != '') {
               echo '<tr class="location-separator"><td colspan="9"></td></tr>';
@@ -108,41 +184,35 @@ if (isset($_GET['generate_report'])) {
 
             if (substr($row['waybill_number'], 4, 1) == "E") {
               // Non-revenue waybill
-              $sql2 = 'select locations.code as code, routing.station as station
-                       from locations, routing
-                       where locations.id = "' . $row['shipment_id'] . '" and locations.station = routing.id';
-              $rs2 = mysqli_query($dbc, $sql2);
-              $row2 = mysqli_fetch_array($rs2);
-
-              echo '<td><u>' . htmlspecialchars($station_name) . '</u><br/>' . htmlspecialchars($row['current_location']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['current_location']) . '</td>';
               echo '<td onclick="show_image(' . $parm_string . ');" style="cursor: pointer;">' . htmlspecialchars($row['reporting_marks']) . '</td>';
-              echo '<td style="text-align: center;">' . htmlspecialchars($row['car_code']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['car_code']) . '</td>';
               echo '<td><span class="status-' . strtolower($row['status']) . '">' . htmlspecialchars($row['status']) . '</span></td>';
               echo '<td>Non-Revenue</td>';
               echo '<td>N/A</td>';
-              echo '<td style="' . set_colors($dbc, $row2['code']) . '" class="destination-highlight"><u>' . htmlspecialchars($row2['station']) . '</u><br/>' . htmlspecialchars($row2['code']) . '</td>';
+              echo '<td style="' . set_colors($dbc, $row['dest_code']) . '" class="destination-highlight">' . htmlspecialchars($row['dest_station']) . '<br/>' . htmlspecialchars($row['dest_code']) . '</td>';
               echo '<td>Repositioning</td>';
               echo '<td>' . htmlspecialchars($row['job_name']) . '</td>';
             } else {
               // Revenue waybill
-              echo '<td><u>' . htmlspecialchars($station_name) . '</u><br/>' . htmlspecialchars($row['current_location']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['current_location']) . '</td>';
               echo '<td onclick="show_image(' . $parm_string . ');" style="cursor: pointer;">' . htmlspecialchars($row['reporting_marks']) . '</td>';
-              echo '<td style="text-align: center;">' . htmlspecialchars($row['car_code']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['car_code']) . '</td>';
               echo '<td><span class="status-' . strtolower($row['status']) . '">' . htmlspecialchars($row['status']) . '</span></td>';
               echo '<td>' . htmlspecialchars($row['consignment']) . '</td>';
 
               // Loading location
               if ($row['status'] == "Ordered") {
-                echo '<td style="' . set_colors($dbc, $row['loading_location']) . '" class="destination-highlight"><u>' . htmlspecialchars($row['loading_station']) . '</u><br/>' . htmlspecialchars($row['loading_location']) . '</td>';
+                echo '<td style="' . set_colors($dbc, $row['loading_location']) . '" class="destination-highlight">' . htmlspecialchars($row['loading_station']) . '<br/>' . htmlspecialchars($row['loading_location']) . '</td>';
               } else if (in_array($row['status'], ["Loading", "Loaded", "Unloading"])) {
-                echo '<td><u>' . htmlspecialchars($row['loading_station']) . '</u><br/>' . htmlspecialchars($row['loading_location']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['loading_station']) . '<br/>' . htmlspecialchars($row['loading_location']) . '</td>';
               } else {
                 echo '<td></td>';
               }
 
               // Unloading location
               if (in_array($row['status'], ["Loading", "Loaded", "Unloading"])) {
-                echo '<td style="' . set_colors($dbc, $row['unloading_location']) . '" class="destination-highlight"><u>' . htmlspecialchars($row['unloading_station']) . '</u><br/>' . htmlspecialchars($row['unloading_location']) . '</td>';
+                echo '<td style="' . set_colors($dbc, $row['unloading_location']) . '" class="destination-highlight">' . htmlspecialchars($row['unloading_station']) . '<br/>' . htmlspecialchars($row['unloading_location']) . '</td>';
               } else if ($row['status'] == "Ordered") {
                 echo '<td></td>';
               } else {
@@ -158,9 +228,10 @@ if (isset($_GET['generate_report'])) {
           ?>
         </tbody>
       </table>
-
+      </div>
       <p class="small text-muted mt-3"><em>If a car is enroute, the next destination in the route is shown in <strong>Bold</strong> letters.</em></p>
-      <?php
+      </div>
+    <?php
     } else {
       echo '<div class="alert alert-warning"><strong>No cars found</strong> at the selected location.</div>';
     }
@@ -214,25 +285,103 @@ if (isset($_GET['generate_report'])) {
         <small><em>If a car is enroute, the next destination in the route is shown in <strong>Bold</strong> letters.</em></small>
       </div>
 
+      <?php
+      // Collect all rows; pre-fetch destinations for non-revenue cars
+      $rows = [];
+      while ($row = mysqli_fetch_array($rs)) {
+        if (substr($row['waybill_number'], 4, 1) == "E") {
+          $sql2 = 'select locations.code as code, routing.station as station
+                   from locations, routing
+                   where locations.id = "' . $row['shipment_id'] . '" and locations.station = routing.id';
+          $rs2 = mysqli_query($dbc, $sql2);
+          $row2 = mysqli_fetch_array($rs2);
+          $row['dest_code']    = $row2['code']    ?? '';
+          $row['dest_station'] = $row2['station'] ?? '';
+        }
+        $rows[] = $row;
+      }
+      ?>
+      <?php
+      // Pickup summary — grouped by service; shown first (and is what prints)
+      $handled_rows = array_filter($rows, fn($r) => !empty($r['job_name']));
+      if (!empty($handled_rows)) {
+        $by_job = [];
+        foreach ($handled_rows as $r) { $by_job[$r['job_name']][] = $r; }
+        ksort($by_job);
+        ?>
+        <div class="pickup-summary-section">
+          <h4><i class="bi bi-arrow-up-circle"></i> Cars to be Picked Up by Service</h4>
+          <?php foreach ($by_job as $job_name => $job_rows): ?>
+          <div class="job-group-header"><?= htmlspecialchars($job_name) ?></div>
+          <div class="table-responsive">
+          <table class="table table-sm report-table mb-3">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Reporting Marks</th>
+                <th>Car Code</th>
+                <th>Status</th>
+                <th>Consignment</th>
+                <th>Destination</th>
+                <th>Handled by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($job_rows as $r):
+                if ($r['status'] == "Ordered") {
+                  $dest       = htmlspecialchars($r['loading_station']) . '<br/>' . htmlspecialchars($r['loading_location']);
+                  $dest_style = set_colors($dbc, $r['loading_location']);
+                } elseif (in_array($r['status'], ["Loading", "Loaded", "Unloading"])) {
+                  $dest       = htmlspecialchars($r['unloading_station']) . '<br/>' . htmlspecialchars($r['unloading_location']);
+                  $dest_style = set_colors($dbc, $r['unloading_location']);
+                } elseif (substr($r['waybill_number'], 4, 1) == "E") {
+                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
+                  $dest_style = set_colors($dbc, $r['dest_code']);
+                } else {
+                  $dest = ''; $dest_style = '';
+                }
+              ?>
+              <tr>
+                <td><?= htmlspecialchars($r['station_name']) ?></td>
+                <td><?= htmlspecialchars($r['current_location']) ?></td>
+                <td><?= htmlspecialchars($r['reporting_marks']) ?></td>
+                <td><?= htmlspecialchars($r['car_code']) ?></td>
+                <td><span class="status-<?= strtolower($r['status']) ?>"><?= htmlspecialchars($r['status']) ?></span></td>
+                <td><?= (substr($r['waybill_number'], 4, 1) == "E") ? 'Non-Revenue' : htmlspecialchars($r['consignment']) ?></td>
+                <td style="<?= $dest_style ?>" class="<?= $dest ? 'destination-highlight' : '' ?>"><?= $dest ?></td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <?php
+      }
+      ?>
+
+      <div class="no-print-section">
+      <div class="on-hand-section-header">All Cars On Hand</div>
+      <div class="table-responsive">
       <table class="table table-sm report-table">
         <thead>
           <tr>
             <th>Station</th>
             <th>Location</th>
-            <th>Reporting<br/>Marks</th>
-            <th>Car<br/>Code</th>
+            <th>Reporting Marks</th>
+            <th>Car Code</th>
             <th>Status</th>
             <th>Consignment</th>
-            <th>Loading<br/>Station<br/>Location</th>
-            <th>Unloading<br/>Station<br/>Location</th>
+            <th>Loading Station / Location</th>
+            <th>Unloading Station / Location</th>
             <th>Remarks</th>
-            <th>To be<br/>handled by</th>
+            <th>Handled by</th>
           </tr>
         </thead>
         <tbody>
           <?php
           $prev_location = '';
-          while ($row = mysqli_fetch_array($rs)) {
+          foreach ($rows as $row) {
             // Add location separator
             if ($row['current_location'] != $prev_location && $prev_location != '') {
               echo '<tr class="location-separator"><td colspan="10"></td></tr>';
@@ -248,20 +397,14 @@ if (isset($_GET['generate_report'])) {
 
             if (substr($row['waybill_number'], 4, 1) == "E") {
               // Non-revenue waybill
-              $sql2 = 'select locations.code as code, routing.station as station
-                       from locations, routing
-                       where locations.id = "' . $row['shipment_id'] . '" and locations.station = routing.id';
-              $rs2 = mysqli_query($dbc, $sql2);
-              $row2 = mysqli_fetch_array($rs2);
-
               echo '<td>' . htmlspecialchars($row['station_name']) . '</td>';
               echo '<td>' . htmlspecialchars($row['current_location']) . '</td>';
               echo '<td onclick="show_image(' . $parm_string . ');" style="cursor: pointer;">' . htmlspecialchars($row['reporting_marks']) . '</td>';
-              echo '<td style="text-align: center;">' . htmlspecialchars($row['car_code']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['car_code']) . '</td>';
               echo '<td><span class="status-' . strtolower($row['status']) . '">' . htmlspecialchars($row['status']) . '</span></td>';
               echo '<td>Non-Revenue</td>';
               echo '<td>N/A</td>';
-              echo '<td style="' . set_colors($dbc, $row2['code']) . '" class="destination-highlight"><u>' . htmlspecialchars($row2['station']) . '</u><br/>' . htmlspecialchars($row2['code']) . '</td>';
+              echo '<td style="' . set_colors($dbc, $row['dest_code']) . '" class="destination-highlight">' . htmlspecialchars($row['dest_station']) . '<br/>' . htmlspecialchars($row['dest_code']) . '</td>';
               echo '<td>Repositioning</td>';
               echo '<td>' . htmlspecialchars($row['job_name']) . '</td>';
             } else {
@@ -269,22 +412,22 @@ if (isset($_GET['generate_report'])) {
               echo '<td>' . htmlspecialchars($row['station_name']) . '</td>';
               echo '<td>' . htmlspecialchars($row['current_location']) . '</td>';
               echo '<td onclick="show_image(' . $parm_string . ');" style="cursor: pointer;">' . htmlspecialchars($row['reporting_marks']) . '</td>';
-              echo '<td style="text-align: center;">' . htmlspecialchars($row['car_code']) . '</td>';
+              echo '<td>' . htmlspecialchars($row['car_code']) . '</td>';
               echo '<td><span class="status-' . strtolower($row['status']) . '">' . htmlspecialchars($row['status']) . '</span></td>';
               echo '<td>' . htmlspecialchars($row['consignment']) . '</td>';
 
               // Loading location
               if ($row['status'] == "Ordered") {
-                echo '<td style="' . set_colors($dbc, $row['loading_location']) . '" class="destination-highlight"><u>' . htmlspecialchars($row['loading_station']) . '</u><br/>' . htmlspecialchars($row['loading_location']) . '</td>';
+                echo '<td style="' . set_colors($dbc, $row['loading_location']) . '" class="destination-highlight">' . htmlspecialchars($row['loading_station']) . '<br/>' . htmlspecialchars($row['loading_location']) . '</td>';
               } else if (in_array($row['status'], ["Loading", "Loaded", "Unloading"])) {
-                echo '<td><u>' . htmlspecialchars($row['loading_station']) . '</u><br/>' . htmlspecialchars($row['loading_location']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['loading_station']) . '<br/>' . htmlspecialchars($row['loading_location']) . '</td>';
               } else {
                 echo '<td></td>';
               }
 
               // Unloading location
               if (in_array($row['status'], ["Loading", "Loaded", "Unloading"])) {
-                echo '<td style="' . set_colors($dbc, $row['unloading_location']) . '" class="destination-highlight"><u>' . htmlspecialchars($row['unloading_station']) . '</u><br/>' . htmlspecialchars($row['unloading_location']) . '</td>';
+                echo '<td style="' . set_colors($dbc, $row['unloading_location']) . '" class="destination-highlight">' . htmlspecialchars($row['unloading_station']) . '<br/>' . htmlspecialchars($row['unloading_location']) . '</td>';
               } else if ($row['status'] == "Ordered") {
                 echo '<td></td>';
               } else {
@@ -293,7 +436,6 @@ if (isset($_GET['generate_report'])) {
 
               echo '<td>' . htmlspecialchars($row['remarks']) . '</td>';
               echo '<td>' . htmlspecialchars($row['job_name']) . '</td>';
-
             }
 
             echo '</tr>';
@@ -301,9 +443,10 @@ if (isset($_GET['generate_report'])) {
           ?>
         </tbody>
       </table>
-
+      </div>
       <p class="small text-muted mt-3"><em>If a car is enroute, the next destination in the route is shown in <strong>Bold</strong> letters.</em></p>
-      <?php
+      </div>
+    <?php
     } else {
       echo '<div class="alert alert-warning"><strong>No cars found</strong> on the system.</div>';
     }
@@ -321,6 +464,8 @@ if (isset($_GET['generate_report'])) {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Lexend font - designed for reading ease / reading ease -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -413,10 +558,10 @@ if (isset($_GET['generate_report'])) {
       font-size: 0.75rem;
     }
     .report-table td {
-      padding: 6px 4px;
+      padding: 6px 8px;
       border-bottom: 1px solid #dee2e6;
       vertical-align: middle;
-      word-break: break-word;
+      white-space: nowrap;
     }
     .report-table tbody tr:hover {
       background-color: #f8f9fa;
@@ -510,6 +655,92 @@ if (isset($_GET['generate_report'])) {
       margin-bottom: 1rem;
     }
 
+    .on-hand-section-header {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #555;
+      border-left: 4px solid #adb5bd;
+      padding: 4px 8px;
+      margin: 1.25rem 0 0.5rem;
+      background-color: #f8f9fa;
+    }
+
+    /* ── Easy Reading mode ─────────────────────────────── */
+    body.reading-mode {
+      font-family: 'Lexend', Arial, sans-serif !important;
+      background-color: #fdf6e3 !important; /* warm cream background */
+      color: #1a1a1a !important;
+      letter-spacing: 0.05em;
+      word-spacing: 0.15em;
+      line-height: 1.8;
+    }
+    body.reading-mode .report-table {
+      font-size: 0.95rem;
+      font-family: 'Lexend', Arial, sans-serif !important;
+    }
+    body.reading-mode .report-table th {
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      letter-spacing: 0.04em;
+    }
+    body.reading-mode .report-table td {
+      padding: 10px 12px;
+      line-height: 1.6;
+    }
+    body.reading-mode .report-table tbody tr:nth-child(odd) {
+      background-color: #fff9ee;
+    }
+    body.reading-mode .report-table tbody tr:nth-child(even) {
+      background-color: #f0e9d8;
+    }
+    body.reading-mode .card {
+      background-color: #fffdf5;
+    }
+    body.reading-mode .job-group-header {
+      font-size: 1rem;
+      padding: 6px 12px;
+      letter-spacing: 0.04em;
+    }
+    body.reading-mode .on-hand-section-header {
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+    body.reading-mode .status-empty,
+    body.reading-mode .status-loaded,
+    body.reading-mode .status-loading,
+    body.reading-mode .status-unloading,
+    body.reading-mode .status-ordered,
+    body.reading-mode .status-unavailable {
+      font-size: 0.9rem;
+      padding: 5px 10px;
+      letter-spacing: 0.03em;
+    }
+    #reading-btn.active {
+      background-color: #e6b800;
+      border-color: #c9a000;
+      color: #1a1a1a;
+    }
+
+    .pickup-summary-section {
+      margin-top: 1.5rem;
+      border-top: 2px solid #4a90e2;
+      padding-top: 1rem;
+    }
+    .pickup-summary-section h4 {
+      color: #4a90e2;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .job-group-header {
+      background-color: #e8f0fe;
+      border-left: 4px solid #4a90e2;
+      padding: 4px 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0;
+    }
+
     /* Print page setup */
     @page {
       size: landscape;
@@ -569,8 +800,8 @@ if (isset($_GET['generate_report'])) {
       }
       .report-table {
         page-break-inside: auto;
-        font-family: "Courier New", monospace;
-        font-size: 6pt;
+        font-family: 'Lexend', Arial, sans-serif !important;
+        font-size: 8pt;
         border-collapse: collapse;
         width: 100%;
         table-layout: fixed;
@@ -583,24 +814,33 @@ if (isset($_GET['generate_report'])) {
         color: #000 !important;
         background-color: transparent !important;
         font-weight: bold !important;
-        padding: 1px 2px;
+        padding: 3px 6px;
         border: 1px solid #000;
         text-align: left;
-        font-size: 5pt;
+        font-size: 8pt;
         position: static;
         overflow: hidden;
         word-wrap: break-word;
+        letter-spacing: 0.04em;
       }
       .report-table td {
-        padding: 1px 2px;
+        padding: 3px 6px;
         border: 1px solid #000;
         vertical-align: top;
         background-color: transparent !important;
         overflow: hidden;
         word-wrap: break-word;
+        font-size: 8pt;
+        letter-spacing: 0.03em;
       }
       .report-table tbody tr {
         page-break-inside: avoid;
+      }
+      .report-table tbody tr:nth-child(odd) {
+        background-color: #f7f7e6;
+      }
+      .report-table tbody tr:nth-child(even) {
+        background-color: #fff;
       }
       .location-separator {
         height: 0;
@@ -609,6 +849,29 @@ if (isset($_GET['generate_report'])) {
       .destination-highlight {
         background-color: transparent !important;
         color: #000;
+        font-weight: bold;
+      }
+      /* Hide the full on-hand table; only print the pickup summary */
+      .no-print-section {
+        display: none !important;
+      }
+      .pickup-summary-section {
+        border-top: 1px solid #000;
+        margin-top: 0.2rem;
+        padding-top: 0.1rem;
+      }
+      .pickup-summary-section h4 {
+        font-size: 7pt;
+        color: #000;
+        font-weight: bold;
+        margin: 0.1rem 0;
+        border: none;
+      }
+      .job-group-header {
+        background-color: transparent !important;
+        border-left: 2px solid #000;
+        padding: 1px 3px;
+        font-size: 6pt;
         font-weight: bold;
       }
       /* Hide status badges, show text only */
@@ -638,8 +901,11 @@ if (isset($_GET['generate_report'])) {
   <nav class="navbar navbar-dark bg-primary no-print">
     <div class="container-fluid">
       <span class="navbar-brand"><i class="bi bi-graph-up"></i> Station Report</span>
-      <div>
-        <a href="index.html" class="btn btn-outline-light btn-sm me-2"><i class="bi bi-house"></i> Home</a>
+      <div class="d-flex align-items-center gap-2">
+        <button id="reading-btn" class="btn btn-outline-light btn-sm" onclick="toggleReadingMode()" title="Toggle easy reading mode">
+          <i class="bi bi-eye"></i> Aa
+        </button>
+        <a href="index.html" class="btn btn-outline-light btn-sm"><i class="bi bi-house"></i> Home</a>
         <a href="reports.html" class="btn btn-outline-light btn-sm"><i class="bi bi-file-text"></i> Reports</a>
       </div>
     </div>
@@ -731,6 +997,9 @@ if (isset($_GET['generate_report'])) {
                 <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('report-container').classList.remove('show'); document.querySelector('.form-card').scrollIntoView({behavior:'smooth'});">
                   <i class="bi bi-pencil"></i> Modify Search
                 </button>
+                <button type="button" class="btn btn-warning btn-sm" id="reading-btn-report" onclick="toggleReadingMode()" title="Toggle easy reading mode">
+                  <i class="bi bi-eye"></i> Reading Mode
+                </button>
               </div>
 
               <div id="report-content"></div>
@@ -746,6 +1015,26 @@ if (isset($_GET['generate_report'])) {
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
+    // ── Dyslexia mode ────────────────────────────────────────────
+    function toggleReadingMode() {
+      const enabled = document.body.classList.toggle('reading-mode');
+      localStorage.setItem('reading-mode', enabled ? '1' : '0');
+      syncDyslexiaBtns(enabled);
+    }
+    function syncDyslexiaBtns(enabled) {
+      document.querySelectorAll('#reading-btn, #reading-btn-report').forEach(btn => {
+        btn.classList.toggle('active', enabled);
+      });
+    }
+    // Restore preference on load
+    (function() {
+      const saved = localStorage.getItem('reading-mode') === '1';
+      if (saved) {
+        document.body.classList.add('reading-mode');
+        syncDyslexiaBtns(true);
+      }
+    })();
+
     document.getElementById('station-report-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
