@@ -1,17 +1,46 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>STS - Pick-up Cars</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS - Pick Up Cars</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-      body {font: normal 20px Verdana, Arial, sans-serif;}
-      table {border-collapse: collapse;}
-      tr {vertical-align: top}
-      th {border: 1px solid black; padding: 10px}
-      td {border: 1px solid black; padding: 10px}
-      pre {white-space: pre-wrap;}
-      @media print
-      {
-        .noprint {display:none;}
+      tr {vertical-align: top;}
+      th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
+      #job_table th,
+      #job_table td {
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: normal;
+        hyphens: none;
       }
+      @media (max-width: 1024px) {
+        #job_table th,
+        #job_table td {
+          font-size: 0.8rem;
+          padding: 4px 6px;
+          line-height: 1.2;
+        }
+
+        /* Hide lower-priority detail columns on tablet to reduce horizontal scroll. */
+        #job_table th:nth-child(6),
+        #job_table td:nth-child(6),
+        #job_table th:nth-child(7),
+        #job_table td:nth-child(7),
+        #job_table th:nth-child(8),
+        #job_table td:nth-child(8) {
+          display: none;
+        }
+      }
+      @media print { .noprint {display:none;} }
+      .status-empty    { display:inline-block; background-color:#ffeaa7; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loaded   { display:inline-block; background-color:#a8e6cf; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loading  { display:inline-block; background-color:#74b9ff; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unloading{ display:inline-block; background-color:#fab1a0; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-ordered  { display:inline-block; background-color:#dfe6e9; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unavailable{ display:inline-block; background-color:#d63031; color:white; padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
     </style>
     <?php
       // bring in the javascript function that shows rollingstock photos
@@ -41,23 +70,26 @@
       }
     </script>
   </head>
-  <body style="margin-left: 50px;">
-    <div class="noprint">
-      <div id="debug"> 
-        <p><img src="ImageStore/GUI/Menu/operations.jpg" width="716" height="145" border="0" usemap="#Map2">
-          <map name="Map2">
-            <area shape="rect" coords="568,5,712,46" href="index.html">
-            <area shape="rect" coords="570,97,710,138" href="index-t.html">
-            <area shape="rect" coords="568,52,717,93" href="operations.html">
-          </map>
-        </p>
+  <body class="bg-light">
+    <nav class="navbar navbar-dark noprint mb-3" style="background-color: #2e7d32;">
+      <div class="container-fluid">
+        <span class="navbar-brand"><i class="bi bi-arrow-up-circle"></i> Pick Up Cars</span>
+        <div>
+          <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-arrow-left"></i> Operations
+          </a>
+          <a href="index.html" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-house"></i> Home
+          </a>
+          <button class="btn btn-light btn-sm noprint" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+          </button>
+        </div>
       </div>
-    </div>
-    <h2>Simulation Operations</h2>
-    <h3>Pick Up Cars</h3>
-    <div class="noprint">
-    Select a job to do do the pickups</br /><br />
-    </div>
+    </nav>
+    <div class="px-4">
+    <h5 class="mb-2">Pick Up Cars</h5>
+    <div class="noprint text-muted mb-3">Select a job to do the pickups</div>
     <form action="pick_up.php" method="get">
     <?php
       // bring in the utility files
@@ -92,15 +124,15 @@
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $location = $row['current_location_id'];
-//print 'location: ' . $location . '<br /><br />';              
+//print 'location: ' . $location . '<br /><br />';
               /*            // and it's position to 0 (zero) so they appear at the top of the list when reorganizing the car order
                             $sql = 'update cars
                                     set current_location_id = "0",
                                         position="0"
                                     where id = "' . $_GET[$car_name] . '"';
               */
-              
-              // build a query to set the car's current location to 0 (zero) indicating that it's in a train              
+
+              // build a query to set the car's current location to 0 (zero) indicating that it's in a train
               // don't set the position to 0 because that undoes any organization performed by the user
               $sql = 'update cars
                       set current_location_id = "0"
@@ -116,41 +148,41 @@
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $session_nbr = $row['setting_value'];
-              
-              $sql = 'select jobs.name as job_name 
+
+              $sql = 'select jobs.name as job_name
                         from jobs, cars
                        where cars.id = "' . $_GET[$car_name] . '" and jobs.id = cars.handled_by_job_id';
 //print 'SQL: ' . $sql . '<br /><br />';
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $job_name = $row['job_name'];
-        
+
               // insert a car history record
               $sql = 'insert into history(car_id, session_nbr, event_date, event, location)
-                      values ("' . $_GET[$car_name] . '", 
-                              "' . $session_nbr . '", 
-                              "' . date("Y-m-d H:i:s") . '", 
-                              "Picked up by Job ' . $job_name . '", 
+                      values ("' . $_GET[$car_name] . '",
+                              "' . $session_nbr . '",
+                              "' . date("Y-m-d H:i:s") . '",
+                              "Picked up by Job ' . $job_name . '",
                               "' . $location . '")';
-                              
+
               if (!mysqli_query($dbc, $sql))
               {
                 print 'Insert error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
-              }              
+              }
             }
           }
         }
       }
-      print '<div class="noprint">';
+      print '<div class="noprint mb-3">';
       // generate the list of jobs from which the user can choose
-      print drop_down_jobs("job_list", '', "get_jobs_and_cars();");
-      print '&nbsp;<input id="finish_btn" name="finish_btn" value="PICK UP" type="submit" disabled
-             style="background-color: #80ff00; font-size: 24px;">&nbsp;';
+            print '<div class="d-flex flex-wrap align-items-center gap-2">';
+            print drop_down_jobs("job_list", '', "get_jobs_and_cars();");
+            print '<button id="finish_btn" name="finish_btn" value="PICK UP" type="submit" disabled
+              class="btn btn-success btn-lg">PICK UP</button>';
+            print '</div>';
     ?>
-      <!-- generate a print button -->
-      <button onclick="window.print()" style="background-color: #ffff00; font-size: 24px;">PRINT</button>&nbsp;&nbsp;
-      <br /><br />
-      <div id="instructions" style="visibility: hidden;">
+      <!-- print button is in the navbar -->
+      <div id="instructions" class="alert alert-info d-none mt-2">
       Mark the cars that have been picked up with check marks and then click the <b>PICK UP</b> button.<br /><br />
       After picking up the cars, click <a href="organize_cars.php"><b>here</b></a> to update the positions of the cars in the train.<br /><br />
       Click <a href="display_switchlist.php"><b>here</b></a> to generate an updated switch list if desired.
@@ -174,7 +206,7 @@
         {
           // enable the pick up button
           document.getElementById("finish_btn").disabled = false;
-          
+
           // submit the request for the cars at the selected station
           var xmlhttp = new XMLHttpRequest();
           xmlhttp.onreadystatechange = function()
@@ -197,14 +229,14 @@
         {
           // get the name of the selected job
           job_name = document.getElementById("job_list").value;
-          
+
           // tell the user that there aren't any cars in this job
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for " + job_name + " doesn't contain any cars.</td></tr>";
         }
         else
         {
           // make the instruction block visible
-          document.getElementById("instructions").style.visibility = "visible";
+          document.getElementById("instructions").classList.remove("d-none");
 
           // display the table being returned from the server
           document.getElementById("job_table_div").innerHTML = xmlhttp.responseText;
@@ -212,5 +244,10 @@
       }
 
     </script>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("select").forEach(function(el){el.classList.add("form-select");el.style.removeProperty("width");if(el.closest("th")){el.classList.add("form-select-sm");}});});</script>
+  </body>
 
 </html>

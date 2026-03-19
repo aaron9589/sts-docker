@@ -7,7 +7,7 @@
 
   // pull in the style color function
   require 'set_colors.php';
-  
+
   // get the incoming parameter
   $station = urldecode($_REQUEST['station']);
 
@@ -58,29 +58,40 @@
 
   // build a table (less the <table> and </table> tags) and return it as a string
   $row_count = 0;
+  $current_location_group = null;
   if (mysqli_num_rows($rs) > 0)
   {
-    $data_table = '<table id="car_table" style="white-space: nowrap;">';
+    $data_table = '<div class="table-responsive"><table id="car_table" class="table table-sm table-bordered table-hover">';
     $data_table .= '<tr><td colspan="8">' . nl2br($instructions) . '</td></tr>';
     $data_table .= '<tr style="position: sticky; top: 0; background-color: #F5F5F5">
                       <th>Select Job</th>
                       <th>Reporting Marks</th>
-                      <th>Car<br />Code</th>
-                      <th>Current<br />Location</th>
-                      <th>Loading<br /><u>Station</u><br />Location</th>
+                      <th>Car Code</th>
+                      <th>Current Location</th>
+                      <th>Loading Station / Location</th>
                       <th>Status</th>
-                      <th>Unloading<br /><u>Station</u><br />Location</th>
+                      <th>Unloading Station / Location</th>
                       <th>Consignment</th>
                     </tr>';
 
     while ($row = mysqli_fetch_array($rs))
     {
+      // insert a group header row when the current location changes
+      $group_key = $row['current_location'];
+      if ($group_key !== $current_location_group)
+      {
+        $current_location_group = $group_key;
+        $data_table .= '<tr class="table-dark"><td colspan="8" class="fw-semibold">'
+            . htmlspecialchars($row['current_station']) . ' &mdash; ' . htmlspecialchars($row['current_location'])
+            . '</td></tr>';
+      }
+
       // generate the table rows
       $data_table .= '<tr>';
-      
+
       // column 1 - list of eligible jobs
       $data_table .= '<td>' . get_jobs_at_station($dbc, $station, $row_count) . '</td>';
-      
+
       // column 2 - reporting marks
       if (file_exists('./ImageStore/DB_Images/RollingStock/' . $row['id'] . '.jpg'))
       {
@@ -90,16 +101,16 @@
       {
         $parm_string = '\'\',\'' . $row['reporting_marks'] . '\'';
       }
-      
+
       $data_table .= '<td onclick="show_image(' . $parm_string . ');">' . $row['reporting_marks'] . '<input name="car' . $row_count . '"';
       $data_table = $data_table . ' value="' . $row['id'] . '" type="hidden"></td>';
-     
+
       // column 3 - car code
-      $data_table .= '<td style="text-align: center;">' . $row['car_code'] . '</td>';
-      
+      $data_table .= '<td>' . $row['car_code'] . '</td>';
+
       // column 4 - current location
-      $data_table .= '<td><u>'. $row['current_station'] . '</u><br />' . $row['current_location'] . '</td>';
-      
+      $data_table .= '<td>' . $row['current_station'] . '<br />' . $row['current_location'] . '</td>';
+
       // column 5 - loading location
       if (substr($row['waybill_number'], 4, 1) == 'E')
       {
@@ -110,17 +121,17 @@
         // if this car is ordered, bold the the loading location
         if ($row['status'] == 'Ordered')
         {
-          $data_table .= '<td style="' . set_colors($dbc, $row['loading_location']) . '"><b><u>' . $row['loading_station'] . '</u><br />' . $row['loading_location'] . '</b></td>';
+          $data_table .= '<td style="' . set_colors($dbc, $row['loading_location']) . '"><b>' . $row['loading_station'] . '<br />' . $row['loading_location'] . '</b></td>';
         }
         else
         {
-          $data_table .= '<td><u>' . $row['loading_station'] . '</u><br />' . $row['loading_location'] . '</td>';
+          $data_table .= '<td>' . $row['loading_station'] . '<br />' . $row['loading_location'] . '</td>';
         }
       }
-      
+
       // column 6 - status
-      $data_table .= '<td>' . $row['status'] . '</td>';
-      
+      $data_table .= '<td><span class="status-' . strtolower($row['status']) . '">' . $row['status'] . '</span></td>';
+
       // column 7 - unloading location
       if (substr($row['waybill_number'], 4, 1) == 'E')
       {
@@ -129,26 +140,26 @@
         $sql2 = 'select code from locations where locations.id = "' . $row['shipment_id'] . '"';
         $rs2 = mysqli_query($dbc, $sql2);
         $row2 = mysqli_fetch_array($rs2);
-        
+
         $sql3 = 'select routing.station from routing, locations where (locations.id = ' . $row['shipment_id'] . ') and (routing.id = locations.station)';
         $rs3 = mysqli_query($dbc, $sql3);
         $row3 = mysqli_fetch_array($rs3);
 
-        $data_table .= '<td style="' . set_colors($dbc, $row2['code']) . '"><b><u>' . $row3['station'] . '</u><br />' . $row2['code'] . '</b></td>';
+        $data_table .= '<td style="' . set_colors($dbc, $row2['code']) . '"><b>' . $row3['station'] . '<br />' . $row2['code'] . '</b></td>';
       }
       else
       {
         // if this car is loaded, bold the the final destination
         if ($row['status'] == 'Loaded')
         {
-          $data_table .= '<td style="' . set_colors($dbc, $row['unloading_location']) . '"><b><u>' . $row['unloading_station'] . '</u><br />' . $row['unloading_location'] . '</b></td>';
+          $data_table .= '<td style="' . set_colors($dbc, $row['unloading_location']) . '"><b>' . $row['unloading_station'] . '<br />' . $row['unloading_location'] . '</b></td>';
         }
         else
         {
-          $data_table .= '<td><u>' . $row['unloading_station'] . '</u><br />' . $row['unloading_location'] . '</td>';
+          $data_table .= '<td>' . $row['unloading_station'] . '<br />' . $row['unloading_location'] . '</td>';
         }
       }
-      
+
       // column 8 - consignment -  if this is a non-revenue move, display "Non-Revenue", otherwise display the consignment
       if (substr($row['waybill_number'], 4, 1) == 'E')
       {
@@ -158,11 +169,11 @@
       {
         $data_table .= '<td>' . $row['consignment'] . '</td>';
       }
-      
+
       $data_table .= '</tr>';
       $row_count++;
     }
-    $data_table .= '</table>';
+    $data_table .= '</table></div>';
     // add a hidden field to the end of the table containing the number of rows
     $data_table .= '<input name="row_count" value="' . $row_count . '" type="hidden">';
   }
@@ -182,7 +193,7 @@
     // build a drop-down list from the jobs that are set to pick up at this station
     if (mysqli_num_rows($rs))
     {
-      $job_list = '<select name="job_list' . $row_count . '">';
+      $job_list = '<select name="job_list' . $row_count . '" class="form-select form-select-sm">';
       $job_list .= '<option value=""></option>';
       while ($row = mysqli_fetch_array($rs))
       {

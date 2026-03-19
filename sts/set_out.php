@@ -1,38 +1,71 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>STS - Set-out Cars</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS - Set Out Cars</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-      body {font: normal 20px Verdana, Arial, sans-serif;}
-      table {border-collapse: collapse;}
-      tr {vertical-align: top}
-      th {border: 1px solid black; padding: 10px}
-      td {border: 1px solid black; padding: 10px}
-      pre {white-space: pre-wrap;}
-      @media print
-      {
-        .noprint {display:none;}
+      tr {vertical-align: top;}
+      th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
+      #job_table th,
+      #job_table td {
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: normal;
+        hyphens: none;
       }
+      @media (max-width: 1024px) {
+        #job_table th,
+        #job_table td {
+          font-size: 0.8rem;
+          padding: 4px 6px;
+          line-height: 1.2;
+        }
+
+        /* Hide lower-priority detail columns on tablet to reduce horizontal scroll. */
+        #job_table th:nth-child(6),
+        #job_table td:nth-child(6),
+        #job_table th:nth-child(8),
+        #job_table td:nth-child(8),
+        #job_table th:nth-child(9),
+        #job_table td:nth-child(9) {
+          display: none;
+        }
+      }
+      @media print { .noprint {display:none;} }
+      .status-empty    { display:inline-block; background-color:#ffeaa7; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loaded   { display:inline-block; background-color:#a8e6cf; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loading  { display:inline-block; background-color:#74b9ff; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unloading{ display:inline-block; background-color:#fab1a0; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-ordered  { display:inline-block; background-color:#dfe6e9; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unavailable{ display:inline-block; background-color:#d63031; color:white; padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
     </style>
     <?php
       // bring in the javascript function that shows rollingstock photos
       require 'show_image.php';
     ?>
   </head>
-  <body style="margin-left: 50px;">
-    <div class="noprint">
-      <div id="debug"> 
-        <p><img src="ImageStore/GUI/Menu/operations.jpg" width="716" height="145" border="0" usemap="#Map2">
-          <map name="Map2">
-            <area shape="rect" coords="568,5,712,46" href="index.html">
-            <area shape="rect" coords="570,97,710,138" href="index-t.html">
-            <area shape="rect" coords="568,52,717,93" href="operations.html">
-          </map>
-        </p>
-        <p>&nbsp; </p>
+  <body class="bg-light">
+    <nav class="navbar navbar-dark noprint mb-3" style="background-color: #2e7d32;">
+      <div class="container-fluid">
+        <span class="navbar-brand"><i class="bi bi-arrow-down-circle"></i> Set Out Cars</span>
+        <div>
+          <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-arrow-left"></i> Operations
+          </a>
+          <a href="index.html" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-house"></i> Home
+          </a>
+          <button class="btn btn-light btn-sm noprint" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+          </button>
+        </div>
       </div>
-    </div>
-    <h2>Simulation Operations</h2>
-    <h3>Set Out Cars</h3>
+    </nav>
+    <div class="px-4">
+    <h5 class="mb-3">Set Out Cars</h5>
     <form action="set_out.php" method="get">
     <?php
       // bring in the utility files
@@ -75,7 +108,7 @@
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $job_name = $row['job_name'];
-//print 'SQL: ' . $sql . ' / job name: ' . $job_name . '<br /><br />';              
+//print 'SQL: ' . $sql . ' / job name: ' . $job_name . '<br /><br />';
               // build a query to update the car's current location field, remove the contents of it's "handled_by" field, and set it's position to 0
               $sql = 'update cars
                       set current_location_id = "' . $_GET[$list_name] . '",
@@ -93,20 +126,20 @@
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $session_nbr = $row['setting_value'];
-              
+
               $sql = 'select current_location_id from cars where id = "' . $_GET[$car_name] . '"';
               $rs = mysqli_query($dbc, $sql);
               $row = mysqli_fetch_array($rs);
               $location = $row['current_location_id'];
-//print 'SQL: ' . $sql . ' Location: ' . $location . '<br /><br />';        
+//print 'SQL: ' . $sql . ' Location: ' . $location . '<br /><br />';
               // insert a car history record
               $sql = 'insert into history(car_id, session_nbr, event_date, event, location)
-                      values ("' . $_GET[$car_name] . '", 
-                              "' . $session_nbr . '", 
-                              "' . date("Y-m-d H:i:s") . '", 
-                              "Set out by Job ' . $job_name . '", 
+                      values ("' . $_GET[$car_name] . '",
+                              "' . $session_nbr . '",
+                              "' . date("Y-m-d H:i:s") . '",
+                              "Set out by Job ' . $job_name . '",
                               "' . $location . '")';
-                              
+
               if (!mysqli_query($dbc, $sql))
               {
                 print 'Insert error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
@@ -159,7 +192,7 @@
                         and cars.status = "Ordered"
                         and cars.current_location_id = car_orders.shipment
                         and cars.id = "' . $_GET[$car_name] . '"';
-                        
+
 // print 'SQL: ' . $sql . '<br /><br />';
               if(!mysqli_query($dbc, $sql))
               {
@@ -185,11 +218,11 @@
                   }
                 }
               }
-              
+
               // check to see if there are any cars that have just been set to "Loading" or "Unloading" where the applicable
               // shipment has min & max load & unload times of zero
               // if so, bump their status to the next setting
-              
+
               // first get the min & max load & unload values for the shipment associated with this car
               $sql = 'select shipments.min_load_time as min_load_time,
                               shipments.max_load_time as max_load_time,
@@ -209,7 +242,7 @@
                 $max_load_time = (int)$row['max_load_time'];
                 $min_unload_time = (int)$row['min_unload_time'];
                 $max_unload_time = (int)$row['max_unload_time'];
-              
+
               // if the car's status is "Loading" and it's shipment has negative values for either the min or max loading time,
               // change it's status to "Loaded"
               if (($row['status'] == "Loading") && (($min_load_time < 0) || ($max_load_time < 0)))
@@ -220,7 +253,7 @@
                   print 'Update Error: ' . mysqli_error($dbc) . ' SQL: ' . $sql2;
                 }
               }
-              
+
               // likewise if the car's status is "Unloading" and it's shipment has negative values for either min or max unloading time,
               // change it's status to "Empty"
               if (($row['status'] == "Unloading") && (($min_unload_time < 0) || ($max_unload_time < 0)))
@@ -243,29 +276,27 @@
       }
       print '<div class="noprint">';
       // choose to display all set out location possibilities for the selected job or only the default locations
-      print '<br /><input type="checkbox" name="default_loc" id="default_loc" onchange="reset_job();">&nbsp;Check to display default set-out locations only</br />';
+      print '<div class="form-check mb-2"><input type="checkbox" class="form-check-input" name="default_loc" id="default_loc" onchange="reset_job();"><label class="form-check-label" for="default_loc">Show default set-out locations only</label></div>';
 
       // generate the list of jobs from which the user can choose
-      print '<br />Select a job to do do the setouts</br /><br />';
+      print '<p class="text-muted mb-1">Select a job to do the setouts:</p>';
       print drop_down_jobs("job_list", '', "get_jobs_and_cars();");
     ?>
-      <!-- generate a print button -->
-      <button onclick="window.print()" style="background-color: #ffff00; font-size: 24px;">PRINT</button>&nbsp;&nbsp;
-      <br /><br />
-      <div id="instructions" style="visibility: hidden;">
-      Mark where each car was left by selecting it's set-out location from it's drop-down list.<br /><br />
+      <!-- print button is in the navbar -->
+      <div id="instructions" class="alert alert-info d-none mt-2">
+      Mark where each car was left by selecting its set-out location from its drop-down list.<br /><br />
       To update the current location of each car that was set out, click the <b>SET OUT</b> button.<br /><br />
-      After placing the cars, click <a href="organize_cars.php">here</a> to update the positions of the cars at the setout location<br />
-      as well as those remaining in the train.<br /><br />
-      <div class="noprint">
-      <br/>
-      <label for="bulk_location">Set all locations to:</label>
-      <select id="bulk_location" name="bulk_location" onchange="updateAllLocations(this.value)">
+      After placing the cars, click <a href="organize_cars.php">here</a> to update the positions of the cars at the setout location
+      as well as those remaining in the train.
+      <div class="noprint mt-3">
+      <label for="bulk_location" class="form-label fw-semibold">Set all locations to:</label>
+      <select id="bulk_location" name="bulk_location" class="form-select" onchange="updateAllLocations(this.value)">
         <option value="">Select location</option>
       </select>
-      <br/><br/>
       </div>
-      <input id="finish_btn" name="finish_btn" value="SET OUT" type="submit" disabled style="background-color: #80ff00; font-size: 24px;"><br /><br />
+      <div class="mt-3">
+      <button id="finish_btn" name="finish_btn" value="SET OUT" type="submit" disabled class="btn btn-success btn-lg">SET OUT</button>
+      </div>
       </div>
     </div>
     <div id="job_table_div">
@@ -281,7 +312,7 @@
         document.getElementById('job_list').selectedIndex = "0";
         document.getElementById('job_table_div').innerHTML = "";
       }
-      
+
       // this javascript routine makes an HttpRequest that provides a list of cars in the selected
       // train and each car will have a drop-down list of locations where it could set out
 
@@ -292,7 +323,7 @@
         {
           // enable the finish button
           document.getElementById("finish_btn").disabled = false;
-          
+
           // submit the request for the cars at the selected station
           var xmlhttp = new XMLHttpRequest();
           xmlhttp.onreadystatechange = function()
@@ -325,39 +356,34 @@
         {
           // get the name of the selected job
           job_name = document.getElementById("job_list").value;
-          
+
           // tell the user that there aren't any cars in this job
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for this job/train doesn't contain any cars.</td></tr>";
         }
         else
         {
           // make the instruction block visible
-          document.getElementById("instructions").style.visibility = "visible";
-          
+          document.getElementById("instructions").classList.remove("d-none");
+
           // display the table being returned from the server
           document.getElementById("job_table_div").innerHTML = xmlhttp.responseText;
+
+          // Add slight delay to ensure DOM is updated
+          setTimeout(populateBulkDropdown, 100);
         }
       }
 
     </script>
 
     <script>
-      // Add this new function to handle bulk updates
       function populateBulkDropdown() {
-          // Get the first car's location dropdown
           const firstDropdown = document.querySelector('select[name^="station_list"]');
           if (!firstDropdown) return;
-
-          // Get the bulk dropdown
           const bulkDropdown = document.getElementById('bulk_location');
           if (!bulkDropdown) return;
-
-          // Clear existing options
           bulkDropdown.innerHTML = '<option value="">Select location</option>';
-
-          // Copy options from the first dropdown
           Array.from(firstDropdown.options).forEach(option => {
-              if (option.value) { // Only copy non-empty values
+              if (option.value) {
                   const newOption = document.createElement('option');
                   newOption.value = option.value;
                   newOption.text = option.text;
@@ -368,10 +394,7 @@
 
       function updateAllLocations(selectedValue) {
           if (!selectedValue) return;
-          
-          // Use name attribute selector since these are generated by PHP
           const dropdowns = document.querySelectorAll('select[name^="station_list"]');
-          
           dropdowns.forEach(dropdown => {
               const optionExists = Array.from(dropdown.options).some(option => option.value === selectedValue);
               if (optionExists) {
@@ -379,20 +402,10 @@
               }
           });
       }
-
-      // Modify the existing populate_job_table function
-      function populate_job_table(xmlhttp) {
-          if (xmlhttp.responseText == "None") {
-              job_name = document.getElementById("job_list").value;
-              document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for this job/train doesn't contain any cars.</td></tr>";
-              document.getElementById("bulk_location").innerHTML = '<option value="">Select location</option>';
-          } else {
-              document.getElementById("instructions").style.visibility = "visible";
-              document.getElementById("job_table_div").innerHTML = xmlhttp.responseText;
-              
-              // Add slight delay to ensure DOM is updated
-              setTimeout(populateBulkDropdown, 100);
-          }
-      }
     </script>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("select").forEach(function(el){el.classList.add("form-select");el.style.removeProperty("width");if(el.closest("th")){el.classList.add("form-select-sm");}});});</script>
+  </body>
 </html>

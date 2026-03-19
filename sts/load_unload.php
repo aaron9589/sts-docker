@@ -1,16 +1,48 @@
-<!-- include the HTML table sort scripts -->
-<script src="sorttable.js"></script>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STS - Load and/or Unload Cars</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="sorttable.js"></script>
     <style>
-      body {font: normal 20px Verdana, Arial, sans-serif;}
-      table {border-collapse: collapse;}
       tr {vertical-align: top;}
-      th {border: 1px solid black; padding: 10px;}
-      td {border: 1px solid black; padding: 10px;}
-      td.checkbox {text-align: center;}
+      th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
+      td.checkbox {text-align: center; white-space: normal; }
+      #car_table th,
+      #car_table td {
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: normal;
+        hyphens: none;
+      }
+      @media (max-width: 1024px) {
+        #car_table th,
+        #car_table td {
+          font-size: 0.8rem;
+          padding: 4px 6px;
+          line-height: 1.2;
+        }
+
+        /* Hide lower-priority detail columns on tablet to reduce horizontal scroll. */
+        #car_table th:nth-child(7),
+        #car_table td:nth-child(7),
+        #car_table th:nth-child(8),
+        #car_table td:nth-child(8),
+        #car_table th:nth-child(9),
+        #car_table td:nth-child(9) {
+          display: none;
+        }
+      }
+      @media print { .noprint {display:none;} }
+      .status-empty    { display:inline-block; background-color:#ffeaa7; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loaded   { display:inline-block; background-color:#a8e6cf; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-loading  { display:inline-block; background-color:#74b9ff; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unloading{ display:inline-block; background-color:#fab1a0; color:white;  padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-ordered  { display:inline-block; background-color:#dfe6e9; color:#333;   padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
+      .status-unavailable{ display:inline-block; background-color:#d63031; color:white; padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
     </style>
     <script>
       function show_image(car_id, reporting_marks)
@@ -20,11 +52,11 @@
           // find the upper right corner of the browser window
           var upper_right_x = window.screenX + window.parent.outerWidth;
           var upper_right_y = window.screenY;
-          
+
           // calculate the upper left corner of the new window
           var upper_left_x = upper_right_x - 700;
           var upper_left_y = upper_right_y + 30;
-          
+
           // open the window
           window.open("./ImageStore/DB_Images/RollingStock/" + car_id + ".jpg", "image_window", "width=660,height=500,left=" + upper_left_x + ",top=" + upper_left_y);
         }
@@ -59,21 +91,25 @@
     </script>
 
   </head>
-  <body style="margin-left: 50px;">
-<p><img src="ImageStore/GUI/Menu/operations.jpg" width="716" height="145" border="0" usemap="#Map2">
-  <map name="Map2">
-    <area shape="rect" coords="568,5,712,46" href="index.html">
-    <area shape="rect" coords="570,97,710,138" href="index-t.html">
-    <area shape="rect" coords="568,52,717,93" href="operations.html">
-  </map>
-</p>
-<h2>Simulation Operations</h2>
-    
-<h3>Load and/or Unload Cars</h3>
-    <div id="instructions">
-    The cars shown on this page are in the process of being loaded or unloaded. To complete the loading or unloading process, <br />
+  <body class="bg-light">
+    <nav class="navbar navbar-dark noprint mb-3" style="background-color: #2e7d32;">
+      <div class="container-fluid">
+        <span class="navbar-brand"><i class="bi bi-truck"></i> Load / Unload Cars</span>
+        <div>
+          <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-arrow-left"></i> Operations
+          </a>
+          <a href="index.html" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house"></i> Home
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class="px-4">
+    <h5 class="mb-2">Load and/or Unload Cars</h5>
+    <div id="instructions" class="text-muted mb-3">
+    The cars shown on this page are in the process of being loaded or unloaded. To complete the loading or unloading process,
     click on the desired car's check box and then click the UPDATE button. Cars are color-coded based on their status.<br /><br />
-
     </div>
     <form method="POST" action="load_unload.php">
     <?php
@@ -95,16 +131,16 @@
                  }
 
                  var table = document.getElementById("car_table");
-                 
+
                  //iterate through rows
-                 for (var i = 2, row; row = table.rows[i]; i++)
+                 for (var i = 1, row; row = table.rows[i]; i++)
                  {
                    var haystack_length = row.cells[tbl_col].innerText.length;
                    var needle_length = needle.length;
                    var match_start = haystack_length - needle_length;
-                   
+
                    var haystack = row.cells[tbl_col].innerText.substr(match_start);
-                   
+
                    if (haystack != needle)
                    {
                      row.style.display = "none"
@@ -175,7 +211,7 @@
             }
           }
         }
-        
+
       }
 
       // build the sql query to pull in cars that are being loaded, unloaded, or enroute home and have
@@ -225,70 +261,63 @@
       if (mysqli_num_rows($rs) > 0)
       {
         // generate the update button
-        print '<br /><input name="update_btn" value="UPDATE" type="submit" style="background-color: #80ff00; font-size: 24px;"><br /><br />';
-        
-        // generate table and column heading tags
-        print '<table class="sortable" id="car_table" name="car_table" style="white-space: nowrap;">
-                 <caption style="font: bold 15px Verdana, Arial, sans-serif; text-align:left;">Row Filters</caption>
+        print '<div class="mb-3 noprint"><button name="update_btn" value="UPDATE" type="submit" class="btn btn-success btn-lg">UPDATE</button></div>';
+
+        // generate filter panel and table
+        print '<div class="card mb-3 noprint">
+                 <div class="card-body py-2">
+                   <div class="row g-2 align-items-end">
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Current Location</label>' .
+                       drop_down_locations('current_loc_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Car Code</label>' .
+                       drop_down_car_codes('car_code_filter', '', 'no_wild') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Status</label>' .
+                       drop_down_status('status_filter', '', 'no_wild') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Consignment</label>' .
+                       drop_down_commodities('commodity_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Loading Location</label>' .
+                       drop_down_locations('loading_loc_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Unloading Location</label>' .
+                       drop_down_locations('unloading_loc_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <button type="button" class="btn btn-outline-secondary btn-sm" onclick="location.reload();">Clear Filters</button>
+                     </div>
+                   </div>
+                 </div>
+               </div>';
+        print '<div class="table-responsive"><table class="table table-sm table-bordered table-hover sortable" id="car_table" name="car_table">
                  <thead>
-                   <tr>
-                     <th style="border-bottom:0px; border-right:0px;">
-                       <button tabindex="4" id="clear_filters_btn" name="clear_filters_btn" onclick="location.reload();"
-                        style="font: bold 10px Verdana, Arial, sans-serif; text-align: center; background-color: ffff00; font-size: 12px;">
-                        CLEAR<br />FILTERS
-                       </button>
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(1, document.getElementById(\'current_loc_filter\').options[document.getElementById(\'current_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'current_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('current_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(4, document.getElementById(\'car_code_filter\').options[document.getElementById(\'car_code_filter\').selectedIndex].text);
-                                   document.getElementById(\'car_code_filter\').disabled=true;">' .
-                                   drop_down_car_codes('car_code_filter', '', 'no_wild') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(5, document.getElementById(\'status_filter\').options[document.getElementById(\'status_filter\').selectedIndex].text);
-                                   document.getElementById(\'status_filter\').disabled=true;">' .
-                                   drop_down_status('status_filter', '', 'no_wild') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(6, document.getElementById(\'commodity_filter\').options[document.getElementById(\'commodity_filter\').selectedIndex].text);
-                                   document.getElementById(\'commodity_filter\').disabled=true;">' .
-                                   drop_down_commodities('commodity_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(7, document.getElementById(\'loading_loc_filter\').options[document.getElementById(\'loading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'loading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('loading_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px;"
-                         onchange="filter_rows(8, document.getElementById(\'unloading_loc_filter\').options[document.getElementById(\'unloading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'unloading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('unloading_loc_filter', '', '') . '
-                     </th>
-                   </tr>
                    <tr style="position: sticky; top: 0; background-color: #F5F5F5">
                      <th class="sorttable_nosort">
-                       Load/Unload Cars<hr />
-                       Check/Uncheck All <input id="check_all" name="check_all" type="checkbox" onchange="checkall();">
+                       Load/Unload Cars
+                       <div class="form-check mt-1">
+                         <input class="form-check-input" id="check_all" name="check_all" type="checkbox" onchange="checkall();">
+                         <label class="form-check-label" for="check_all">Check/Uncheck All</label>
+                       </div>
                      </th>
-                     <th><i>Current<br /><u>Station</u><br />Location</i></th>
-                     <th><i>Position</i></th>
-                     <th><i>Reporting<br />Marks</i></th>
-                     <th><i>Car Code</i></th>
-                     <th><i>Status</i></th>
-                     <th><i>Consignment</i></th>
-                     <th><i>Loading<br /><u>Station</u><br />Location</i></th>
-                     <th><i>Unloading<br /><u>Station</u><br />Location</i></th>
+                     <th>Current Station / Location</th>
+                     <th>Position</th>
+                     <th>Reporting Marks</th>
+                     <th>Car Code</th>
+                     <th>Status</th>
+                     <th>Consignment</th>
+                     <th>Loading Station / Location</th>
+                     <th>Unloading Station / Location</th>
                    </tr>
                  </thead>';
- 
+
         while ($row = mysqli_fetch_array($rs))
         {
           // look for non-revenue waybills
@@ -296,13 +325,13 @@
           {
             $consignment = 'Non-Revenue';
             $load_loc = 'N/A';
-            $unload_loc = '<u>' . $row['unloading_station'] . '</u><br />' . $row['unloading_location'];
+            $unload_loc = $row['unloading_station'] . '<br />' . $row['unloading_location'];
           }
           else
           {
             $consignment = $row['consignment'];
-            $load_loc = '<u>' . $row['loading_station'] . '</u><br />' . $row['loading_location'];
-            $unload_loc = '<u>' . $row['unloading_station'] . '</u><br />' . $row['unloading_location'];
+            $load_loc = $row['loading_station'] . '<br />' . $row['loading_location'];
+            $unload_loc = $row['unloading_station'] . '<br />' . $row['unloading_location'];
           }
 
           $checkbox_name = 'check' . $row_count;
@@ -317,7 +346,7 @@
           {
             $parm_string = '\'\',\'' . $row['reporting_marks'] . '\'';
           }
-          
+
           if ($row['status'] ==  'Loading')
           {
             $row_style = 'background-color:DarkGray;';
@@ -330,13 +359,13 @@
           {
             $row_style = 'background-color:LightGray;';
           }
-          
+
           // get the min & max load and unload times from the current shipment
           // if older shipments have empty or blank values in the min and max fields, convert them to a value of 1
           $sql2 = 'select min_load_time, max_load_time, min_unload_time, max_unload_time from shipments where id = "' . $row['shipment'] . '"';
           $rs2 = mysqli_query($dbc, $sql2);
           $row2 = mysqli_fetch_array($rs2);
- 
+
           if (strlen(trim($row2[0]))<1)
           {
             $min_load_time = 0;
@@ -345,7 +374,7 @@
           {
             $min_load_time = (int)$row2[0];
           }
-          
+
           if (strlen(trim($row2[1]))<1)
           {
             $max_load_time = 0;
@@ -354,7 +383,7 @@
           {
             $max_load_time = (int)$row2[1];
           }
-          
+
           if (strlen(trim($row2[2]))<1)
           {
             $min_unload_time = 0;
@@ -363,7 +392,7 @@
           {
             $min_unload_time = (int)$row2[2];
           }
-          
+
           if (strlen(trim($row2[3]))<1)
           {
             $max_unload_time = 0;
@@ -379,7 +408,7 @@
           {
             // get a random number between the min and max load times
             $random_load_time = rand($min_load_time, $max_load_time);
-//print 'current session: ' . $current_session . ' last spotted: ' . $row['last_spotted'] . ' random load time: ' . $random_load_time . '<br />';       
+//print 'current session: ' . $current_session . ' last spotted: ' . $row['last_spotted'] . ' random load time: ' . $random_load_time . '<br />';
             // add the random load time to the time spotted and if the result is less than the current session, check the box
             if (($row['last_spotted'] + $random_load_time) <= $current_session)
             {
@@ -390,47 +419,47 @@
           {
             // get a random number between the min and max unload times
             $random_unload_time = rand($min_unload_time, $max_unload_time);
-//print 'current session: ' . $current_session . ' last spotted: ' . $row['last_spotted'] . ' random unload time: ' . $random_unload_time . '<br />';       
+//print 'current session: ' . $current_session . ' last spotted: ' . $row['last_spotted'] . ' random unload time: ' . $random_unload_time . '<br />';
             // add the random unload time to the time spotted and if the result is less than the current session, check the box
             if (($row['last_spotted'] + $random_unload_time) <= $current_session)
             {
               $chk_box_val = 'checked';
             }
-          }       
+          }
 
           print '<tr>
                    <td class="checkbox" style="' . $row_style . '">
                      <input id="' . $checkbox_name . '" name="' . $checkbox_name . '" value="' . $row['id'] . '" type="checkbox" ' . $chk_box_val . '>
                    </td>
-                   <td style="' . $row_style . '">
-                     <u>' . $row['current_station'] . '</u><br />' . $row['current_location'] . '
+                   <td style="' . $row_style . '">' .
+                     $row['current_station'] . '<br />' . $row['current_location'] . '
                    </td>
-                   <td style="' . $row_style . ' text-align:center">' . 
+                   <td style="' . $row_style . '">' .
                      $row['position'] . '
                    </td>
-                   <td style="' . $row_style . '" onclick="show_image(' . $parm_string . ');">' . 
+                   <td style="' . $row_style . '" onclick="show_image(' . $parm_string . ');">' .
                      $row['reporting_marks'] . '<input name="' . $car_name . '" value="' . $row[0] . '" type="hidden">
                    </td>
-                   <td style="' . $row_style . ' text-align:center">' .
+                   <td style="' . $row_style . '">' .
                      $row['car_code'] . '
                    </td>
-                   <td style="' . $row_style . '">' . 
-                     $row['status'] . '<input name="' . $status_name . '" value="' . $row['status'] . '" type="hidden">
+                   <td style="' . $row_style . '"><span class="status-' . strtolower($row['status']) . '">' .
+                     $row['status'] . '</span><input name="' . $status_name . '" value="' . $row['status'] . '" type="hidden">
                    </td>
-                   <td style="' . $row_style . '">' . 
+                   <td style="' . $row_style . '">' .
                      $consignment . '
                    </td>
-                   <td style="' . $row_style . '">' . 
+                   <td style="' . $row_style . '">' .
                      $load_loc . '
                    </td>
-                   <td style="' . $row_style . '">' . 
+                   <td style="' . $row_style . '">' .
                      $unload_loc . '<input name="' . $unload_loc_name . '" value="' . $unload_loc . '" type="hidden">
                    </td>
                  </tr>';
           $row_count++;
           $previous_status = $row['status'];
         }
-        print '</table>';
+        print '</table></div>';
         // put the row count into a hidden field for when this program calls itself
         print '<input name="row_count" value="' . $row_count . '" type="hidden">';
       }
@@ -442,10 +471,25 @@
       // add some extra lines to the instructions div
       print '<script>
                document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + "Filters can be used to hide rows. ";
-               document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + "Click on column titles shown in <i>italics</i> to sort the table<br />";
+               document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + "Click on column titles to sort the table<br />";
              </script>';
-  
+
     ?>
     </form>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll("select").forEach(function(el) {
+        el.classList.add("form-select", "form-select-sm");
+        el.style.removeProperty("width");
+      });
+      [['current_loc_filter',1],['car_code_filter',4],['status_filter',5],['commodity_filter',6],['loading_loc_filter',7],['unloading_loc_filter',8]].forEach(function(f) {
+        var el = document.getElementById(f[0]);
+        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; }); }
+      });
+    });
+  </script>
   </body>
 </html>

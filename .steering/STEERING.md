@@ -274,6 +274,113 @@ Mark editable cells with a pencil icon that appears on hover:
 
 ---
 
+### 4.9 Operations Page Tables
+
+Operations pages (`build_switchlists.php`, `organize_cars.php`, `pick_up.php`, `set_out.php`, `load_unload.php`, `reposition.php`) render interactive car lists that may be wide. Use the following pattern — distinct from report tables (§4.3).
+
+#### Bootstrap Classes
+
+```html
+<div class="table-responsive">
+  <table class="table table-sm table-bordered table-hover">
+    <thead>
+      <tr style="position: sticky; top: 0; background-color: #F5F5F5;">
+        <th>Column Header</th>
+        ...
+      </tr>
+    </thead>
+    <tbody>...</tbody>
+  </table>
+</div>
+```
+
+> **Note:** `position: sticky` here causes the header to stick to the top of the **scroll container** (the `.table-responsive` div), not the viewport. This is correct behaviour for wide, horizontally-scrollable tables on operations pages.
+
+#### Required CSS (in parent full-page file's `<style>` block)
+
+```css
+table th, table td {
+  font-size: 0.875rem;
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+```
+
+Plus the full status badge block (see §4.5).
+
+#### Column Header Rules
+
+| Rule | Correct | Incorrect |
+|------|---------|-----------|
+| Format | Plain text, title case | `<i>`, `<u>`, `<br/>` inside `<th>` |
+| Station + location columns | `"Loading Station / Location"` | Multi-line with underlined station |
+| No line breaks in headers | Single line always | `Loading Station<br/>Location` |
+
+#### Cell Content Rules
+
+| Cell type | Correct | Incorrect |
+|-----------|---------|-----------|
+| Station / location | `Station Name<br />Location Code` | `<u>Station Name</u><br />Location Code` |
+| Status | `<span class="status-<?= strtolower($row['status']) ?>"><?= $row['status'] ?></span>` | Plain text |
+| Destination (coloured) | `set_colors()` background + bold text | Add `<u>` wrapping |
+| Car code / position # | Plain text | `text-align: center` |
+| Arrow / checkbox controls | Keep `text-align: center` | Remove centering |
+
+---
+
+### 4.10 Operations Navbar Variant
+
+Operations pages use a **green** navbar to visually distinguish them from data-entry and report pages.
+
+```html
+<nav class="navbar navbar-dark px-3 py-2 d-flex justify-content-between align-items-center"
+     style="background-color: #2e7d32;">
+  <span class="navbar-brand mb-0 h5">Page Title</span>
+  <div class="d-flex gap-2">
+    <a href="operations.html" class="btn btn-sm btn-outline-light">
+      <i class="bi bi-arrow-left"></i> Operations
+    </a>
+    <a href="index.html" class="btn btn-sm btn-outline-light">
+      <i class="bi bi-house"></i> Home
+    </a>
+    <!-- Optional: print button for pick_up / set_out -->
+    <button onclick="window.print()" class="btn btn-sm btn-outline-light noprint">
+      <i class="bi bi-printer"></i> Print
+    </button>
+  </div>
+</nav>
+```
+
+| Navbar colour | Page type |
+|---------------|-----------|
+| `#2e7d32` (green) | Operations pages (build_switchlists, pick_up, set_out, organize_cars, load_unload, reposition) |
+| `bg-primary` (Bootstrap blue) | Report / display pages (display_station_report, display_fleet_report, etc.) |
+| `bg-secondary` | Data editor pages (db_edit_*, db_list_*) |
+
+---
+
+### 4.11 Ajax Fragment Tables
+
+Several pages load car lists via AJAX into a `<div>` container. The response files return a raw HTML `<table>` fragment — not a full page.
+
+**Ajax response files:**
+
+| File | Called by | Purpose |
+|------|-----------|---------|
+| `get_cars_at_station.php` | `build_switchlists.php` | Cars available at a station |
+| `get_cars_in_job.php` | `set_out.php` | Cars assigned to a job for set-out |
+| `get_cars_position_in_job.php` | `pick_up.php` | Cars in a job for pick-up |
+| `get_job_cars.php` | `organize_cars.php` | Cars in a job (by job view) |
+| `get_location_cars.php` | `organize_cars.php` | Cars at a location (by location view) |
+
+**Critical rules:**
+- ❌ **Never add `<style>` blocks to Ajax response files.** CSS defined inside an AJAX-injected fragment is applied globally and unpredictably — it will bleed into the parent page and persist across subsequent AJAX calls.
+- ✅ All CSS (including status badge styles, `th/td` padding, etc.) **must be defined in the parent full-page file**.
+- ✅ Ajax response files may use inline `style=""` attributes on individual elements where dynamic values are needed (e.g. `set_colors()` output).
+- ✅ Ajax response table classes must match what the parent page's CSS targets: `table table-sm table-bordered table-hover`.
+
+---
+
 ## 5. Touch & Mobile Guidelines
 
 | Rule | Value | Rationale |
@@ -469,10 +576,15 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 - ✅ Keep print font sizes ≤ 7pt to fit landscape pages with many columns
 - ✅ Consolidate display + printable into a single-file AJAX pattern
 - ✅ Use `set_colors.php` / `set_colors()` for location-based highlighting
+- ✅ Use `table table-sm table-bordered table-hover` on all operations tables
+- ✅ Wrap wide operations tables in `.table-responsive` to enable horizontal scroll
+- ✅ Use status badge `<span class="status-...">` for all car status values (see §4.5)
+- ✅ Use green navbar (`#2e7d32`) on all operations pages (see §4.10)
+- ✅ Define all CSS (including status badges) in the parent full-page file, not in Ajax response files (see §4.11)
 
 ### Don't
-- ❌ Wrap tables in `.table-responsive` if sticky headers are needed (overflow breaks sticky)
-- ❌ Set `overflow-x: auto` on any ancestor of a sticky-header table (creates a new scroll container, breaking `position: sticky`)
+- ❌ Wrap **report** tables in `.table-responsive` when viewport-sticky headers are needed — `overflow` creates a new scroll context and breaks `position: sticky` relative to the viewport. Operations tables (§4.9) are exempt: their sticky header intentionally sticks within the scroll container.
+- ❌ Set `overflow-x: auto` on any ancestor of a report-table sticky header
 - ❌ Use inline `<select>` for touch-editable fields (won't open on tap)
 - ❌ Override `<u>` or `<strong>` formatting in print CSS
 - ❌ Use `font-size` below `16px` on form inputs (causes iOS zoom)
@@ -480,6 +592,10 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 - ❌ Forget `display: table-header-group` on `<thead>` in print CSS
 - ❌ Use hardcoded colours without referencing this palette
 - ❌ Create separate "printable" versions of report pages
+- ❌ Add `<style>` blocks to Ajax response files — CSS bleeds into the parent page (see §4.11)
+- ❌ Use `<u>` tags in station/location table cells on operations pages
+- ❌ Use `<br/>`, `<u>`, or `<i>` inside `<th>` column headers
+- ❌ Apply `text-align: center` to data cells (car code, reporting marks, position number); keep it only on arrow/checkbox control cells
 
 ---
 
@@ -505,5 +621,35 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 
 ---
 
-*Last updated: 2026-02-27*
-*Derived from: `feat/report_ui`, `feat/car_db_ui_refresh` branches*
+---
+
+## 13. Development Workflow
+
+### Live Container Update (without rebuild)
+
+When working on an already-running container (`sts-docker-web-1`), copy modified files directly into the container to test changes immediately without `docker compose down/up`:
+
+```bash
+# Copy a single file (note: sts/ prefix is preserved in the destination path)
+docker cp sts/some_file.php sts-docker-web-1:/var/www/html/sts/some_file.php
+
+# Copy all files that have been modified since the last commit
+git diff --name-only | grep '^sts/' | xargs -I{} docker cp {} sts-docker-web-1:/var/www/html/{}
+```
+
+> The STS app lives at `/var/www/html/sts/` inside the container. The `docker cp` command preserves the `sts/` path prefix, so `sts/foo.php` maps to `/var/www/html/sts/foo.php`. The container name is `sts-docker-web-1`. Confirm it is running with `docker ps` before copying.
+
+### Applying Changes Permanently
+
+After validating changes in the live container, commit and rebuild as normal:
+
+```bash
+git add .
+git commit -m "feat: ..."
+docker compose down && docker compose up -d --build
+```
+
+---
+
+*Last updated: 2025-07-14*
+*Derived from: `feat/report_ui`, `feat/car_db_ui_refresh`, `feat/on_hand_report_updates`, `feat/ui_updates` branches*
