@@ -1,30 +1,83 @@
-<!-- include the HTML table sort scripts -->
-<script src="sorttable.js"></script>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>STS-Generate Car Orders</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS - Generate Car Orders</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="sorttable.js"></script>
     <style>
-      body {font: normal 20px Verdana, Arial, sans-serif;}
-      table {border-collapse: collapse;}
-      tr {vertical-align: top}
-      th {border: 1px solid black; padding: 10px}
-      td {border: 1px solid black; padding: 10px}
+      tr {vertical-align: top;}
+      th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
+      #ship_tbl th,
+      #ship_tbl td {
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: normal;
+        hyphens: none;
+      }
+      @media (max-width: 1024px) {
+        #ship_tbl th,
+        #ship_tbl td {
+          font-size: 0.8rem;
+          padding: 4px 6px;
+          line-height: 1.2;
+        }
+
+        /* Hide lower-priority numeric planning columns on tablet widths. */
+        #ship_tbl th:nth-child(8),
+        #ship_tbl td:nth-child(8),
+        #ship_tbl th:nth-child(9),
+        #ship_tbl td:nth-child(9),
+        #ship_tbl th:nth-child(10),
+        #ship_tbl td:nth-child(10),
+        #ship_tbl th:nth-child(11),
+        #ship_tbl td:nth-child(11),
+        #ship_tbl th:nth-child(12),
+        #ship_tbl td:nth-child(12) {
+          display: none;
+        }
+      }
+      @media print { .noprint {display:none;} }
     </style>
   </head>
-  <body style="margin-left: 50px;">
-<img src="ImageStore/GUI/Menu/operations.jpg" width="716" height="145" border="0" usemap="#Map2">
-<map name="Map2">
-  <area shape="rect" coords="568,5,712,46" href="index.html">
-  <area shape="rect" coords="570,97,710,138" href="index-t.html">
-  <area shape="rect" coords="568,52,717,93" href="operations.html">
-</map>
-<h2>Simulation Operations</h2>
-<h3>Generate Car Orders</h3>
-    Select "Automatic" and then click on the AUTOMATIC button to increment the current operating session number and automatically generate car orders.<br /><br />
-    Select "Manual", choose shipments to order cars, and click on the MANUAL button to order cars for those shipments.<br /><br />
-    Automatic <input type="radio" name="gen_type" id="gen_auto" value="Auto" onchange="show_auto();">&nbsp;&nbsp;
-    Manual <input type="radio" name="gen_type" id="gen_manual" value="Manual" onchange="show_manual();"><br /><br />
+  <body class="bg-light">
+<nav class="navbar navbar-dark noprint mb-3" style="background-color: #2e7d32;">
+  <div class="container-fluid">
+    <span class="navbar-brand"><i class="bi bi-gear"></i> Generate Car Orders</span>
+    <div>
+      <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
+        <i class="bi bi-arrow-left"></i> Operations
+      </a>
+      <a href="index.html" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-house"></i> Home
+      </a>
+    </div>
+  </div>
+</nav>
+<div class="px-4 py-3">
+<h5 class="mb-3">Generate Car Orders</h5>
+<div class="row g-3 mb-3">
+  <div class="col-sm-6">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <h6 class="card-title"><i class="bi bi-lightning-charge"></i> Automatic Generation</h6>
+        <p class="card-text text-muted small">Increment the operating session number and automatically generate car orders based on shipment schedules.</p>
+        <button class="btn btn-success mt-auto w-100" onclick="show_auto();">AUTOMATIC</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <h6 class="card-title"><i class="bi bi-list-check"></i> Manual Generation</h6>
+        <p class="card-text text-muted small">Choose specific shipments and click MANUAL to generate car orders for those shipments only.</p>
+        <button class="btn btn-success mt-auto w-100" onclick="show_manual();">MANUAL</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
   function show_auto()
@@ -32,13 +85,13 @@
     document.getElementById("automatic").style.display = "block";
     document.getElementById("manual").style.display = "none";
   }
- 
+
   function show_manual()
   {
     document.getElementById("manual").style.display = "block";
     document.getElementById("automatic").style.display = "none";
   }
-  
+
   function confirm_manual_order()
   {
     alert('Click "OK" to order these cars. Otherwise click the browser back button to cancel.');
@@ -60,16 +113,16 @@
       }
 
       var table = document.getElementById("ship_tbl");
-             
+
       //iterate through rows
-      for (var i = 2, row; row = table.rows[i]; i++)
+      for (var i = 1, row; row = table.rows[i]; i++)
       {
         var haystack_length = row.cells[tbl_col].innerText.length;
         var needle_length = needle.length;
         var match_start = haystack_length - needle_length;
-             
+
         var haystack = row.cells[tbl_col].innerText.substr(match_start);
-                 
+
         if (haystack != needle)
         {
           row.style.display = "none"
@@ -77,7 +130,7 @@
       }
     }
   }
-  
+
   function clear_filters()
   {
     document.location.reload();
@@ -197,7 +250,7 @@
           if (isset($_POST['select' . $i]))
           {
 // print 'Ordering cars for row ' . $i . '<br />';
-            
+
             // get the things we need to create the waybills
             $shipment_id = $_POST['id' . $i];
             $min_amount = $_POST['min_amt' . $i];
@@ -238,24 +291,24 @@
 
       // set up the auto-generate div
       print '<div name="automatic" id="automatic" style="display:none;">';
-      
+
       // start the auto-generate form
       print '<form name="automatic" id="automatic" method="post" action="generate.php">';
-      print 'Ready...<br /><br />';
+      print '<p class="text-muted">Ready to generate car orders automatically.</p>';
       print '<input name="autogenerate_btn" id="autogenerate_btn" value="AUTOMATIC" type="submit"
-             style="background-color: #80ff00; font-size: 24px;"><br /><br />';
+             class="btn btn-success btn-lg"><br /><br />';
       print '</form>';
-      
+
       print '</div>';
 
 //----------------------------------- manual generation division -------------------------------
 
       // set up the manual car order generation div
       print '<div id="manual" name="manual" style="display:none;">';
-        
+
       // start the manual generation form
       print '<form name="manual" id="manual" method="post" action="generate.php">';
-    
+
       // pull in all shipments
       $sql = 'select shipments.id as id,
                      shipments.code as code,
@@ -279,57 +332,44 @@
                 left join locations loc02 on loc02.id = shipments.unloading_location
                 left join routing sta02 on sta02.id = loc02.station
                order by shipments.code';
-                
+
       $rs_shipments = mysqli_query($dbc, $sql);
       if (mysqli_num_rows($rs_shipments) > 0)
       {
-        print 'Ready...<br /><br />';
+        print '<p class="text-muted">Check shipments to order cars for, then click MANUAL.</p>';
         // put a submit button on the top and the bottom of the div
-        print '<input name="mangenerate_btn" value="MANUAL" type="submit" onmouseup="confirm_manual_order();" 
-               style="background-color: #80ff00; font-size: 24px;"><br /><br />';
-        // first, set up a table header row with drop down boxes that will determine which rows are displayed
-        print '<table id="ship_tbl" class="sortable" style="white-space: nowrap;">
-                 <caption style="font: bold 15px Verdana, Arial, sans-serif; text-align:left;">Row Filters</caption>
+        print '<input name="mangenerate_btn" value="MANUAL" type="submit" onmouseup="confirm_manual_order();"
+               class="btn btn-success btn-lg mb-3"><br /><br />';
+        // filter panel above the table
+        print '<div class="card mb-3">
+                 <div class="card-body py-2">
+                   <div class="row g-2 align-items-end">
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Commodity</label>' .
+                       drop_down_commodities('commodity_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Car Code</label>' .
+                       drop_down_car_codes('car_code_filter', '', 'no_wild') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Loading Location</label>' .
+                       drop_down_locations('loading_loc_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <label class="form-label small mb-1">Unloading Location</label>' .
+                       drop_down_locations('unloading_loc_filter', '', '') . '
+                     </div>
+                     <div class="col-sm-auto">
+                       <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clear_filters();">Clear Filters</button>
+                     </div>
+                   </div>
+                 </div>
+               </div>';
+        // table with clean column headers only
+        print '<div class="table-responsive"><table id="ship_tbl" class="table table-sm table-bordered table-hover sortable">
                  <thead>
-                   <tr>
-                     <th style="border-bottom:0px; border-right:0px; text-align: left;" colspan=3>
-                       <input tabindex="4" type="button" id="clear_filters_btn" name="clear_filters_btn" value="CANCEL SORTING AND FILTERS"
-                       onclick="clear_filters();" style="font: bold 10px Verdana, Arial, sans-serif; text-align:left;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(3, document.getElementById(\'commodity_filter\').options[document.getElementById(\'commodity_filter\').selectedIndex].text);
-                                   document.getElementById(\'commodity_filter\').disabled=true;">' .
-                                   drop_down_commodities('commodity_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(4, document.getElementById(\'car_code_filter\').options[document.getElementById(\'car_code_filter\').selectedIndex].text);
-                                   document.getElementById(\'car_code_filter\').disabled=true;">' .
-                                   drop_down_car_codes('car_code_filter', '', 'no_wild') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(5, document.getElementById(\'loading_loc_filter\').options[document.getElementById(\'loading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'loading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('loading_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;"
-                         onchange="filter_rows(6, document.getElementById(\'unloading_loc_filter\').options[document.getElementById(\'unloading_loc_filter\').selectedIndex].text);
-                                   document.getElementById(\'unloading_loc_filter\').disabled=true;">' .
-                                   drop_down_locations('unloading_loc_filter', '', '') . '
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px; border-right:0px;">
-                     </th>
-                     <th style="border-bottom:0px; border-left:0px">
-                     </th>
-                   </tr>';
-
-        // display the column headings - locked so they won't scroll with the table rows    
-        print '      <tr style="position: sticky; top: 0; background-color: #F5F5F5">
+                   <tr style="position: sticky; top: 0; background-color: #F5F5F5">
                      <th class="sorttable_nosort">Select</th>
                      <th><i>Shipment<br />Code</th>
                      <th><i>Description</th>
@@ -370,12 +410,12 @@
                  </tr>';
           $row_count++;
         }
-        print '</table>';
-        
+        print '</table></div>';
+
         // save the row count for the next time around
         print '<input type="hidden" name="row_count" id="row_count" value="' . $row_count . '">';
         // put a submit button at the bottom as well as the top of the div
-        print '<br /><input name="mangenerate_btn" value="MANUAL" type="submit" onclick="return confirm(\'Order these cars?\');"><br /><br />';
+        print '<br /><input name="mangenerate_btn" value="MANUAL" type="submit" onclick="return confirm(\'Order these cars?\');" class="btn btn-success btn-lg mt-2"><br /><br />';
       }
       else
       {
@@ -384,5 +424,20 @@
       print '</form>';
       print '</div>';
     ?>
+</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll("select").forEach(function(el) {
+        el.classList.add("form-select", "form-select-sm");
+        el.style.removeProperty("width");
+      });
+      [['commodity_filter',3],['car_code_filter',4],['loading_loc_filter',5],['unloading_loc_filter',6]].forEach(function(f) {
+        var el = document.getElementById(f[0]);
+        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; }); }
+      });
+    });
+  </script>
 </body>
 </html>

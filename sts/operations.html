@@ -1,73 +1,149 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>STS - Operations Menu</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STS - Operations Menu</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .section-header {
+      background-color: #2e7d32;
+      color: white;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 6px 6px 0 0;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .op-group {
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .op-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #dee2e6;
+      background: #fff;
+      text-decoration: none;
+      color: #333;
+      transition: background-color 0.15s;
+    }
+    .op-btn:last-child { border-bottom: none; }
+    .op-btn:hover { background-color: #f0fff4; color: #333; text-decoration: none; }
+    .op-btn i.op-icon { font-size: 1.4rem; color: #2e7d32; width: 26px; flex-shrink: 0; }
+    .op-btn-title { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
+    .op-btn-desc { font-size: 0.8rem; color: #666; margin-top: 2px; }
+  </style>
 </head>
+<body>
+  <nav class="navbar navbar-dark noprint" style="background-color: #2e7d32;">
+    <div class="container-fluid">
+      <span class="navbar-brand"><i class="bi bi-train-freight-front"></i> Operations</span>
+      <div>
+        <a href="index.html" class="btn btn-outline-light btn-sm me-2">
+          <i class="bi bi-house"></i> Home
+        </a>
+        <a href="database.html" class="btn btn-outline-light btn-sm me-2">
+          <i class="bi bi-database"></i> Database
+        </a>
+        <a href="reports.html" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-file-text"></i> Reports
+        </a>
+      </div>
+    </div>
+  </nav>
 
-<body bgcolor="#CCCCCC">
-<table width="30%" border="1" align="center" cellpadding="2" cellspacing="2">
-  <tr> 
-    <td rowspan="4"><img src="ImageStore/GUI/STS-logo.jpg" width="170" height="170"></td>
-    <td rowspan="4"><img src="ImageStore/GUI/logo.jpg" width="335" height="170"></td>
-    <td rowspan="4"><img src="ImageStore/GUI/steam.gif" width="302" height="170"></td>
-    <td bgcolor="#000000"><p align="center"><a href="index.html"><img src="ImageStore/GUI/Menu/Touch-s.png" width="138" height="38"></a></p></td>
-  </tr>
-  <tr> 
-    <td height="25" bgcolor="#000000"><div align="center"><a href="operations.html"><img src="ImageStore/GUI/Menu/Ops-sm.png" width="138" height="38" border="0"></a></div></td>
-  </tr>
-  <tr> 
-    <td height="28" bgcolor="#000000"><div align="center"><a href="database.html"><img src="ImageStore/GUI/Menu/DB_manage-Sm.png" width="138" height="38" border="0"></a></div></td>
-  </tr>
-  <tr> 
-    <td bgcolor="#000000"><div align="center"><font color="#FFFFFF" size="7" face="Verdana, Arial, Helvetica, sans-serif"><strong><a href="reports.html"><img src="ImageStore/GUI/Menu/Reports-sm.png" width="138" height="38" border="0"></a></strong></font></div></td>
-  </tr>
-</table>
-<table width="60%" border="1" align="center" cellpadding="2" cellspacing="2" bordercolor="#00CC00" bgcolor="#00CC00">
-  <tr bgcolor="#000000"> 
-    <td colspan="3"><div align="center"><font color="#FFFFFF" size="7" face="Verdana, Arial, Helvetica, sans-serif"><strong><img src="ImageStore/GUI/Menu/Ops.png" width="362" height="62"></strong></font></div></td>
-  </tr>
-  <tr bgcolor="#CCCCCC">
-    <td colspan="3">&nbsp;</td>
-  </tr>
-  <tr bgcolor="#000000"> 
-    <td width="33%"><div align="center"><img src="ImageStore/GUI/Menu/Ops_BO-W.png" width="362" height="62"></div></td>
-    <td width="33%"><div align="center"><font color="#FFFFFF" size="7" face="Verdana, Arial, Helvetica, sans-serif"><img src="ImageStore/GUI/Menu/Ops_DO-W.png" width="362" height="62"></font></div></td>
-    <td width="33%"><div align="center"><font color="#FFFFFF" size="7" face="Verdana, Arial, Helvetica, sans-serif"><img src="ImageStore/GUI/Menu/Ops_AO-W.png" width="362" height="62"></font></div></td>
-  </tr>
-  <tr> 
-    <td rowspan="4" bgcolor="#000000"><div align="center"> 
-        <p><a href="generate.php"><img src="ImageStore/GUI/Menu/Ops-GCO.png" width="362" height="87"></a></p>
+  <div class="container mt-4" style="max-width: 960px;">
+    <div class="row g-4">
+
+      <!-- Before Operations -->
+      <div class="col-md-4">
+        <div class="op-group">
+          <div class="section-header"><i class="bi bi-clock-history"></i> Before Operations</div>
+          <a href="generate.php" class="op-btn">
+            <i class="bi bi-gear op-icon"></i>
+            <div>
+              <div class="op-btn-title">Generate Car Orders</div>
+              <div class="op-btn-desc">Auto or manually generate car orders for the session</div>
+            </div>
+          </a>
+          <a href="fill_orders.php" class="op-btn">
+            <i class="bi bi-box-seam op-icon"></i>
+            <div>
+              <div class="op-btn-title">Fill Car Orders</div>
+              <div class="op-btn-desc">Assign available cars to open orders</div>
+            </div>
+          </a>
+          <a href="reposition.php" class="op-btn">
+            <i class="bi bi-arrows-move op-icon"></i>
+            <div>
+              <div class="op-btn-title">Reposition Empty Cars</div>
+              <div class="op-btn-desc">Move empty cars to their home location</div>
+            </div>
+          </a>
+        </div>
       </div>
-      <div align="center"></div>
-      <div align="center"> 
-        <p><a href="fill_orders.php"><img src="ImageStore/GUI/Menu/Ops-FCO.png" width="362" height="87"></a></p>
+
+      <!-- During Operations -->
+      <div class="col-md-4">
+        <div class="op-group">
+          <div class="section-header"><i class="bi bi-play-circle"></i> During Operations</div>
+          <a href="build_switchlists.php" class="op-btn">
+            <i class="bi bi-list-check op-icon"></i>
+            <div>
+              <div class="op-btn-title">Build Switch Lists</div>
+              <div class="op-btn-desc">Assign cars to jobs/trains for switching</div>
+            </div>
+          </a>
+          <a href="pick_up.php" class="op-btn">
+            <i class="bi bi-arrow-up-circle op-icon"></i>
+            <div>
+              <div class="op-btn-title">Pick Up Cars</div>
+              <div class="op-btn-desc">Mark cars as picked up by a job</div>
+            </div>
+          </a>
+          <a href="organize_cars.php" class="op-btn">
+            <i class="bi bi-sort-numeric-up op-icon"></i>
+            <div>
+              <div class="op-btn-title">Organize Cars</div>
+              <div class="op-btn-desc">View and adjust car order in a consist</div>
+            </div>
+          </a>
+          <a href="set_out.php" class="op-btn">
+            <i class="bi bi-arrow-down-circle op-icon"></i>
+            <div>
+              <div class="op-btn-title">Set Out Cars</div>
+              <div class="op-btn-desc">Set out cars at their destination</div>
+            </div>
+          </a>
+        </div>
       </div>
-      <div align="center"><a href="reposition.php"><img src="ImageStore/GUI/Menu/Ops-REC.png" width="362" height="87"></a></div></td>
-    <td height="86" bgcolor="#000000"><div align="center"> 
-        <p><a href="build_switchlists.php"><img src="ImageStore/GUI/Menu/Ops-BS.png" width="362" height="87"></a></p>
-      </div></td>
-    <td rowspan="4" align="center" valign="middle" bgcolor="#000000"><div align="center"><a href="load_unload.php"><img src="ImageStore/GUI/Menu/Ops_LURC.png" width="362" height="87" border="0"></a></div>
-      <div align="center"> 
-        <p>&nbsp;</p>
-      </div></td>
-  </tr>
-  <tr> 
-    <td height="73" bgcolor="#000000"><div align="center"> 
-        <p><a href="pick_up.php"><img src="ImageStore/GUI/Menu/Ops-PUC.png" width="362" height="87"></a></p>
-      </div></td>
-  </tr>
-  <tr> 
-    <td height="96" bgcolor="#000000"><div align="center"> 
-        <p><a href="organize_cars.php"><img src="ImageStore/GUI/Menu/Ops-OC.png" width="362" height="87"></a></p>
-      </div></td>
-  </tr>
-  <tr> 
-    <td bgcolor="#000000"><div align="center"> 
-        <p><a href="set_out.php"><img src="ImageStore/GUI/Menu/Ops-SOC.png" width="362" height="87"></a></p>
-      </div></td>
-  </tr>
-</table>
-<p>&nbsp;</p>
+
+      <!-- After Operations -->
+      <div class="col-md-4">
+        <div class="op-group">
+          <div class="section-header"><i class="bi bi-check-circle"></i> After Operations</div>
+          <a href="load_unload.php" class="op-btn">
+            <i class="bi bi-truck op-icon"></i>
+            <div>
+              <div class="op-btn-title">Load / Unload Cars</div>
+              <div class="op-btn-desc">Complete car loading and unloading</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

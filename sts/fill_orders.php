@@ -1,12 +1,3 @@
-<!-- Bootstrap CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
 <?php
 require 'open_db.php';
 require 'drop_down_list_functions.php';
@@ -49,59 +40,14 @@ $rs = mysqli_query($dbc, $sql);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STS - Fill Car Orders</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-        body {
-            font: normal 20px Verdana, Arial, sans-serif;
-            margin-left: 50px;
-        }
-        .nav-header {
-            margin-bottom: 1rem;
-        }
-        .nav-header img {
-            display: block;
-            margin-bottom: 1rem;
-        }
-        .page-title {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .page-description {
-            font: normal 15px Verdana, Arial, sans-serif;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-        .color-legend {
-            margin: 1rem 0;
-        }
-        .color-legend li {
-            margin-bottom: 0.5rem;
-        }
-        .legend-box {
-            display: inline-block;
-            padding: 2px 6px;
-            margin-right: 0.5rem;
-            color: white;
-        }
-        .legend-pool {
-            color: white;
-            background-color: Gray;
-        }
-        .legend-station {
-            background-color: DarkGray;
-        }
-        .legend-priority {
-            background-color: LightGray;
-            color: black;
-        }
-        .legend-system {
-            background-color: White;
-            color: black;
-            border: 1px solid black;
-        }
         .order-card {
             margin-bottom: 1rem;
             border: 1px solid #dee2e6;
@@ -203,20 +149,23 @@ $rs = mysqli_query($dbc, $sql);
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="container-fluid">
-        <!-- Navigation Header -->
-        <div class="nav-header">
-            <img src="ImageStore/GUI/Menu/fill.jpg" width="716" height="145" border="0" usemap="#Map2" alt="Navigation Menu">
-            <map name="Map2">
-                <area shape="rect" coords="568,5,712,46" href="index.html" alt="Main">
-                <area shape="rect" coords="570,97,710,138" href="index-t.html" alt="Timetable">
-                <area shape="rect" coords="568,52,717,93" href="operations.html" alt="Operations">
-            </map>
-        </div>
-
-        <div class="page-title">Fill Orders</div>
-        <div class="page-description">Select an order to see available cars, then click a car to assign it.</div>
+<body class="bg-light">
+<nav class="navbar navbar-dark noprint mb-3" style="background-color: #2e7d32;">
+  <div class="container-fluid">
+    <span class="navbar-brand"><i class="bi bi-box-seam"></i> Fill Car Orders</span>
+    <div>
+      <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
+        <i class="bi bi-arrow-left"></i> Operations
+      </a>
+      <a href="index.html" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-house"></i> Home
+      </a>
+    </div>
+  </div>
+</nav>
+    <div class="container-fluid px-4">
+        <h5 class="mb-1">Fill Car Orders</h5>
+        <p class="text-muted mb-3">Select an order to see available cars, then click a car to assign it.</p>
 
         <?php if (mysqli_num_rows($rs) > 0) { ?>
             <div class="mb-4 p-3 bg-light border rounded">
@@ -438,5 +387,7 @@ $rs = mysqli_query($dbc, $sql);
             font-size: 1.5rem;
         }
     </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>
