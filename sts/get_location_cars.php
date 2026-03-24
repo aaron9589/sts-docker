@@ -47,6 +47,10 @@
           order by position, reporting_marks';
 // print 'SQL: ' . $sql . '<br /><br />';
   $rs = mysqli_query($dbc, $sql);
+  if ($rs === false) {
+    echo 'No cars at ' . htmlspecialchars($location_code);
+    exit;
+  }
 
   // build a table (less the <table> and </table> tags) and return it as a string
   $row_count = 0;

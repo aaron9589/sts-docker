@@ -64,6 +64,10 @@
 
 //print 'SQL: ' . $sql . '<br /><br />';
   $rs = mysqli_query($dbc, $sql);
+  if ($rs === false) {
+    echo 'No cars in ' . htmlspecialchars($job_name);
+    exit;
+  }
 
   // build a table (less the <table> and </table> tags) and return it as a string
   $row_count = 0;
