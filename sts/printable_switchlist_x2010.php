@@ -4,31 +4,169 @@
   <title>STS - Print Switchlist</title>
   <style>
     body {
-      font: normal 20px Verdana, Arial, sans-serif;
+      font: normal 14px 'Arial Narrow', Arial, sans-serif;
     }
 
     table {
       border-collapse: collapse;
-      table-layout: fixed;
     }
 
     tr {
-      vertical-align: middle
+      vertical-align: middle;
     }
 
     th {
       border: 1px solid black;
-      padding: 1px
+      padding: 3px 5px;
     }
 
     td {
       border: 1px solid black;
-      padding: 1px
+      padding: 3px 5px;
+    }
+
+    .form-page {
+      width: 100%;
+      max-width: 1200px;
+      font-family: 'Arial Narrow', 'Franklin Gothic', Arial, sans-serif;
+      margin-bottom: 40px;
+    }
+
+    .logo-header {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .logo-header td {
+      border: none;
+      padding: 3px;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid black;
+      margin-top: -1px;
+    }
+
+    .detail-table td {
+      border: 1px solid black;
+      padding: 4px 5px;
+      font-size: 12px;
+      height: 2.8em;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid black;
+      margin-top: -1px;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      border: 1px solid black;
+      padding: 4px 5px;
+      background-color: #1e4d78;
+      color: white;
+    }
+
+    .data-table td {
+      border: 1px solid black;
+      padding: 4px 5px;
+    }
+
+    .data-table tbody tr:nth-child(even) td {
+      background-color: #d0e8ff;
+    }
+
+    /* Bold the row number and wagon number columns for easy scanning */
+    .data-table tbody td:nth-child(1) {
+      font-weight: bold;
+    }
+
+    .data-table tbody td:nth-child(3) {
+      font-weight: bold;
+    }
+
+    .serial-number {
+      color: red;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .page-info {
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
     }
 
     @media print {
       .noprint {
-        display: none;
+        display: none !important;
+      }
+
+      @page {
+        size: A5 landscape;
+      }
+
+      body {
+        font-size: 8pt;
+        font-family: 'Arial Narrow', Arial, sans-serif;
+      }
+
+      .form-page {
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+      }
+
+      .page-break {
+        padding-top: 3mm;
+      }
+
+      .logo-img {
+        height: 32px !important;
+        width: auto !important;
+      }
+
+      h2.form-title {
+        font-size: 10pt !important;
+        margin: 1px 0 !important;
+      }
+
+      .serial-number {
+        font-size: 11pt !important;
+      }
+
+      .detail-table td {
+        font-size: 7pt !important;
+        padding: 1px 3px !important;
+        line-height: 1.2 !important;
+      }
+
+      .data-table th,
+      .data-table td {
+        font-size: 8pt !important;
+        padding: 2px 4px !important;
+        line-height: 1.3 !important;
+      }
+
+      .data-table th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: #1e4d78 !important;
+        color: white !important;
+      }
+
+      .data-table tbody tr:nth-child(even) td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: #d0e8ff !important;
       }
     }
   </style>
@@ -92,6 +230,89 @@
   require 'open_db.php';
   require 'set_colors.php';
 
+  // Maximum visual "lines" of content that fit in the data area of one A5 landscape page.
+  // Each row is at least 2 lines (station + location code); rows with special instructions
+  // are counted as 3+ lines. Tune this value if content clips or pages are under-filled.
+  define('X2010_LINES_PER_PAGE', 22);
+
+  /**
+   * Estimate how many printed lines a data row will consume.
+   * Counts explicit <br> separators and wraps for long special-instruction text.
+   */
+  function count_row_lines($row) {
+    // Current Location: bold station <br> location code — always 2 lines unless "In Train"
+    $current_loc_lines = ($row['current_location_id'] > 0) ? 2 : 1;
+
+    // Destination: bold station <br> location code — always 2 lines
+    $dest_lines = 2;
+
+    // Special instructions flag now appears in the Contents column.
+    // Contents column is roughly 1/11 of ~194mm usable width ≈ 18mm.
+    // At 8pt × 0.85em Arial Narrow, roughly 18 characters fit per line.
+    $spec_instr    = trim($row['special_instructions'] ?? '');
+    $loc_remarks   = trim($row['location_remarks'] ?? '');
+    $show_spec     = ($spec_instr !== '' && strtolower($spec_instr) !== 'n/a');
+    $show_loc_rem  = ($loc_remarks !== '' && strtolower($loc_remarks) !== 'n/a');
+    $contents_lines = 1; // commodity code or empty — single line
+    if ($show_spec) {
+      $contents_lines += max(1, (int) ceil(mb_strlen($spec_instr) / 18));
+    }
+    if ($show_loc_rem) {
+      $contents_lines += max(1, (int) ceil(mb_strlen($loc_remarks) / 18));
+    }
+
+    return max($current_loc_lines, $dest_lines, $contents_lines);
+  }
+
+  function x2010_page_header($logo, $table_name, $serial_number, $page_num, $page_count, $driverNameWidth, $timeOnDutyWidth, $depotWidth) {
+    // Logo / title / serial — inside the bordered table like the rest of the header
+    print '<table class="detail-table">';
+    print '<tr>';
+    print '<td style="width: 30%; border: 1px solid black; padding: 4px;"><img class="logo-img" src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 52px; width: auto;"></td>';
+    print '<td style="width: 45%; text-align: center; border: 1px solid black; padding: 4px; vertical-align: middle;"><h2 class="form-title" style="margin: 0;">Train Consist Form x 2010</h2></td>';
+    print '<td style="width: 25%; border: 1px solid black; padding: 4px; position: relative;">';
+    print '<div style="position: absolute; bottom: 4px; left: 4px;" class="page-info">PAGE ' . $page_num . ' OF ' . $page_count . '</div>';
+    print '<div style="position: absolute; bottom: 4px; right: 4px;" class="serial-number">' . $serial_number . '</div>';
+    print '</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Train details
+    print '<table class="detail-table">';
+    print '<tr>';
+    print '<td style="width: 10%;">Train No.<br/><b>' . trim(explode('|', $table_name)[0]) . '</b></td>';
+    print '<td style="width: 10%;">Date</td>';
+    print '<td style="width: 10%;">Dept Time</td>';
+    print '<td style="width: 15%;">Origin</td>';
+    print '<td style="width: 16%;">Destination</td>';
+    print '<td style="width: ' . $driverNameWidth . ';">Driver Name</td>';
+    print '<td style="width: ' . $timeOnDutyWidth . ';">Time on Duty</td>';
+    print '<td style="width: ' . $depotWidth . ';">Depot</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Radio / unit
+    print '<table class="detail-table">';
+    print '<tr>';
+    print '<td style="width: 30%;">Train Radio Number</td>';
+    print '<td style="width: 15%;">Unit No.</td>';
+    print '<td style="width: 16%;">P.M. Date Due</td>';
+    print '<td style="width: 14%;">Driver Name</td>';
+    print '<td style="width: 13%;">Time on Duty</td>';
+    print '<td style="width: 12%;">Depot</td>';
+    print '</tr>';
+    print '</table>';
+
+    // Mobile / brake
+    print '<table class="detail-table">';
+    print '<tr>';
+    print '<td style="width: 30%;">Mobile Number</td>';
+    print '<td style="width: 45%;">Brake Certificate No.</td>';
+    print '<td style="width: 25%;">Train Type</td>';
+    print '</tr>';
+    print '</table>';
+  }
+
   // has the display button be clicked?
   if (isset($_GET['display_btn'])) {
     // get a database connection
@@ -131,7 +352,7 @@
     // build a query to pull in the switchlist information
     // the first query in the union looks for cars that are assigned to the specified job and are revenue moves
     // the second query in the union looks for cars that are assigned to the specified job but are repositioning moves
-  
+
     $sql = '(select
                  cars.reporting_marks as reporting_marks,
                  car_codes.code as car_code,
@@ -140,6 +361,7 @@
                  commodities.code as consignment,
                  shipments.consignment as consignment_id,
                  shipments.special_instructions as special_instructions,
+                 "" as location_remarks,
                  routing.station as current_station,
                  locations.code as current_location,
                  loading_sta.station as loading_station,
@@ -185,6 +407,7 @@
                  "" as consignment,
                  0 as consignment_id,
                  "" as special_instructions,
+                 unloading_loc.remarks as location_remarks,
                  routing.station as current_station,
                  locations.code as current_location,
                  0 as loading_station,
@@ -219,31 +442,34 @@
     //                 inner join shipments on shipments.id = car_orders.shipment // removed because repositions don't have shipments
 //                 inner join commodities on commodities.id = shipments.consignment // ditto
 //                 ORDER BY max_step_number, position, unloading_location, reporting_marks'; // fixed sort order
-  
+
     //print 'SQL: ' . $sql . '<br /><br />';
-  
-    // run the query before generating the page in order to collect a list of all the reporting marks
+
+    // First pass: collect reporting marks and simulate line-based pagination to get the true page count
     $rs = mysqli_query($dbc, $sql);
-    $i = 0;
+    $car_list        = [];
+    $row_lines_list  = [];   // line count for each row, indexed in order
+    $page_count      = 1;
+    $lines_on_page   = 0;
+    $first_page_sim  = true;
     while ($row = mysqli_fetch_array($rs)) {
-      $car_list[$i] = $row['reporting_marks'];
-      $i++;
+      $car_list[] = $row['reporting_marks'];
+      $rl = count_row_lines($row);
+      $row_lines_list[] = $rl;
+      $budget = X2010_LINES_PER_PAGE;
+      if ($lines_on_page > 0 && $lines_on_page + $rl > $budget) {
+        $page_count++;
+        $lines_on_page = $rl;
+        $first_page_sim = false;
+      } else {
+        $lines_on_page += $rl;
+      }
     }
-
-    // set a variable for the number of pages
-    $car_count = count($car_list);
-
-    if ($car_count > 25) {
-      $page_count = 3;
-    } elseif ($car_count > 13) {
-      $page_count = 2;
-    } else {
-      $page_count = 1;
-    }
+    $page_count = max(1, $page_count);
+    $car_count  = count($car_list);
 
     // run the query again to build the switchlist table
     $rs = mysqli_query($dbc, $sql);
-    //print "num_rows = " . mysqli_num_rows($rs) . '<br />';
     if (mysqli_num_rows($rs) > 0) {
       // initialize the counters for loads and empties
       $loads = 0;
@@ -252,18 +478,13 @@
       // x2010 format based on Pacific National Train Consist Form
       if ($_GET['format'] == 'x2010') {
         print '<div class="noprint">';
-        // Print button and return link
         print '<button onclick="window.print()">PRINT</button>&nbsp;&nbsp;';
         print '<a href="display_switchlist.php">Return to Display Switchlist page</a><br /><br />';
         print '</div>';
 
-        // Generate random serial number
         $serial_number = sprintf("%06d", rand(1, 999999));
 
-        // Main form container
-        print '<div style="font-family: \'Arial Narrow\', \'Franklin Gothic\', Arial, sans-serif; width: 100%; max-width: 1200px;">';
-
-        $operator_number = $table_name[2] ?? "No third digit found.";
+        $operator_number = $table_name[2] ?? 'x';
         $logo = match ($operator_number) {
           '0' => 'railcorp',
           '2' => 'pn',
@@ -274,315 +495,151 @@
           default => 'nswgr'
         };
 
-        // Define the widths for the aligned columns
-        $driverNameWidth = "15%";
-        $timeOnDutyWidth = "12%";
+        $driverNameWidth = "14%";
+        $timeOnDutyWidth = "13%";
         $depotWidth = "12%";
 
-        // Header with logo and form title - modified to include logo
-        print '<table style="width: 100%; border-collapse: collapse;">';
-        print '<tr>';
-        print '<td style="width: 30%;"><img src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 100px; width: auto;"></td>';
-        print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
-        print '<td style="width: 25%; text-align: right; position: relative;">
-                      <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE 1 OF ' . $page_count . '</div>
-                    </td>';
-        print '</tr>';
-        print '</table>';
-
-        // Top section with train details
-        print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">';
-        print '<tr>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Train No.<br/><b>' . trim(explode("|", $table_name)[0]) . '</b></td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Date</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Dept Time</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 15%;">Origin</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 16%;">Destination</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: ' . $driverNameWidth . ';">Driver Name</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: ' . $timeOnDutyWidth . ';">Time on Duty</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: ' . $depotWidth . ';">Depot</td>';
-        print '</tr>';
-        print '</table>';
-
-        // Second row with radio and unit details - matching column widths
-        print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
-        print '<tr>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 32.5%;">Train Radio Number</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 15.25%;">Unit No.</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 16.25%;">P.M. Date Due</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 15.2%;">Driver Name</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 12.3%;">Time on Duty</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 12.1%;">Depot</td>';
-        print '</tr>';
-        print '</table>';
-
-        // Rest of the form remains the same
-        print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
-        print '<tr>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 50%;">Mobile Number</td>';
-        print '<td style="border: 1px solid black; padding: 5px; width: 30%;">Brake Certificate No.</td>';
-        print '<td style="border: 1px solid black; padding: 5px;">Train Type</td>';
-        print '</tr>';
-        print '</table>';
-
-        // Main consist table
-        print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px; font-size: 12px; table-layout: auto;">';
-        print '<tr style="background-color: #f5f5f5;">';
-        print '<th style="border: 1px solid black; padding: 5px;">Sl.<br/>No</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Wagon Class</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Wagon or Locomotive<br/>Number</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">CL</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Sta</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">DG</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Gross<br/>Mass</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Length<br/>Metres</th>';
-        //current location
-        print '<th style="border: 1px solid black; padding: 5px;">Current Location</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Destination</th>';
-        print '<th style="border: 1px solid black; padding: 5px;">Contents</th>';
-        print '</tr>';
-
-        //initialise an array
         $special_instruction_counter = 0;
+        $page_num = 0;
+        $row_num  = 1;
+        $row_idx  = 0;   // index into $row_lines_list
+        $lines_on_current_page = 0;
 
-        // Generate rows for consist entries
-        $row_num = 1;
-        //$row = mysqli_fetch_array($rs);
-        //print json_encode($row, JSON_PRETTY_PRINT);
         while ($row = mysqli_fetch_array($rs)) {
+
+          $rl = $row_lines_list[$row_idx] ?? count_row_lines($row);
+
+          // Start a new page at row 1, or when adding this row would exceed the line budget
+          $budget = X2010_LINES_PER_PAGE;
+          if ($row_num === 1 || $lines_on_current_page + $rl > $budget) {
+            // Close the previous page's data table and wrapper div
+            if ($row_num > 1) {
+              print '</tbody></table></div>';
+            }
+            $page_num++;
+            $break_class = ($page_num > 1) ? ' page-break' : '';
+            print '<div class="form-page' . $break_class . '">';
+            x2010_page_header($logo, $table_name, sprintf("%06d", $serial_number + $page_num - 1), $page_num, $page_count, $driverNameWidth, $timeOnDutyWidth, $depotWidth);
+            // Data table column headers
+            print '<table class="data-table">';
+            print '<colgroup>';
+            print '<col style="width:6%">';   // Sl. No
+            print '<col style="width:7%">';   // Wagon Class
+            print '<col style="width:10%">';  // Wagon/Loco Number
+            print '<col style="width:2%">';   // CL
+            print '<col style="width:2%">';   // Sta
+            print '<col style="width:7%">';   // DG
+            print '<col style="width:5%">';   // Gross Mass
+            print '<col style="width:5%">';   // Length Metres
+            print '<col style="width:18%">'; // Current Location
+            print '<col style="width:19%">'; // Destination
+            print '<col style="width:19%">'; // Contents
+            print '</colgroup>';
+            print '<thead><tr>';
+            print '<th>Sl.<br/>No</th>';
+            print '<th>Wagon Class</th>';
+            print '<th>Wagon or Locomotive<br/>Number</th>';
+            print '<th>CL</th>';
+            print '<th>Sta</th>';
+            print '<th>DG</th>';
+            print '<th>Gross<br/>Mass</th>';
+            print '<th>Length<br/>Metres</th>';
+            print '<th>Current Location</th>';
+            print '<th>Destination</th>';
+            print '<th>Contents<br/><span style="font-weight:normal;font-size:0.85em;">&#9873; Routing</span></th>';
+            print '</tr></thead>';
+            print '<tbody>';
+            $lines_on_current_page = 0;
+          }
+
+          $lines_on_current_page += $rl;
+
           print '<tr>';
-          print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row_num . '</td>';
-          print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . substr($row['car_code'], 0, 4) . '</td>';
+          print '<td style="text-align: center;">' . $row_num . '</td>';
+          print '<td style="text-align: center;">' . substr($row['car_code'], 0, 4) . '</td>';
 
-          // reporting marks - strip any text
+          // Wagon number - strip trailing alpha check letter
           if (ctype_alpha($row['reporting_marks'][strlen($row['reporting_marks']) - 1])) {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . preg_replace("/[a-zA-Z\-]+$/", "", $row['reporting_marks']) . '</td>';
+            print '<td style="text-align: center;">' . preg_replace("/[a-zA-Z\-]+$/", "", $row['reporting_marks']) . '</td>';
           } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row['reporting_marks'] . '</td>';
+            print '<td style="text-align: center;">' . $row['reporting_marks'] . '</td>';
           }
 
-
-          // CL (Check Letter) column logic
-          // Display the check letter if it exists - otherwise done
-  
+          // CL check letter
           if (ctype_alpha($row['reporting_marks'][strlen($row['reporting_marks']) - 1])) {
-            // Display the last character
-            //echo "The last letter is: " . $row['reporting_marks'][strlen($row['reporting_marks']) - 1];
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row['reporting_marks'][strlen($row['reporting_marks']) - 1] . '</td>'; // CL
+            print '<td style="text-align: center;">' . $row['reporting_marks'][strlen($row['reporting_marks']) - 1] . '</td>';
           } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;"></td>';
+            print '<td></td>';
           }
 
+          // Status
+          print '<td style="text-align: center;">' . ($row['status'] == 'Loaded' ? 'L' : 'E') . '</td>';
 
-          // status logic - loaded or M/T
-          //print '<td style="border: 1px solid black; padding: 5px;"></td>'; // Sta
-  
-          if ($row['status'] == "Loaded") {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">L</td>'; // Sta
+          // DG
+          if ($row['car_code'] == 'ATMF' || $row['car_code'] == 'NTAF') {
+            print '<td style="text-align: center; white-space: nowrap;">Y-Petroleum</td>';
           } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">E</td>'; // Sta
+            print '<td></td>';
           }
 
-          // Mark ATMF/NTAF as dangerous goods
-  
-          if (($row['car_code'] == "ATMF") || ($row['car_code'] == "NTAF")) {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">Y-Petroleum</td>'; // DG
-          } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;"></td>'; // DG
-          }
+          // Gross mass and length from remarks field
+          print '<td style="text-align: center;">' . trim(explode('|', $row['remarks'])[0]) . '</td>';
+          print '<td style="text-align: center;">' . trim(explode('|', $row['remarks'])[1]) . '</td>';
 
-
-          //
-  
-
-          //print '<td style="border: 1px solid black; padding: 5px;"></td>'; // Gross Mass
-  
-          print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . trim(explode('|', $row['remarks'])[0]) . '</td>';
-
-
-          print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . trim(explode('|', $row['remarks'])[1]) . '</td>'; // Length
-  
-
-          // current location logic
+          // Current location
           if ($row['current_location_id'] > 0) {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;"><b>' . $row['current_station'] . '</b><br>' . $row['current_location'] . '</td>'; // Length
-  
+            print '<td style="text-align: center;"><b>' . $row['current_station'] . '</b><br>' . $row['current_location'] . '</td>';
           } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">In Train</td>'; // DG
-  
+            print '<td style="text-align: center;">In Train</td>';
           }
 
+          // Special instructions flag
+          $spec_instr = trim($row['special_instructions'] ?? '');
+          $show_spec = ($spec_instr !== '' && strtolower($spec_instr) !== 'n/a');
+          $spec_flag = $show_spec ? '<br><span style="color:#b30000;font-size:0.85em;">&#9873; ' . htmlspecialchars($spec_instr) . '</span>' : '';
 
-          // Updated Destination Logic
-  
-          if (($row['status'] == "Empty") || ($row['status'] == "Ordered")) {
-            // if the commodity column is empty, this is a non revenue move and the car's destination
-            // is the unloading location
+          // Location routing remarks flag (for empty/repositioning cars)
+          $loc_remarks = trim($row['location_remarks'] ?? '');
+          $show_loc_rem = ($loc_remarks !== '' && strtolower($loc_remarks) !== 'n/a');
+          $loc_flag = $show_loc_rem ? '<br><span style="color:#b30000;font-size:0.85em;">&#9873; ' . htmlspecialchars($loc_remarks) . '</span>' : '';
+
+          // Destination
+          if ($row['status'] == 'Empty' || $row['status'] == 'Ordered') {
             if ($row['consignment_id'] <= 0) {
-              print '<td style="border: 1px solid black; padding: 5px; text-align: center;"><b>' . $row['unloading_station'] . '</b><br>' . $row['unloading_location'] . '</td>';
+              print '<td style="text-align: center;"><b>' . $row['unloading_station'] . '</b><br>' . $row['unloading_location'] . '</td>';
             } else {
-              print '<td style="border: 1px solid black; padding: 5px; text-align: center;"><b>' . $row['loading_station'] . '</b><br>' . $row['loading_location'] . '</td>';
+              print '<td style="text-align: center;"><b>' . $row['loading_station'] . '</b><br>' . $row['loading_location'] . '</td>';
             }
-          } elseif ($row['status'] == "Loaded") {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;"><b>' . $row['unloading_station'] . '</b><br>' . $row['unloading_location'] . '</td>';
+          } elseif ($row['status'] == 'Loaded') {
+            print '<td style="text-align: center;"><b>' . $row['unloading_station'] . '</b><br>' . $row['unloading_location'] . '</td>';
           }
 
-
-          // Contents
-          if ($row['status'] == "Loaded") {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">' . $row['consignment'];
-            if (strlen($row['special_instructions']) > 0) {
-              print '<br />Spec Instr';
-              $special_instructions[$special_instruction_counter][0] = $row['car_code'];
-              $special_instructions[$special_instruction_counter][1] = $row['reporting_marks'];
-              $special_instructions[$special_instruction_counter][2] = $row['consignment'];
-              $special_instructions[$special_instruction_counter][3] = $row['special_instructions'];
-              $special_instruction_counter++;
-            }
-            print '</td>';
+          // Contents (with special instructions / location routing flags below)
+          if ($row['status'] == 'Loaded') {
+            print '<td style="text-align: center;">' . $row['consignment'] . $spec_flag . $loc_flag . '</td>';
           } else {
-            print '<td style="border: 1px solid black; padding: 5px; text-align: center;">';
-            if (strlen($row['special_instructions']) > 0) {
-              print 'Spec Instr';
-              $special_instructions[$special_instruction_counter][0] = $row['car_code'];
-              $special_instructions[$special_instruction_counter][1] = $row['reporting_marks'];
-              $special_instructions[$special_instruction_counter][2] = $row['consignment'];
-              $special_instructions[$special_instruction_counter][3] = $row['special_instructions'];
-              $special_instruction_counter++;
-            }
-            print '</td>';
+            print '<td style="text-align: center;">' . $spec_flag . $loc_flag . '</td>';
           }
 
           print '</tr>';
           $row_num++;
-          if (($row_num == 14 || $row_num == 25) && count($car_list) > 13) { //only generate next page if it will spill over to another page
-            $serial_number++; //generate the next page serial
-            print '</table>';
-            // generate a page break
-            print '<p style="page-break-after: always;">&nbsp;</p>';
-            // Header with logo and form title - modified to include logo
-            print '<table style="width: 100%; border-collapse: collapse;">';
-            print '<tr>';
-            print '<td style="width: 30%;"><img src="images/' . $logo . '_logo.jpg" alt="Company Logo" style="height: 100px; width: auto;"></td>';
-            print '<td style="width: 45%; text-align: center;"><h2 style="height: 3px;">Train Consist Form x 2010</h2></td>';
-            print '<td style="width: 25%; text-align: right; position: relative;">
-                      <div style="color: red; font-size: 24px; margin-top: 60px; text-align: right;">' . $serial_number . '</div>
-                      <div style="position: absolute; bottom: 0; left: 0;">PAGE ' . ($row_num == 14 ? 2 : 3) . ' OF ' . $page_count . '</div>
-                    </td>';
-            print '</tr>';
-            print '</table>';
-
-            // Top section with train details
-            print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">';
-            print '<tr>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Train No.<br/><b>' . trim(explode("|", $table_name)[0]) . '</b></td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Date</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 10%;">Dept Time</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 15%;">Origin</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 16%;">Destination</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: ' . $driverNameWidth . ';">Driver Name</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: ' . $timeOnDutyWidth . ';">Time on Duty</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: ' . $depotWidth . ';">Depot</td>';
-            print '</tr>';
-            print '</table>';
-
-            // Second row with radio and unit details - matching column widths
-            print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
-            print '<tr>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 32.5%;">Train Radio Number</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 15.25%;">Unit No.</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 16.25%;">P.M. Date Due</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 15.2%;">Driver Name</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 12.3%;">Time on Duty</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 12.1%;">Depot</td>';
-            print '</tr>';
-            print '</table>';
-
-            // Rest of the form remains the same
-            print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px;">';
-            print '<tr>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 50%;">Mobile Number</td>';
-            print '<td style="border: 1px solid black; padding: 5px; width: 30%;">Brake Certificate No.</td>';
-            print '<td style="border: 1px solid black; padding: 5px;">Train Type</td>';
-            print '</tr>';
-            print '</table>';
-
-            // Main consist table
-            print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: -1px; font-size: 12px; table-layout: auto;">';
-            print '<tr style="background-color: #f5f5f5;">';
-            print '<th style="border: 1px solid black; padding: 5px;">Sl.<br/>No</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Wagon Class</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Wagon or Locomotive<br/>Number</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">CL</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Sta</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">DG</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Gross<br/>Mass</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Length<br/>Metres</th>';
-            //current location
-            print '<th style="border: 1px solid black; padding: 5px;">Current Location</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Destination</th>';
-            print '<th style="border: 1px solid black; padding: 5px;">Contents</th>';
-            print '</tr>';
-          }
+          $row_idx++;
         }
 
-        print '</table>';
-        print '</div>';
-      }
+        // Close the last page
+        if ($row_num > 1) {
+          print '</tbody></table></div>';
+        }
 
+      } // end x2010
 
-
-      // finish up the table
-      print '</table>';
     } else {
       print '<p style="font-family: verdana;">';
       print 'No switchlist found for ' . $table_name . '<br />';
       print '</p>';
     }
 
-    // if there are any special instructions, print them on their own page
-    if ($special_instruction_counter > 0) {
-      // generate a page break
-      print '<p style="page-break-after: always;">&nbsp;</p>';
-      print '<div id="wagon_special_instructions" style="font-family: Arial Narrow, Franklin Gothic, Arial, sans-serif; width: 100%; max-width: 1200px;">';
-      print '<h3>Special Instructions</h3>';
-      print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 12px; table-layout: auto;">';
-      print '<tr style="background-color: #f5f5f5;">';
-      print '<td style="border: 1px solid black; padding: 5px;">';
-      print '<ul>';
-      for ($i = 0; $i < $special_instruction_counter; $i++) {
-        print '<li>' . $special_instructions[$i][0] . ' ' . $special_instructions[$i][1] . ' (' . $special_instructions[$i][2] . ')</li> <ul><li> ' . $special_instructions[$i][3] . '</li></ul><br>';
-      }
-      print '</ul>';
-      print '</td>';
-      print '</tr>';
-      print '</table>';
-      print '</div>';
-    }
-
-    // generate a page break
-    print '<p style="page-break-after: always;">&nbsp;</p>';
-
-    // display the selected job's description with X2010 styling
-    print '<div id="full_sheet_job_instructions" style="font-family: Arial Narrow, Franklin Gothic, Arial, sans-serif; width: 100%; max-width: 1200px;">';
-    print '<h3>Crew Instructions</h3>';
-    print '<table style="width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 12px; table-layout: auto;">';
-    print '<tr style="background-color: #f5f5f5;">';
-    print '<td style="border: 1px solid black; padding: 5px;">';
-    print '<h3>Job: ' . $table_name . '</h3>';
-    print 'Description: ' . nl2br($job_desc);
-    print '</td>';
-    print '</tr>';
-    print '</table>';
-    print '</div>';
-
-    // generate a page break
-    print '<p style="page-break-after: always;">&nbsp;</p>';
-
-    print '<div class="noprint">';
-    print '<hr />';
-    print '</div>';
+    print '<div class="noprint"><hr /></div>';
 
 
   }
@@ -649,13 +706,11 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const tables = document.querySelectorAll("table");
+      const tables = document.querySelectorAll(".data-table");
       let clearButtonInserted = false; // only add button once
 
       tables.forEach((table, tableIndex) => {
-        const headers = table.querySelectorAll("th");
-        if (headers.length > 0 && headers[0].innerText.trim().startsWith("Sl.")) {
-          const rows = table.querySelectorAll("tbody tr");
+        const rows = table.querySelectorAll("tbody tr");
 
           rows.forEach((row, rowIndex) => {
             const firstCell = row.querySelector("td:first-child");
@@ -703,10 +758,10 @@
             table.parentNode.insertBefore(clearButton, table);
             clearButtonInserted = true;
           }
-        }
-      });
+        });
     });
   </script>
+
   <!-- End Strikeout Table Script -->
 
 
@@ -718,4 +773,3 @@
 </body>
 
 </html>
-
