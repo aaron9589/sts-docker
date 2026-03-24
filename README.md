@@ -33,7 +33,18 @@ docker compose up --profile build --build
 
 ## Application overview
 
-STS is organised into five main areas accessible from the home screen. Here is what each section does and what has changed in this Docker fork compared to the original XAMPP-based release.
+STS is organised into five main areas accessible from the home screen. Below is a description of every page, what it does, and what has changed in this Docker fork compared to the original XAMPP-based release.
+
+Car status is shown throughout the application using colour-coded badges:
+
+| Badge | Status | Meaning |
+|---|---|---|
+| 🟡 Yellow | Empty | Car is empty and available |
+| 🟢 Green | Loaded | Car has been loaded |
+| 🔵 Blue | Loading | Car is in the process of being loaded |
+| 🟠 Orange | Unloading | Car is in the process of being unloaded |
+| ⬜ Grey | Ordered | Car has an order assigned |
+| 🔴 Red | Unavailable | Car is not available for use |
 
 ---
 
@@ -41,68 +52,189 @@ STS is organised into five main areas accessible from the home screen. Here is w
 
 The day-to-day workflow for running a session. Accessible from the **Operations** button on the home screen.
 
-| Page | What it does | Changes in this fork |
-|---|---|---|
-| **Generate Car Orders** | Start a new session — auto or manually select shipments to generate car orders for. | UI modernised to Bootstrap 5 with a clean, responsive layout. |
-| **Fill Car Orders** | Assign available rolling stock to open car orders. Cars are colour-ranked by pool membership, proximity to shipper, and priority locations. | UI modernised to Bootstrap 5. Car status shown with colour-coded badges (see below). AJAX used to fetch available cars without a full page reload. |
-| **Reposition Empty Cars** | Move empty wagons back to their home location between sessions. | No functional changes. |
-| **Build Switch Lists** | Assign cars to specific jobs/trains, station by station or via auto-assign. | UI modernised to Bootstrap 5. AJAX used for car assignment — the page no longer reloads on each change. |
-| **Pick Up Cars** | Record that a job has physically picked up its assigned cars. | No functional changes. |
-| **Organize Cars** | View and adjust the order of cars within a consist. | No functional changes. |
-| **Set Out Cars** | Record cars being set out at their destination. | No functional changes. |
-| **Load / Unload Cars** | Mark wagons as loaded or unloaded at a location. Completing an unload removes the car order and returns the wagon to Empty status. | Available via the REST API (see below) for use with RFID readers or phone apps. |
+#### Generate Car Orders
+Starts a new session. Select **Automatic** to increment the session number and generate all car orders in one step, or **Manual** to hand-pick specific shipments to order cars for.
 
-**Car status colour codes** used throughout the Operations pages:
+**Changes:** UI modernised to Bootstrap 5. The manual order confirmation was cleaned up — now uses the browser's native confirm dialog instead of a custom JS alert. Filter dropdowns on the manual shipment table work without a page reload.
 
-| Colour | Status |
-|---|---|
-| 🟡 Yellow | Empty |
-| 🟢 Green | Loaded |
-| 🔵 Blue | Loading |
-| 🟠 Orange | Unloading |
-| ⬜ Grey | Ordered |
-| 🔴 Red | Unavailable |
+---
+
+#### Fill Car Orders
+Shows all open car orders (waybills) for the current session. Click an order to expand it and see all eligible empty cars. Click a car to assign it. Cars are colour-ranked by priority:
+1. Cars in the shipment's pool, highlighted in yellow
+2. Cars already at the shipper's station (sorted by lowest load count)
+3. Cars at priority locations for this shipment
+4. All remaining eligible cars, sorted by least used
+
+**Changes:** Completely rebuilt UI. Orders are now shown as interactive expandable cards rather than a flat table. Available cars are loaded on demand via AJAX when you click an order — no page reload required. Car assignment is also done via AJAX. Car status shown with colour-coded badges.
+
+---
+
+#### Reposition Empty Cars
+Shows all empty cars on the system and lets you assign each one a destination to reposition it. Selecting a destination creates an E-series waybill for that car. A single **REPOSITION TO HOME** button repositions all out-of-place cars to their home location at once.
+
+**Changes:** UI modernised to Bootstrap 5.
+
+---
+
+#### Build Switch Lists
+Assigns cars to jobs/trains for the session. Two modes:
+- **Station-by-station**: Select a station to see cars and jobs at that stop, then assign cars individually.
+- **Auto-Assign**: Select a job and click AUTO-ASSIGN to let the system fill all positions automatically.
+
+Cars in the station table are now **grouped by current location** with a bold header row separating each group, making it easier to find cars when a station has multiple sidings.
+
+**Changes:** UI modernised to Bootstrap 5. Car assignment uses AJAX — the car table refreshes in place without a full page reload. Job name case is now preserved (the original forced all job table names to lowercase, which broke jobs with mixed-case names). Bug fix: job table lookups no longer incorrectly lowercase the job name before querying.
+
+---
+
+#### Pick Up Cars
+Select a job and mark all its assigned cars as picked up (sets their location to "in train"). The switchlist for the selected job is shown with each car's details and waybill information.
+
+**Changes:** UI modernised to Bootstrap 5. On-screen "Working..." spinner removed; now uses Bootstrap's loading state. The "no cars" message now includes the job name for clarity (e.g. *"The switchlist for Job A doesn't contain any cars"* rather than the generic original).
+
+---
+
+#### Organize Cars
+Shows the current consist order for a job or location and lets you drag and drop cars to re-sequence them. Position numbers update live as you drag.
+
+**Changes:** UI modernised to Bootstrap 5. The drag-and-drop implementation was completely rewritten from basic HTML5 draggable events to a full pointer-events and touch-events implementation. This means **drag-and-drop now works on tablets and phones** as well as desktop. Lower-priority detail columns are automatically hidden on small screens to prevent horizontal scrolling. Position numbers auto-refresh after each drag without needing to reload the page. Bug fix: `update_car_positions.php` now identifies cars by their internal database ID rather than reporting marks, which is more reliable when marks contain special characters.
+
+---
+
+#### Set Out Cars
+Select a job and record where each car in the consist was set out. A dropdown per car lets you choose the set-out location from the station's available sidings.
+
+**New feature: Bulk set-out.** A **"Set all locations to"** dropdown at the top of the car list lets you set every car's destination to the same location in a single click. Individual dropdowns can still be adjusted afterwards. This saves significant time when setting out an entire consist to a single siding.
+
+**Changes:** UI modernised to Bootstrap 5. Responsive layout with lower-priority columns hidden on tablet screens.
+
+---
+
+#### Load / Unload Cars
+Shows all cars currently in the process of loading or unloading. Tick the checkbox next to a car and click **UPDATE** to complete the operation. Completing a load changes status to Loaded; completing an unload deletes the car order and returns the car to Empty.
+
+**Changes:** UI modernised to Bootstrap 5. Also available programmatically via the REST API (see below) — useful for physical RFID readers or phone-based scanning apps.
 
 ---
 
 ### Reports
 
-Printable and on-screen reports for the layout. Accessible from the **Reports** button on the home screen.
+Printable and on-screen reports. Accessible from the **Reports** button on the home screen.
 
-| Page | What it does | Changes in this fork |
-|---|---|---|
-| **Switch Lists** | Generate a printable switch list for a job. | New **X2010** format added alongside Mobile, Half Sheet, and Work Order. The default format has been changed from Mobile to **Half Sheet**. |
-| **Waybills** | Generate car waybills for a session. | No functional changes. |
-| **Fleet Report** | Overview of all rolling stock and their current status. | No functional changes. |
-| **Station Report** | Shows all cars currently at a given station, with their status and order details. | Report now generates inline on the same page — no separate printable page required. |
-| **CC Waybill** | Conductor's copy waybill report. | No functional changes. |
-| **Shipment Forecast** | Projects future shipment demand. | No functional changes. |
-| **Car Forecast** | Projects future car requirements by car code. | No functional changes. |
-| **Wheel Report** | Summary of car movements and load counts. | No functional changes. |
-| **Car QR Codes** | Printable QR code labels for each car. | No functional changes. |
-| **Station QR Codes** | Printable QR code labels for stations/locations. | No functional changes. |
+#### Switch Lists
+Generates a printable switch list for a selected job, showing each car's pickup and set-out locations.
+
+**Changes:** New **X2010** print format added alongside Mobile, Half Sheet, and Work Order. The default print format has been changed from Mobile to **Half Sheet**. When X2010 is selected the form automatically routes to a separate template (`printable_switchlist_x2010.php`). Bug fix: `GROUP BY` clause in the switch list SQL query simplified — the over-specified grouping in the original caused duplicate rows on strict MariaDB servers.
+
+---
+
+#### Waybills
+Generates car waybills for all open car orders in the session.
+
+**Changes:** No functional changes.
+
+---
+
+#### Fleet Report
+An overview of all rolling stock — shows each car's reporting marks, car code, current location, status, and load count. Can be filtered by car code.
+
+**Changes:** Filter condition changed from a string comparison (`!= 'All'`) to a numeric check (`> 0`), which is more robust against unexpected form values.
+
+---
+
+#### Station Report
+Shows all cars currently at a given station, with their status, current location, and order details. Previously this opened a separate printable page; it now generates inline.
+
+**Changes:** Report now renders directly within the page, no redirect to a separate file. Print button added to the page header.
+
+---
+
+#### Wheel Report
+A job-by-job breakdown of all cars in the current session, grouped by job and pickup location. Useful for checking what each crew will be handling.
+
+**Changes:** Major SQL fix — `GROUP BY` clause simplified to `group by job_id, job_name, car_id`, resolving duplicate row issues on strict MariaDB servers. Sort order improved to sort by station sequence, station name, location code, and then position/reporting marks. Job name lookup no longer lowercases names (matches the broader job name case fix).
+
+---
+
+#### Car QR Codes
+Generates and prints QR code labels for rolling stock. Each label encodes the car's reporting marks and includes its details.
+
+**Changes:** Filter condition uses numeric comparison (`> 0`). Removed unnecessary `trim()` calls from QR image generation, which could alter code values on some PHP versions.
+
+---
+
+#### Station QR Codes
+Generates and prints QR code and barcode labels for each location/siding. Barcodes encode the location ID for scanner lookup.
+
+**Changes:** Filter condition uses numeric comparison (`> 0`). Removed unnecessary `trim()` calls from QR and barcode generation.
+
+---
+
+#### CC Waybill / Shipment Forecast / Car Forecast
+Standard conductor's copy waybill and forecasting reports.
+
+**Changes:** No functional changes.
 
 ---
 
 ### Database Management
 
-View and edit the underlying data for your layout. Accessible from the **DB Manage** button on the home screen.
+View and edit the underlying layout data. Accessible from the **DB Manage** button on the home screen.
 
-| Page | What it does | Changes in this fork |
-|---|---|---|
-| **Cars** | List and edit all rolling stock. Add new cars, edit car codes, status, and remarks. | Fully modernised with Bootstrap 5. Sticky table header, inline cell editing (no page reload), and colour-coded status badges. |
-| **Scan Car** | Look up a car by reporting marks or QR/barcode scan to view its details or jump to its edit page. | Fixed: the "Edit car" link now correctly navigates to the car's edit page (was broken in the original due to a missing parameter). |
-| **Car Orders** | View open car orders (waybills) in the database. | No functional changes. |
-| **Jobs** | Add, rename, or delete job/train routes and their station steps. | Fixed: job names with mixed-case or spaces now work correctly (the original was incorrectly forcing all job table names to lowercase). |
-| **Shipments** | Manage shipment definitions — origin, destination, commodity, and car code requirements. | No functional changes. |
-| **Scan Location** | Look up all cars currently at a location by scanning a location QR code. | No functional changes. |
-| **Locations** | Add and edit individual spots/tracks within a station. | No functional changes. |
-| **Routing** | Manage stations and the routing connections between them. | No functional changes. |
-| **Car Codes** | Manage the list of car type codes (e.g. MHGX, RKWF). | No functional changes. |
-| **Commodities** | Manage the list of commodities that can be shipped. | No functional changes. |
-| **Backup DB** | Download a backup of the database. | No functional changes. |
-| **Restore DB** | Upload and restore a previously backed-up database. | UI modernised to Bootstrap 5. |
-| **Import Tables** | Import data tables from CSV files. | No functional changes. |
+#### Cars (Fleet List)
+Lists all rolling stock in the database. Add new cars, edit reporting marks, car code, status, remarks, RFID code, load count, and current location.
+
+**Changes:** Fully modernised. Bootstrap 5 layout with sticky table header. **Inline cell editing**: click a cell to edit it directly and save without leaving the page, powered by AJAX (`update_car_ajax.php`, `get_dropdowns_ajax.php`). Car status shown with colour-coded badges. Filters (car code, location, home location, reporting marks prefix) still work as before.
+
+---
+
+#### Scan Car
+Look up any car by typing its reporting marks or scanning a QR/barcode. Shows the car's current status and a link to edit it directly.
+
+**Changes:** Bug fix — the "Edit car" link was missing the `obj_id` parameter, so clicking it would fail to load the correct car in the edit form. Now passes both `obj_id` and `obj_name` correctly.
+
+---
+
+#### Jobs
+Add, rename, and delete job/train route definitions. Each job has a list of station steps with pickup and set-out instructions.
+
+**Changes:** Bug fix — the original forced all job table names to lowercase when creating, renaming, or querying jobs (`strtolower()`). This broke any job with uppercase letters or mixed case (e.g. a job called "NR Class" would be stored as "nr class" and then fail to link correctly from other pages). Job names are now stored exactly as entered.
+
+---
+
+#### Car Orders
+View all open car orders (waybills) currently in the database.
+
+**Changes:** No functional changes.
+
+---
+
+#### Shipments / Locations / Routing / Car Codes / Commodities
+Standard data management pages for layout configuration.
+
+**Changes:** No functional changes.
+
+---
+
+#### Backup DB
+Triggers a download of the full database backup file.
+
+**Changes:** No functional changes.
+
+---
+
+#### Restore DB
+Upload a previously downloaded backup file to restore the database.
+
+**Changes:** UI modernised to Bootstrap 5.
+
+---
+
+#### Import Tables
+Import table data from CSV files.
+
+**Changes:** No functional changes.
 
 ---
 
@@ -110,13 +242,24 @@ View and edit the underlying data for your layout. Accessible from the **DB Mana
 
 Tools for keeping the database healthy. Accessible from the **DB Maint** button on the home screen.
 
-| Page | What it does | Changes in this fork |
-|---|---|---|
-| **Validate DB** | Check the database for inconsistencies and orphaned records. | Fixed: job name lookup no longer incorrectly lowercases names, preventing false validation errors. |
-| **Restart Session** | Reset the current session number to restart operations. | No functional changes. |
-| **Reset DB** | Reset operational data while keeping your layout configuration. | No functional changes. |
-| **Wipe DB** | Wipe the entire database back to a blank state. | Fixed: same job name case fix as Validate DB. |
-| **Settings** | Configure layout-wide settings such as railroad name and print width. | No functional changes. |
+#### Validate DB
+Checks the database for ghost records, orphaned car orders, and inconsistencies between related tables.
+
+**Changes:** Bug fix — job name queries were being lowercased before the lookup (`lower(name)`), causing any mixed-case job names to appear as ghost records even if they were valid. Removed the `lower()` wrapper to match the broader job name case fix.
+
+---
+
+#### Restart Session / Reset DB / Settings
+Standard maintenance operations.
+
+**Changes:** No functional changes.
+
+---
+
+#### Wipe DB
+Wipes the entire database back to a blank state.
+
+**Changes:** Same job name case fix as Validate DB — the wipe now correctly identifies job tables regardless of their case.
 
 ---
 
@@ -142,9 +285,10 @@ See [`sts/api/README.md`](sts/api/README.md) for full request/response documenta
 
 ## Docker-specific changes
 
-These are changes that are specific to running STS inside Docker rather than under XAMPP/WAMP.
+These are changes specific to running STS inside Docker rather than under XAMPP/WAMP.
 
 - **No local web server needed.** PHP 8.0, Apache, and MariaDB all run inside Docker containers. Nothing extra needs to be installed on the host machine beyond Docker itself.
 - **Database configured via environment variables.** The original STS hardcoded the database hostname, username, password, and database name in `credentials.php`. This fork reads those from Docker environment variables (`MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`) set in `docker-compose.yml`. Hardcoded defaults are kept as a fallback.
 - **Automatic directory setup.** The Dockerfile creates the required `temp/`, `backups/`, `uploads/`, and `ImageStore/` directories and sets the correct permissions automatically on first run.
 - **Database provisioning flag.** Set `PROVISION_DATABASE=1` in `docker-compose.yml` to create a fresh database on startup. Set it back to `0` after first run to prevent accidentally wiping your data on container restarts.
+- **`open_db.php` SQL fix.** The history query contained an over-specified `GROUP BY` clause (`group by car_id, session_nbr`) that caused errors on strict MariaDB servers. Simplified to `group by car_id`.
