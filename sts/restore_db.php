@@ -1,3 +1,135 @@
+<?php
+require 'open_db.php';
+require 'credentials.php';
+
+function sanitize_uploaded_name($name)
+{
+  $name = basename($name);
+  $name = preg_replace('/[^A-Za-z0-9._-]/', '_', $name);
+  if ($name === '' || $name === '.' || $name === '..') {
+    $name = 'uploaded_restore.sql';
+  }
+  return $name;
+}
+
+function clear_image_folder($dir)
+{
+  $files = glob($dir . '/*.*');
+  foreach ($files as $file) {
+    if (is_file($file)) {
+      unlink($file);
+    }
+  }
+}
+
+function restore_sql_file($dbc, $restore_name, $sql_file_path)
+{
+  if (!is_file($sql_file_path)) {
+    return array(false, 'Selected SQL file was not found.');
+  }
+
+  $sql_string = file_get_contents($sql_file_path);
+  $sql = explode('#', $sql_string);
+
+  foreach ($sql as $sql_cmd) {
+    if (!empty(trim($sql_cmd))) {
+      if (!mysqli_query($dbc, $sql_cmd)) {
+        if (strpos(strtolower($sql_cmd), 'drop') === false) {
+          return array(false, 'SQL error while restoring: ' . htmlspecialchars(mysqli_error($dbc)));
+        }
+      }
+    }
+  }
+
+  // Remove generated and uploaded image artifacts.
+  clear_image_folder('./ImageStore/DB_Images/barcodes');
+  clear_image_folder('./ImageStore/DB_Images/qrcodes');
+  clear_image_folder('./ImageStore/DB_Images/uploads');
+  clear_image_folder('./ImageStore/DB_Images/RollingStock');
+
+  // Restore matching photo backup folder if it exists.
+  $restore_dir = './backups/' . $restore_name . '_photos';
+  if (file_exists($restore_dir)) {
+    $files = glob($restore_dir . '/*.*');
+    if (sizeof($files) > 0) {
+      $photo_dir = './ImageStore/DB_Images/RollingStock';
+      foreach ($files as $file) {
+        $file_to_go = str_replace($restore_dir, $photo_dir, $file);
+        copy($file, $file_to_go);
+      }
+    }
+  }
+
+  return array(true, htmlspecialchars($restore_name) . ' restored successfully.');
+}
+
+$status_msg = '';
+$status_color = 'red';
+$dbc = open_db();
+
+if (isset($_GET['download'])) {
+  $download_name = basename($_GET['download']);
+  $download_path = './backups/' . $download_name;
+
+  if (is_file($download_path)) {
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="' . $download_name . '"');
+    header('Content-Length: ' . filesize($download_path));
+    readfile($download_path);
+    exit;
+  }
+
+  http_response_code(404);
+  echo 'Backup file not found.';
+  exit;
+}
+
+if (isset($_POST['restore_btn'])) {
+  if (!isset($_POST['restore_name']) || $_POST['restore_name'] === '') {
+    $status_msg = 'Select a backup file before clicking RESTORE.';
+  } else {
+    $restore_name = basename($_POST['restore_name']);
+    $restore_path = './backups/' . $restore_name;
+    list($ok, $msg) = restore_sql_file($dbc, $restore_name, $restore_path);
+    $status_msg = $msg;
+    if ($ok) {
+      $status_color = 'green';
+    }
+  }
+}
+
+if (isset($_POST['upload_restore_btn'])) {
+  if (!isset($_FILES['sql_file']) || $_FILES['sql_file']['error'] !== UPLOAD_ERR_OK) {
+    $status_msg = 'Choose a local SQL file and try again.';
+  } else {
+    $orig_name = sanitize_uploaded_name($_FILES['sql_file']['name']);
+    $extension = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION));
+
+    if ($extension !== 'sql') {
+      $status_msg = 'Only .sql files can be restored.';
+    } else {
+      $stored_name = 'uploaded_' . date('Ymd_His') . '_' . $orig_name;
+      $stored_path = './backups/' . $stored_name;
+
+      if (!move_uploaded_file($_FILES['sql_file']['tmp_name'], $stored_path)) {
+        $status_msg = 'Could not upload the SQL file.';
+      } else {
+        list($ok, $msg) = restore_sql_file($dbc, $stored_name, $stored_path);
+        if ($ok) {
+          $status_color = 'green';
+          $status_msg = 'Uploaded file restored successfully: ' . htmlspecialchars($orig_name);
+        } else {
+          $status_msg = $msg;
+        }
+      }
+    }
+  }
+}
+
+$backup_files = array_slice(scandir('./backups'), 2);
+sort($backup_files);
+?>
 <html>
   <head>
     <title>STS - Restore DB</title>
@@ -7,18 +139,14 @@
       tr {vertical-align: top}
       th {border: 1px solid black; padding: 10px}
       td {border: 1px solid black; padding: 10px}
+      .section-card {margin-bottom: 24px;}
+      .download-link {font-size: 16px;}
+      .status-box {font-size: 18px; margin: 12px 0;}
     </style>
     <script>
       function enable_restore_btn()
       {
         document.getElementById("restore_btn").disabled = false;
-        document.getElementById("msg1").innerHTML = "";
-      }
-    </script>
-    <script>
-      function display_msg1()
-      {
-        document.getElementById("msg1").innerHTML = "Restore operation started...<br /><br />";
       }
     </script>
   </head>
@@ -31,174 +159,48 @@
     </map>
   </p>
   <h2>Database Management</h2>
-    <h3>Restore Database</h3>
-    <form action="restore_db.php" method="get">
-    Click on the radio button for the backup copy that you want to restore and then click the <b>RESTORE</b> button.<br /><br />
-    The current contents of the database for this railroad will be erased and replaced with the data stored in the backup copy.<br /><br />
-    If you are restoring a backup file for a different railroad, run the <b>WIPE</b> function first.<br /><br />
-    <?php
-      // bring in the utility files
-      require 'open_db.php';
-      require 'credentials.php';
+  <h3>Restore Database</h3>
 
-      // get a database connection
-      $dbc = open_db();
+  <?php if ($status_msg !== '') { ?>
+    <div class="status-box" style="color: <?php echo $status_color; ?>;"><?php echo $status_msg; ?></div>
+  <?php } ?>
 
-      // get the list of name from the backup directory
-      $backup_files = array_slice(scandir('./backups'), 2);
-      if (count($backup_files) > 0)
-      {
-        // since there are backup copies, we can now display the restore button
-        print '<input id="restore_btn" name="restore_btn" value="RESTORE" type="submit" onmouseup="display_msg1();" disabled><br /><br />';
+  <div class="section-card">
+    <form action="restore_db.php" method="post">
+      Click on the radio button for the backup copy that you want to restore and then click the <b>RESTORE</b> button.<br /><br />
+      The current contents of the database for this railroad will be erased and replaced with the data stored in the backup copy.<br /><br />
+      If you are restoring a backup file for a different railroad, run the <b>WIPE</b> function first.<br /><br />
 
-        // if the Restore button has been clicked, display a "running" status message, otherwise nothing
-        if (isset($_GET['restore_btn']))
-        {
-          print '<div id="msg1" style="color: red;">Restore operation running...<br /><br /></div>';
-        }
-        else
-        {
-          print '<div id="msg1" style="color: red;"></div>';
-        }
+      <?php
+      if (count($backup_files) > 0) {
+        print '<input id="restore_btn" name="restore_btn" value="RESTORE" type="submit" disabled><br /><br />';
 
-        // build a table of backup names with radio buttons
         print '<table>';
-        foreach($backup_files as $file_name)
-        {
-          // only generate radio buttons for files, not for directories
-          if (is_file('./backups/' . $file_name))
-          {
+        print '<tr><th>Select</th><th>Backup File</th><th>Download</th></tr>';
+        foreach ($backup_files as $file_name) {
+          if (is_file('./backups/' . $file_name)) {
             print '<tr>
-                     <td><input id="restore_name" name="restore_name" value="' . $file_name . '" type="radio" onclick="enable_restore_btn();"></td>
-                     <td>' . $file_name . '</td>
+                     <td><input name="restore_name" value="' . htmlspecialchars($file_name) . '" type="radio" onclick="enable_restore_btn();"></td>
+                     <td>' . htmlspecialchars($file_name) . '</td>
+                     <td><a class="download-link" href="restore_db.php?download=' . urlencode($file_name) . '">Download</a></td>
                    </tr>';
           }
         }
-        print "</table>";
-      }
-      else
-      {
+        print '</table>';
+      } else {
         print 'No backup copies available.';
       }
-    ?>
-    <br />
-    <?php
-      // has the Restore button been clicked?
-      if (isset($_GET["restore_btn"]))
-      {
-// print 'Restore button clicked<br />';
-        print '<script>
-                 document.getElementById("msg1").innerHTML = "Restore operation running...<br /><br />";
-               </script>';
-
-        // get the name of the backup to be restored from the form
-        $restore_name = $_GET['restore_name'];
-// print 'Backup File Name: ' . $restore_name;
-        // read the sql file into an array
-        $sql_string = file_get_contents('./backups/' . $restore_name);
-
-        // parse the string using the comment lines as delimiters
-        $sql = explode('#', $sql_string);
-        foreach($sql as $sql_cmd)
-        {
-// print 'Backup File Line: ' . $sql_cmd . '<br />';
-          // ignore any empty lines
-          if (!empty(trim($sql_cmd)))
-          {
-// print 'SQL: ' . $sql_cmd . '<br />';
-            if(!mysqli_query($dbc, $sql_cmd))
-            {
-              if (strpos($sql_cmd, 'drop') === false)
-              {
-                print 'SQL: [' . $sql_cmd . '] Error ' . mysqli_error($dbc) . '<br />';
-              }
-            }
-          }
-        }
-        // get rid of any existing QR, bar code, upload and rollingstock photo files.
-        // the QR and barcode files will be replaced when the reports are run
-        
-        //first, get a list of all of the file names in the barcodes folder.
-        $files = glob('./ImageStore/DB_Images/barcodes' . '/*.*');
-         
-        //Loop through the file list.
-        foreach($files as $file)
-        {
-          //Make sure that this is a file and not a directory.
-          if(is_file($file)){
-              //Use the unlink function to delete the file.
-                unlink($file);
-//print 'Deleting barcode file ' . $file . '<br />';
-          }
-        }        
-        
-        //next, get a list of all of the file names in the qrcodes folder.
-        $files = glob('./ImageStore/DB_Images/qrcodes' . '/*.*');
-         
-        //Loop through the file list.
-        foreach($files as $file)
-        {
-          //Make sure that this is a file and not a directory.
-          if(is_file($file)){
-              //Use the unlink function to delete the file.
-                unlink($file);
-//print 'Deleting QR code file ' . $file . '<br />';
-          }
-        }        
-
-        //get a list of all of the file names in the uploads folder.
-        $files = glob('./ImageStore/DB_Images/uploads' . '/*.*');
-         
-        //Loop through the file list.
-        foreach($files as $file)
-        {
-          //Make sure that this is a file and not a directory.
-          if(is_file($file)){
-              //Use the unlink function to delete the file.
-                unlink($file);
-//print 'Deleting uploaded file ' . $file . '<br />';
-          }
-        }
-        
-        // get a list of all the file names in the rollingstock photo directory
-        $files = glob('./ImageStore/DB_Images/RollingStock' . '/*.*');
-         
-        //Loop through the file list.
-        foreach($files as $file)
-        {
-          //Make sure that this is a file and not a directory.
-          if(is_file($file)){
-              //Use the unlink function to delete the file.
-                unlink($file);
-//print 'Deleting rollingstock photo ' . $file . '<br />';
-          }
-        }
-        
-        // if a subdirectory exists in the backup directory with the same name as the backup file,
-        // copy it's contents to the rollingstock photos directory
-        $restore_dir = './backups/' . $restore_name . '_photos';
-        if (file_exists($restore_dir))
-        {
-          $files = glob($restore_dir . '/*.*');
-          
-          // if there are files in there, make a backup copy of them
-          if (sizeof($files) > 0)
-          {
-            // copy the photos from the backup directory to the rollingstock photos directory
-            print 'Copying backup photos to rollingstock photo directory...<br /><br />';
-            $photo_dir = './ImageStore/DB_Images/RollingStock';
-            foreach($files as $file)
-            {
-              $file_to_go = str_replace($restore_dir,$photo_dir,$file);
-              copy($file, $file_to_go);
-            }
-          }
-        }
-        
-        print '<script>
-                 document.getElementById("msg1").innerHTML = "' . $restore_name . ' restored...<br /><br />";
-               </script>';
-      }
-    ?>
+      ?>
     </form>
+  </div>
+
+  <div class="section-card">
+    <h3>Restore From Your Device</h3>
+    <form action="restore_db.php" method="post" enctype="multipart/form-data">
+      Select a local SQL file and click <b>UPLOAD &amp; RESTORE</b>.<br /><br />
+      <input type="file" name="sql_file" accept=".sql" required>
+      <input type="submit" name="upload_restore_btn" value="UPLOAD &amp; RESTORE">
+    </form>
+  </div>
+  </body>
 </html>
