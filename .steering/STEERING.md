@@ -651,5 +651,197 @@ docker compose down && docker compose up -d --build
 
 ---
 
-*Last updated: 2025-07-14*
+## 14. Tablet Responsiveness (Operations Pages)
+
+Operations pages are regularly used on tablets. Apply this pattern to every operations table.
+
+### CSS Pattern
+
+Add inside the page's `<style>` block:
+
+```css
+/* Prevent word-splitting in all table cells */
+#your_table_id th,
+#your_table_id td {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+/* On tablets (≤1024px), hide non-critical columns */
+@media (max-width: 1024px) {
+  #your_table_id .hide-tablet { display: none; }
+  #your_table_id th,
+  #your_table_id td {
+    font-size: 0.78rem;
+    padding: 4px 5px;
+  }
+}
+```
+
+Mark non-critical `<th>` and `<td>` with `class="hide-tablet"`. Retain at minimum: car road/number, status, current location, and action controls.
+
+### Applied Pages
+
+| Page | Table ID | Hidden tablet columns |
+|------|----------|-----------------------|
+| `organize_cars.php` | (drag-sort table) | Position #, car code description |
+| `generate.php` | `#ship_tbl` | Commodity, car type detail |
+| `pick_up.php` | `#job_table` | Position #, car code |
+| `set_out.php` | `#job_table` | Position #, car code |
+| `load_unload.php` | `#car_table` | Position #, car code |
+
+### Button / Dropdown Collision Fix
+
+When a page has a dropdown + action button side-by-side (e.g. `pick_up.php`), wrap them together:
+
+```html
+<div class="d-flex flex-wrap align-items-center gap-2">
+  <select class="form-select form-select-sm" ...>...</select>
+  <button class="btn btn-sm btn-primary" ...>Go</button>
+</div>
+```
+
+This prevents the button from overlapping the dropdown on narrow viewports.
+
+---
+
+## 15. Drag-and-Drop Car Ordering (`organize_cars.php`)
+
+### Architecture
+
+`organize_cars.php` renders a two-mode view (by job / by location). Car rows are draggable to reorder; the new order is sent to `update_car_positions.php` and persisted in the `cars.position` database column.
+
+**File roles:**
+
+| File | Role |
+|------|------|
+| `organize_cars.php` | Parent page: drag engine, save button, UI |
+| `get_job_cars.php` | Ajax: returns drag-ready table fragment for a job |
+| `get_location_cars.php` | Ajax: returns drag-ready table fragment for a location |
+| `update_car_positions.php` | Ajax: saves new order, returns refreshed table fragment |
+
+### Drag Engine
+
+Use **document-level pointer/mouse/touch event listeners** — not element-level. Element-level listeners lose the drag if the pointer moves off the source element before the browser fires the event.
+
+```javascript
+function init_drag_sort() {
+  const tbody = document.querySelector('#car_table tbody');
+
+  tbody.addEventListener('mousedown',   start_drag);
+  tbody.addEventListener('pointerdown', start_drag);
+  tbody.addEventListener('touchstart',  start_drag, { passive: true });
+
+  // CRITICAL: non-passive touchmove so preventDefault() works
+  document.addEventListener('touchmove',  on_move, { passive: false });
+  document.addEventListener('mousemove',  on_move);
+  document.addEventListener('pointermove', on_move);
+
+  document.addEventListener('mouseup',   end_drag);
+  document.addEventListener('pointerup', end_drag);
+  document.addEventListener('touchend',  end_drag);
+}
+```
+
+> **Non-passive `touchmove`:** Required to call `e.preventDefault()` and suppress page scroll during a drag. Chrome logs a warning if you call `preventDefault()` on a passive listener — always register `touchmove` with `{ passive: false }`.
+
+> **`body.drag-active` class:** Add `document.body.classList.add('drag-active')` on drag start and remove on end. Target `body.drag-active` in CSS to disable `user-select` and `cursor` globally during a drag.
+
+### Row Reordering Logic
+
+Use **instant direction-based swapping** — do not wait until the pointer reaches the 50% midpoint of the next row. This makes reordering feel immediate.
+
+```javascript
+function move_row_by_pointer(clientY) {
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  for (const row of rows) {
+    if (row === dragging_row) continue;
+    const rect = row.getBoundingClientRect();
+    const mid  = rect.top + rect.height / 2;
+    if (clientY < mid) {
+      tbody.insertBefore(dragging_row, row);
+      break;
+    }
+  }
+}
+```
+
+### Visual Feedback
+
+```css
+/* Dragged row: orange highlight */
+.dragging-row > td {
+  background-color: #fd7e14 !important;
+  color: #fff !important;
+  opacity: 0.85;
+}
+
+/* Flash animation when a row moves */
+@keyframes row-moved-flash {
+  0%   { background-color: #fff3cd; }
+  100% { background-color: transparent; }
+}
+.row-flash > td {
+  animation: row-moved-flash 0.4s ease-out;
+}
+```
+
+Apply `.row-flash` to `tr` elements that shifted position, and remove it after the animation ends.
+
+### Save Feedback
+
+The save button should reflect three states: idle → saving (spinner) → success/error.
+
+```javascript
+function show_save_state(state) {
+  // state: 'saving' | 'success' | 'error'
+  const btn = document.getElementById('save_btn');
+  if (state === 'saving') {
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving…';
+    btn.disabled = true;
+  } else if (state === 'success') {
+    btn.innerHTML = '<i class="bi bi-check-circle"></i> Saved';
+    btn.classList.replace('btn-primary', 'btn-success');
+    setTimeout(() => reset_save_btn(), 2000);
+  } else {
+    btn.innerHTML = '<i class="bi bi-x-circle"></i> Error';
+    btn.classList.replace('btn-primary', 'btn-danger');
+    setTimeout(() => reset_save_btn(), 3000);
+  }
+}
+```
+
+### thead / tbody Separation (Ajax Fragment Files)
+
+`get_job_cars.php` and `get_location_cars.php` **must** use a proper `<thead>` containing only the header row and a `<tbody>` containing only data rows. Without this separation, the drag engine's row iterator will count the header as a draggable row and the Position column will display "1" instead of the header text.
+
+```html
+<table class="table table-sm table-bordered table-hover" id="car_table">
+  <thead>
+    <tr><th>☰</th><th>Reporting Marks</th><th>Position</th>...</tr>
+  </thead>
+  <tbody>
+    <!-- data rows here, each with a hidden input: -->
+    <!-- <td><input type="hidden" name="car_id[]" value="<?= $row['id'] ?>"> ... </td> -->
+  </tbody>
+</table>
+```
+
+### Persistence: Save by Car ID
+
+`update_car_positions.php` must use `cars.id` (not `reporting_marks`) as the key when writing positions back to the database:
+
+```php
+// CORRECT: qualify the column to avoid ambiguous-column error in multi-join queries
+$sql = "UPDATE cars SET position = \"$car_pos\" WHERE cars.id = \"$car_id\"";
+```
+
+> **Why not `reporting_marks`?** The drag engine sends `car_id[]` hidden inputs. The `reporting_marks` key was used in a previous (removed) implementation and will silently fail to match if the new drag HTML is in use.
+
+> **Ambiguous column guard:** Multi-join queries that include `cars.id` and another table's `id` must always qualify every column reference in the WHERE clause to prevent `mysqli` from returning `false` with an "ambiguous column" error.
+
+---
+
+*Last updated: 2025-07-15*
 *Derived from: `feat/report_ui`, `feat/car_db_ui_refresh`, `feat/on_hand_report_updates`, `feat/ui_updates` branches*
