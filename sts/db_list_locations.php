@@ -17,11 +17,11 @@
            {
              document.getElementById("sort_msg").innerHTML = "Sorting...";
            }
-           
+
            function clear_msg()
            {
              document.getElementById("sort_msg").innerHTML = "&nbsp;";
-           }             
+           }
          </script>';
 
 
@@ -50,12 +50,12 @@
 
   // query the database for all of the locations and display them in a table
   $sql = 'select locations.id as id,
-                 locations.code as code, 
-                 locations.station as loc_station, 
-                 locations.track as track, 
-                 locations.spot as spot, 
+                 locations.code as code,
+                 locations.station as loc_station,
+                 locations.track as track,
+                 locations.spot as spot,
                  locations.rpt_station as rpt_station,
-                 locations.remarks as remarks, 
+                 locations.remarks as remarks,
                  locations.color as color,
                  routing.station as station
           from locations
@@ -73,7 +73,7 @@
              <th>Track</th>
              <th>Spot</th>
              <th>Reporting<br />Station</th>
-             <th>Remarks</th>
+             <th title="x2010: used as the via/routing flag for empty/repositioning cars">Remarks &#9432;</th>
              <th>Color</th>
            </tr>
            <tr>
@@ -95,7 +95,7 @@
              <th><i>Track</i></th>
              <th><i>Spot</i></th>
              <th><i>Reporting<br />Station</i></th>
-             <th><i>Remarks</i></th>
+             <th title="x2010: used as the via/routing flag for empty/repositioning cars"><i>Remarks &#9432;</i></th>
              <th><i>Color</i></th>
            </tr>
          </thead>';
@@ -121,7 +121,7 @@
   print '<script>
            document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + "Click on column titles shown in <i>italics</i> to sort the table<br /><br />";
          </script>';
-  
+
   // generate a javascript line to set focus on the first input text box
   print '<script>document.getElementById("code").focus();</script>';
 ?>

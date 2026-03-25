@@ -127,6 +127,21 @@ Generates a printable switch list for a selected job, showing each car's pickup 
 
 **Changes:** New **X2010** print format added alongside Mobile, Half Sheet, and Work Order. The default print format has been changed from Mobile to **Half Sheet**. When X2010 is selected the form automatically routes to a separate template (`printable_switchlist_x2010.php`). Bug fix: `GROUP BY` clause in the switch list SQL query simplified — the over-specified grouping in the original caused duplicate rows on strict MariaDB servers.
 
+##### X2010 — Routing / Via flag
+
+The **Contents** column in the X2010 form shows the commodity code for loaded cars, and displays a red ⚑ routing note beneath it when one is configured. The source of that note depends on the order type:
+
+| Order type | Source field | How to set it |
+|---|---|---|
+| Revenue car (normal order) | `shipments.special_instructions` | Edit the shipment in **DB Manage → Shipments** |
+| Empty/reposition car (E-order) | `locations.remarks` on the destination location | Edit the location in **DB Manage → Locations** |
+
+The flag is **suppressed** (left blank) when:
+- The source field is empty/null — the most common case; not every move needs routing notes
+- The source field contains exactly `n/a` (case-insensitive) — the explicit opt-out value
+
+Both column headers in the database management pages include a ⓘ tooltip as a reminder of this behaviour.
+
 ---
 
 #### Waybills
