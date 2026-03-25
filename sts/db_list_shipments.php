@@ -11,7 +11,7 @@
   print '<style>
            th, td {padding: 3px;}
          </style>';
-  
+
   // generate some javascript to display the table name, identify this table to the program, and set the update button's tab index
   print '<script>
            document.getElementById("table_name").innerHTML = "Shipments";
@@ -31,7 +31,7 @@
                  window.alert("Minimum interval must be less than or equal to Maximum interval");
              }
            }
-           
+
            function check_max_interval(max_interval)
            {
              // check for maximum interval < minimum interval
@@ -41,7 +41,7 @@
                  window.alert("Minimum interval must be less than or equal to Maximum interval");
              }
            }
-           
+
            function check_min_amount(min_amount)
            {
              // check for minimum amount > maximum amount
@@ -51,7 +51,7 @@
                  window.alert("Minimum amount must be less than or equal to Maximum amount");
              }
            }
-           
+
            function check_max_amount(max_amount)
            {
              // check for maximum amount < minimum amount
@@ -65,7 +65,7 @@
            function filter_rows(tbl_col, needle)
            {
              // hide rows that do not match this filter
-             
+
              // confirm that a non-blank option has been selected
              if (needle.length > 0)
              {
@@ -78,16 +78,16 @@
                }
 
                var table = document.getElementById("ship_tbl");
-               
+
                //iterate through rows
                for (var i = 6, row; row = table.rows[i]; i++)
                {
                  var haystack_length = row.cells[tbl_col].innerText.length;
                  var needle_length = needle.length;
                  var match_start = haystack_length - needle_length;
-                 
+
                  var haystack = row.cells[tbl_col].innerText.substr(match_start);
-                 
+
                  if (haystack != needle)
                  {
                    row.style.display = "none"
@@ -95,7 +95,7 @@
                }
              }
            }
-           
+
            // generate some javascript that disable the data entry boxes (default setting) and enable the
            // filters when the filter radio button is clicked
            function add_shipments()
@@ -118,13 +118,13 @@
              document.getElementById("max_load_time").disabled = false;
              document.getElementById("min_unload_time").disabled = false;
              document.getElementById("max_unload_time").disabled = false;
-             
+
              document.getElementById("commodity_filter").disabled = true;
              document.getElementById("car_code_filter").disabled = true;
              document.getElementById("loading_location_filter").disabled = true;
              document.getElementById("unloading_location_filter").disabled = true;
            }
-    
+
            // generate some javascript that disables the filters and enables the data entry boxes when
            // the data entry radio button is clicked
            function filter_shipments()
@@ -147,12 +147,12 @@
              document.getElementById("max_load_time").disabled = true;
              document.getElementById("min_unload_time").disabled = true;
              document.getElementById("max_unload_time").disabled = true;
-             
+
              document.getElementById("commodity_filter").disabled = false;
              document.getElementById("car_code_filter").disabled = false;
              document.getElementById("loading_location_filter").disabled = false;
              document.getElementById("unloading_location_filter").disabled = false;
-             
+
            }
            // use the location.replace function instead of location.reload because the reload
            // pulls in the POST parameters which can cause a duplicate record to be inserted
@@ -161,7 +161,7 @@
              window.location.replace("db_list.php?tbl_name=shipments");
            }
          </script>';
-         
+
   // get a database connection
   $dbc = open_db();
 
@@ -172,23 +172,23 @@
     if (strlen($_POST['code']) > 0)
     {
       // add the new shipment to the shipments table
-      $sql = 'insert into shipments (code, 
-                                    description, 
-                                    consignment, 
-                                    car_code, 
-                                    loading_location, 
-                                    unloading_location, 
-                                    last_ship_date, 
-                                    min_interval, 
-                                    max_interval, 
-                                    min_amount, 
+      $sql = 'insert into shipments (code,
+                                    description,
+                                    consignment,
+                                    car_code,
+                                    loading_location,
+                                    unloading_location,
+                                    last_ship_date,
+                                    min_interval,
+                                    max_interval,
+                                    min_amount,
                                     max_amount,
                                     special_instructions,
                                     remarks,
                                     min_load_time,
                                     max_load_time,
                                     min_unload_time,
-                                    max_unload_time)	  
+                                    max_unload_time)
               values ("' . $_POST['code'] . '",
                       "' . $_POST['description'] . '",
                       "' . $_POST['consignment'] . '",
@@ -265,7 +265,7 @@
                <th>Max<br />Int</th>
                <th>Min<br />Amt</th>
                <th>Max<br />Amt</th>
-               <th>Special<br />Instructions</th>
+               <th title="x2010: used as the via/routing flag for revenue (loaded) cars">Special<br />Instructions &#9432;</th>
                <th>Remarks</th>
                <th>Min<br />Load<br />Time</th>
                <th>Max<br />Load<br />Time</th>
@@ -312,22 +312,22 @@
                </td>
                <td style="border-bottom: 0px; border-left: 0px; border-right:0px; text-align:center;"
                  onchange="filter_rows(2, document.getElementById(\'commodity_filter\').options[document.getElementById(\'commodity_filter\').selectedIndex].text);
-                 document.getElementById(\'commodity_filter\').disabled = true;">' . 
+                 document.getElementById(\'commodity_filter\').disabled = true;">' .
                  drop_down_commodities('commodity_filter', '', '') . '
                </td>
                <td style="border-bottom: 0px; border-left: 0px; border-right:0px; text-align:center;"
                  onchange="filter_rows(3, document.getElementById(\'car_code_filter\').options[document.getElementById(\'car_code_filter\').selectedIndex].text);
-                 document.getElementById(\'car_code_filter\').disabled = true;">' . 
+                 document.getElementById(\'car_code_filter\').disabled = true;">' .
                  drop_down_car_codes('car_code_filter', '', 'wild_ok') . '
                </td>
                <td style="border-bottom: 0px; border-left: 0px; border-right:0px; text-align:center;"
                  onchange="filter_rows(4, document.getElementById(\'loading_location_filter\').options[document.getElementById(\'loading_location_filter\').selectedIndex].text);
-                 document.getElementById(\'loading_location_filter\').disabled = true;">' . 
+                 document.getElementById(\'loading_location_filter\').disabled = true;">' .
                  drop_down_locations('loading_location_filter', '', '') . '
                </td>
                <td style="border-bottom: 0px; border-left: 0px; border-right:0px; text-align:center;"
                  onchange="filter_rows(5, document.getElementById(\'unloading_location_filter\').options[document.getElementById(\'unloading_location_filter\').selectedIndex].text);
-                 document.getElementById(\'unloading_location_filter\').disabled = true;">' . 
+                 document.getElementById(\'unloading_location_filter\').disabled = true;">' .
                  drop_down_locations('unloading_location_filter', '', '') . '
                </td>
                <td style="border-bottom: 0px; border-left: 0px; border-right:0px;">
@@ -369,7 +369,7 @@
                <th><i>Max<br />Int</th>
                <th><i>Min<br />Amt</th>
                <th><i>Max<br />Amt</th>
-               <th><i>Special<br />Instructions</th>
+               <th title="x2010: used as the via/routing flag for revenue (loaded) cars"><i>Special<br />Instructions &#9432;</th>
                <th><i>Remarks</th>
                <th class="sorttable_nosort">Min<br />Load<br />Time</th>
                <th class="sorttable_nosort">Max<br />Load<br />Time</th>
@@ -379,7 +379,7 @@
                <th class="sorttable_nosort">Empty Location<br />Search Priority</th>
              </tr>
            </thead>';
-         
+
   if (mysqli_num_rows($rs) > 0)
   {
     while ($row = mysqli_fetch_array($rs))
@@ -396,7 +396,7 @@
       {
         $background = 'White';
       }
-      
+
       print '<tr style="background-color:' . $background . ';">';
       print '  <td><a href="db_edit.php?tbl_name=shipments&obj_id=' . $row['id'] . '&obj_name=' . urlencode($row['code']) . '">' . $row['code'] . '</td>';
       print '  <td>' . $row['description'] . '</td>';
@@ -433,9 +433,9 @@
 
   // add some extra lines to the instructions div
   print '<script>
-           document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + 
+           document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML +
                                                                \'Filters can be used to hide rows. \';
-           document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML + 
+           document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML +
                                                                \'Click on column titles shown in <i>italics</i> to sort the table<br /><br />\';
            document.getElementById("instructions").innerHTML = document.getElementById("instructions").innerHTML +
                                                                \'Shipments in a car/shipment pooling arrangement are <span style="background-color:#ffff80;">highlighted.</span><br /><br />\';
@@ -459,7 +459,7 @@
            document.getElementById("max_unload_time").disabled = true;
 
          </script>';
-  
+
   // generate a javascript line to set focus on the first input text box
   print '<script>document.getElementById("code").focus();</script>';
 ?>
