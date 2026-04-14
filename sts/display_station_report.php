@@ -99,7 +99,13 @@ if (isset($_GET['generate_report'])) {
         ?>
         <div class="pickup-summary-section">
           <h4><i class="bi bi-arrow-up-circle"></i> Cars to be Picked Up by Service</h4>
-          <?php foreach ($by_job as $job_name => $job_rows): ?>
+          <?php $total_jobs = count($by_job); $page_num = 0; ?>
+          <?php foreach ($by_job as $job_name => $job_rows): $page_num++; ?>
+          <div class="job-group">
+          <div class="job-print-header">
+            <div class="job-print-header-left"><?= htmlspecialchars($rr_name) ?> &mdash; Station Car Report &mdash; <?= htmlspecialchars($station_name) ?></div>
+            <div class="job-print-header-right">Page <?= $page_num ?> of <?= $total_jobs ?></div>
+          </div>
           <div class="job-group-header"><?= htmlspecialchars($job_name) ?></div>
           <div class="table-responsive">
           <table class="table table-sm report-table mb-3">
@@ -141,6 +147,7 @@ if (isset($_GET['generate_report'])) {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
           </div>
           <?php endforeach; ?>
         </div>
@@ -311,7 +318,13 @@ if (isset($_GET['generate_report'])) {
         ?>
         <div class="pickup-summary-section">
           <h4><i class="bi bi-arrow-up-circle"></i> Cars to be Picked Up by Service</h4>
-          <?php foreach ($by_job as $job_name => $job_rows): ?>
+          <?php $total_jobs = count($by_job); $page_num = 0; ?>
+          <?php foreach ($by_job as $job_name => $job_rows): $page_num++; ?>
+          <div class="job-group">
+          <div class="job-print-header">
+            <div class="job-print-header-left"><?= htmlspecialchars($rr_name) ?> &mdash; Station Car Report &mdash; All Stations</div>
+            <div class="job-print-header-right">Page <?= $page_num ?> of <?= $total_jobs ?></div>
+          </div>
           <div class="job-group-header"><?= htmlspecialchars($job_name) ?></div>
           <div class="table-responsive">
           <table class="table table-sm report-table mb-3">
@@ -353,6 +366,7 @@ if (isset($_GET['generate_report'])) {
               <?php endforeach; ?>
             </tbody>
           </table>
+          </div>
           </div>
           <?php endforeach; ?>
         </div>
@@ -561,7 +575,6 @@ if (isset($_GET['generate_report'])) {
       padding: 6px 8px;
       border-bottom: 1px solid #dee2e6;
       vertical-align: middle;
-      white-space: nowrap;
     }
     .report-table tbody tr:hover {
       background-color: #f8f9fa;
@@ -740,11 +753,14 @@ if (isset($_GET['generate_report'])) {
       font-size: 0.85rem;
       margin-bottom: 0;
     }
+    .job-print-header {
+      display: none;
+    }
 
     /* Print page setup */
     @page {
-      size: landscape;
-      margin: 0.3in;
+      size: A5 landscape;
+      margin: 0.25in;
     }
 
     /* Print media queries */
@@ -801,7 +817,7 @@ if (isset($_GET['generate_report'])) {
       .report-table {
         page-break-inside: auto;
         font-family: 'Lexend', Arial, sans-serif !important;
-        font-size: 8pt;
+        font-size: 6pt;
         border-collapse: collapse;
         width: 100%;
         table-layout: fixed;
@@ -814,24 +830,24 @@ if (isset($_GET['generate_report'])) {
         color: #000 !important;
         background-color: transparent !important;
         font-weight: bold !important;
-        padding: 3px 6px;
+        padding: 2px 3px;
         border: 1px solid #000;
         text-align: left;
-        font-size: 8pt;
+        font-size: 6pt;
         position: static;
         overflow: hidden;
         word-wrap: break-word;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.02em;
       }
       .report-table td {
-        padding: 3px 6px;
+        padding: 2px 3px;
         border: 1px solid #000;
         vertical-align: top;
         background-color: transparent !important;
         overflow: hidden;
         word-wrap: break-word;
-        font-size: 8pt;
-        letter-spacing: 0.03em;
+        font-size: 6pt;
+        letter-spacing: 0.01em;
       }
       .report-table tbody tr {
         page-break-inside: avoid;
@@ -855,13 +871,38 @@ if (isset($_GET['generate_report'])) {
       .no-print-section {
         display: none !important;
       }
+      .print-header {
+        display: none !important;
+      }
+      .job-print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px dashed #000;
+        margin-bottom: 0.2rem;
+        padding-bottom: 0.1rem;
+      }
+      .job-print-header-left {
+        font-size: 6pt;
+        font-weight: bold;
+      }
+      .job-print-header-right {
+        font-size: 6pt;
+        font-style: italic;
+      }
       .pickup-summary-section {
-        border-top: 1px solid #000;
-        margin-top: 0.2rem;
-        padding-top: 0.1rem;
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
+      }
+      .job-group {
+        break-after: page;
+      }
+      .job-group:last-child {
+        break-after: avoid;
       }
       .pickup-summary-section h4 {
-        font-size: 7pt;
+        font-size: 6pt;
         color: #000;
         font-weight: bold;
         margin: 0.1rem 0;
@@ -871,7 +912,7 @@ if (isset($_GET['generate_report'])) {
         background-color: transparent !important;
         border-left: 2px solid #000;
         padding: 1px 3px;
-        font-size: 6pt;
+        font-size: 5pt;
         font-weight: bold;
       }
       /* Hide status badges, show text only */

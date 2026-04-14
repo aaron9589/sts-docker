@@ -23,6 +23,10 @@ COPY php-barcode /var/www/html/php-barcode
 COPY phpqrcode /var/www/html/phpqrcode
 COPY sts /var/www/html/sts
 
+# Make all copied files readable by Apache (www-data)
+RUN find /var/www/html -type f -exec chmod 644 {} \; && \
+    find /var/www/html -type d -exec chmod 755 {} \;
+
 # Edit permissions for directories and create folder structure
 RUN mkdir -p /var/www/html/sts/temp \
     /var/www/html/sts/ImageStore/DB_Images/barcodes \
