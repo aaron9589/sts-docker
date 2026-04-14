@@ -122,15 +122,15 @@ if (isset($_GET['generate_report'])) {
             </thead>
             <tbody>
               <?php foreach ($job_rows as $r):
-                if ($r['status'] == "Ordered") {
+                if (substr($r['waybill_number'], 4, 1) == "E") {
+                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
+                  $dest_style = set_colors($dbc, $r['dest_code']);
+                } elseif ($r['status'] == "Ordered") {
                   $dest       = htmlspecialchars($r['loading_station']) . '<br/>' . htmlspecialchars($r['loading_location']);
                   $dest_style = set_colors($dbc, $r['loading_location']);
                 } elseif (in_array($r['status'], ["Loading", "Loaded", "Unloading"])) {
                   $dest       = htmlspecialchars($r['unloading_station']) . '<br/>' . htmlspecialchars($r['unloading_location']);
                   $dest_style = set_colors($dbc, $r['unloading_location']);
-                } elseif (substr($r['waybill_number'], 4, 1) == "E") {
-                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
-                  $dest_style = set_colors($dbc, $r['dest_code']);
                 } else {
                   $dest = ''; $dest_style = '';
                 }
@@ -341,15 +341,15 @@ if (isset($_GET['generate_report'])) {
             </thead>
             <tbody>
               <?php foreach ($job_rows as $r):
-                if ($r['status'] == "Ordered") {
+                if (substr($r['waybill_number'], 4, 1) == "E") {
+                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
+                  $dest_style = set_colors($dbc, $r['dest_code']);
+                } elseif ($r['status'] == "Ordered") {
                   $dest       = htmlspecialchars($r['loading_station']) . '<br/>' . htmlspecialchars($r['loading_location']);
                   $dest_style = set_colors($dbc, $r['loading_location']);
                 } elseif (in_array($r['status'], ["Loading", "Loaded", "Unloading"])) {
                   $dest       = htmlspecialchars($r['unloading_station']) . '<br/>' . htmlspecialchars($r['unloading_location']);
                   $dest_style = set_colors($dbc, $r['unloading_location']);
-                } elseif (substr($r['waybill_number'], 4, 1) == "E") {
-                  $dest       = htmlspecialchars($r['dest_station']) . '<br/>' . htmlspecialchars($r['dest_code']);
-                  $dest_style = set_colors($dbc, $r['dest_code']);
                 } else {
                   $dest = ''; $dest_style = '';
                 }
