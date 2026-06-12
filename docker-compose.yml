@@ -1,5 +1,24 @@
 ---
 services:
+  # --- STS v2 (SvelteKit + SQLite rebuild, see app/ and docs/SPEC.md) ---
+  # Single container, no database service needed. The SQLite database lives in
+  # the mounted data volume; back it up by copying the file (or via the UI).
+  web_v2:
+    build: ./app
+    profiles: ["v2"]
+    ports:
+      - "0.0.0.0:8980:3000" # Change the port on the LEFT to taste.
+    environment:
+      # Required so form submissions pass origin checks. Set to the URL you
+      # actually browse to (host and port included).
+      - ORIGIN=http://192.168.0.55:8980
+      # Allow uploading legacy backup .sql files on the Restore page.
+      - BODY_SIZE_LIMIT=64M
+    volumes:
+      - ~/sts-data:/data # <Path on PC>:<container data dir>. Holds sts.db.
+    restart: unless-stopped
+
+  # --- Legacy STS (PHP 8 / Apache / MariaDB) ---
   web:
     build: .
     profiles: ["build"]
