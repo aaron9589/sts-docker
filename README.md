@@ -3,11 +3,11 @@
 
 A containerised fork of the Shipper-Driven Traffic Simulator (STS) model railway operations software. Rather than requiring a local XAMPP or WAMP stack to be installed on your machine, everything — PHP 8, Apache, and MariaDB — runs inside Docker containers.
 
-Current HART fork version: **0.4.3** (see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md)).
+Current project version: **0.4.4** (see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md)).
 
 ## Versioning and Recovery
 
-This HART fork uses semantic versioning (`x.y.z`):
+This project uses semantic versioning (`x.y.z`):
 
 - `x` increments for breaking changes or major operating model resets.
 - `y` increments for new features, seed structure changes, or workflow additions.
