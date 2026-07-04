@@ -99,7 +99,7 @@
             $car_name = 'car' . $i;
 
             // does the drop-down list have a job name in it?
-            if (strlen($_GET[$list_name]) > 0)
+            if (isset($_GET[$list_name]) && strlen($_GET[$list_name]) > 0)
             {
               // before marking the car as set out, save the job that is handling it for the history file
               $sql = 'select jobs.name as job_name
@@ -307,6 +307,54 @@
       <button id="finish_btn" name="finish_btn" value="SET OUT" type="submit" disabled class="btn btn-success btn-lg">SET OUT</button>
       </div>
       </div>
+      <div id="station_filters" class="card card-body noprint d-none mb-3">
+      <div class="row g-2 align-items-end">
+      <div class="col-md-3">
+      <label for="pickup_location_filter" class="form-label fw-semibold">Pickup station / location</label>
+      <select id="pickup_location_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
+      <label for="reporting_marks_filter" class="form-label fw-semibold">Reporting marks</label>
+      <input id="reporting_marks_filter" type="text" class="form-control" placeholder="Filter marks" oninput="applyStationFilters()">
+      </div>
+      <div class="col-md-3">
+      <label for="car_code_filter" class="form-label fw-semibold">Car code</label>
+      <select id="car_code_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
+      <label for="status_filter" class="form-label fw-semibold">Status</label>
+      <select id="status_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
+      <label for="consignment_filter" class="form-label fw-semibold">Consignment</label>
+      <select id="consignment_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
+      <label for="loading_station_filter" class="form-label fw-semibold">Loading station / location</label>
+      <select id="loading_station_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
+      <label for="unloading_station_filter" class="form-label fw-semibold">Unloading station / location</label>
+      <select id="unloading_station_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" onclick="clearStationFilters()">Clear Filters</button>
+      <span id="station_filter_count" class="text-muted small"></span>
+      </div>
+      </div>
+      </div>
     </div>
     <div id="job_table_div">
       <!-- the guts of the table are filled in by the HttpRequest call-back function -->
@@ -320,6 +368,7 @@
       {
         document.getElementById('job_list').selectedIndex = "0";
         document.getElementById('job_table_div').innerHTML = "";
+        document.getElementById('station_filters').classList.add('d-none');
       }
 
       // this javascript routine makes an HttpRequest that provides a list of cars in the selected
@@ -368,6 +417,7 @@
 
           // tell the user that there aren't any cars in this job
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for this job/train doesn't contain any cars.</td></tr>";
+          document.getElementById("station_filters").classList.add("d-none");
         }
         else
         {
@@ -378,8 +428,167 @@
           document.getElementById("job_table_div").innerHTML = xmlhttp.responseText;
 
           // Add slight delay to ensure DOM is updated
-          setTimeout(populateBulkDropdown, 100);
+          setTimeout(function() {
+            populateBulkDropdown();
+            populateStationFilters();
+          }, 100);
         }
+      }
+
+      function populateStationFilters()
+      {
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const filters = document.getElementById('station_filters');
+
+        if (!filters || rows.length === 0) {
+          if (filters) {
+            filters.classList.add('d-none');
+          }
+          return;
+        }
+
+        populateStationLocationFilterOptions('pickup_location_filter', 'pickupStation', 'pickupLocation', 'pickup stations / locations');
+        populateStationFilterOptions('car_code_filter', 'carCode', 'car codes');
+        populateStationFilterOptions('status_filter', 'status', 'statuses');
+        populateStationFilterOptions('consignment_filter', 'consignment', 'consignments');
+        populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation', 'loading stations / locations');
+        populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation', 'unloading stations / locations');
+        document.getElementById('reporting_marks_filter').value = '';
+        filters.classList.remove('d-none');
+        applyStationFilters();
+      }
+
+      function populateStationLocationFilterOptions(selectId, stationKey, locationKey, allLabel)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const stations = new Map();
+
+        rows.forEach(row => {
+          const station = row.dataset[stationKey];
+          const location = row.dataset[locationKey];
+          if (!station) return;
+
+          if (!stations.has(station)) {
+            stations.set(station, new Set());
+          }
+          if (location) {
+            stations.get(station).add(location);
+          }
+        });
+
+        select.innerHTML = '';
+
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        Array.from(stations.keys()).sort().forEach(station => {
+          const stationOption = document.createElement('option');
+          stationOption.value = 'station::' + station;
+          stationOption.textContent = station;
+          select.appendChild(stationOption);
+
+          Array.from(stations.get(station)).sort().forEach(location => {
+            const locationOption = document.createElement('option');
+            locationOption.value = 'location::' + location;
+            locationOption.textContent = location;
+            select.appendChild(locationOption);
+          });
+        });
+
+        select.value = '';
+      }
+
+      function populateStationFilterOptions(selectId, datasetKey, allLabel)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const stations = Array.from(new Set(rows.map(row => row.dataset[datasetKey]).filter(Boolean))).sort();
+
+        select.innerHTML = '';
+
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        stations.forEach(station => {
+          const option = document.createElement('option');
+          option.value = station;
+          option.textContent = station;
+          select.appendChild(option);
+        });
+
+        select.value = '';
+      }
+
+      function applyStationFilters()
+      {
+        const pickupLocationFilter = document.getElementById('pickup_location_filter').value;
+        const reportingMarks = document.getElementById('reporting_marks_filter').value.trim().toLowerCase();
+        const carCode = document.getElementById('car_code_filter').value;
+        const status = document.getElementById('status_filter').value;
+        const consignment = document.getElementById('consignment_filter').value;
+        const loadingLocationFilter = document.getElementById('loading_station_filter').value;
+        const unloadingLocationFilter = document.getElementById('unloading_station_filter').value;
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+          const matchesPickup = matchesStationLocationFilter(row, pickupLocationFilter, 'pickupStation', 'pickupLocation');
+          const matchesMarks = !reportingMarks || row.dataset.reportingMarks.toLowerCase().includes(reportingMarks);
+          const matchesCarCode = !carCode || row.dataset.carCode === carCode;
+          const matchesStatus = !status || row.dataset.status === status;
+          const matchesConsignment = !consignment || row.dataset.consignment === consignment;
+          const matchesLoading = matchesStationLocationFilter(row, loadingLocationFilter, 'loadingStation', 'loadingLocation');
+          const matchesUnloading = matchesStationLocationFilter(row, unloadingLocationFilter, 'unloadingStation', 'unloadingLocation');
+          const isVisible = matchesPickup && matchesMarks && matchesCarCode && matchesStatus && matchesConsignment && matchesLoading && matchesUnloading;
+
+          row.hidden = !isVisible;
+          const stationList = row.querySelector('select[name^="station_list"]');
+          if (stationList) {
+            stationList.disabled = !isVisible;
+          }
+          if (isVisible) {
+            visibleCount++;
+          }
+        });
+
+        updateStationFilterCount(visibleCount, rows.length);
+      }
+
+      function matchesStationLocationFilter(row, selectedValue, stationKey, locationKey)
+      {
+        if (!selectedValue) return true;
+        if (selectedValue.indexOf('station::') === 0) {
+          return row.dataset[stationKey] === selectedValue.substring(9);
+        }
+        if (selectedValue.indexOf('location::') === 0) {
+          return row.dataset[locationKey] === selectedValue.substring(10);
+        }
+        return true;
+      }
+
+      function updateStationFilterCount(visibleCount, totalCount)
+      {
+        const count = document.getElementById('station_filter_count');
+        if (count) {
+          count.textContent = visibleCount + ' of ' + totalCount + ' cars shown';
+        }
+      }
+
+      function clearStationFilters()
+      {
+        document.getElementById('pickup_location_filter').value = '';
+        document.getElementById('reporting_marks_filter').value = '';
+        document.getElementById('car_code_filter').value = '';
+        document.getElementById('status_filter').value = '';
+        document.getElementById('consignment_filter').value = '';
+        document.getElementById('loading_station_filter').value = '';
+        document.getElementById('unloading_station_filter').value = '';
+        applyStationFilters();
       }
 
     </script>
@@ -403,7 +612,7 @@
 
       function updateAllLocations(selectedValue) {
           if (!selectedValue) return;
-          const dropdowns = document.querySelectorAll('select[name^="station_list"]');
+          const dropdowns = document.querySelectorAll('#job_table tr.job-car-row:not([hidden]) select[name^="station_list"]');
           dropdowns.forEach(dropdown => {
               const optionExists = Array.from(dropdown.options).some(option => option.value === selectedValue);
               if (optionExists) {

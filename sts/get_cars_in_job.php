@@ -42,6 +42,21 @@
                  loc02.code as loading_location,
                  sta03.station as unloading_station,
                  loc03.code as unloading_location,
+                 (select pickup_sta.station
+                    from history pickup_history
+                    left join locations pickup_loc on pickup_loc.id = pickup_history.location
+                    left join routing pickup_sta on pickup_sta.id = pickup_loc.station
+                   where pickup_history.car_id = cars.id
+                     and pickup_history.event = "Picked up by Job ' . $job_name . '"
+                   order by pickup_history.event_date desc
+                   limit 1) as pickup_station,
+                 (select pickup_loc.code
+                    from history pickup_history
+                    left join locations pickup_loc on pickup_loc.id = pickup_history.location
+                   where pickup_history.car_id = cars.id
+                     and pickup_history.event = "Picked up by Job ' . $job_name . '"
+                   order by pickup_history.event_date desc
+                   limit 1) as pickup_location,
                  car_codes.code as car_code,
                  commodities.code as consignment,
                  `' . $job_name . '`.step_number as step_number
@@ -91,8 +106,51 @@
                    </tr>';
     while ($row = mysqli_fetch_array($rs))
     {
+      $is_non_revenue = substr($row['waybill_number'], 4, 1) == 'E';
+      $loading_filter_station = ($is_non_revenue ? '' : $row['loading_station']);
+      $loading_filter_location = ($is_non_revenue ? '' : $row['loading_station'] . ' - ' . $row['loading_location']);
+      $unloading_filter_station = $row['unloading_station'];
+      $unloading_filter_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
+      $pickup_filter_station = '';
+      $pickup_filter_location = '';
+      $consignment_filter = ($is_non_revenue ? 'Non-Revenue' : $row['consignment']);
+      $non_revenue_unloading_station = '';
+      $non_revenue_unloading_location = '';
+
+      if (strlen($row['pickup_station']) > 0 || strlen($row['pickup_location']) > 0)
+      {
+        $pickup_filter_station = $row['pickup_station'];
+        $pickup_filter_location = $row['pickup_station'] . ' - ' . $row['pickup_location'];
+      }
+
+      if ($is_non_revenue)
+      {
+        // Non-revenue final destination is stored directly on the car order shipment field.
+        $sql2 = 'select code from locations where id = "' . $row['shipment'] . '"';
+        $rs2 = mysqli_query($dbc, $sql2);
+        $row2 = mysqli_fetch_array($rs2);
+        $non_revenue_unloading_location = $row2['code'];
+
+        $sql3 = 'select routing.station from routing, locations where locations.id = "' . $row['shipment'] . '" and routing.id = locations.station';
+        $rs3 = mysqli_query($dbc, $sql3);
+        $row3 = mysqli_fetch_array($rs3);
+        $non_revenue_unloading_station = $row3['station'];
+        $unloading_filter_station = $non_revenue_unloading_station;
+        $unloading_filter_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
+      }
+
       // generate the table rows
-      $data_table .= '<tr>';
+      $data_table .= '<tr class="job-car-row"'
+                  . ' data-pickup-station="' . htmlspecialchars($pickup_filter_station, ENT_QUOTES) . '"'
+                  . ' data-pickup-location="' . htmlspecialchars($pickup_filter_location, ENT_QUOTES) . '"'
+                  . ' data-reporting-marks="' . htmlspecialchars($row['reporting_marks'], ENT_QUOTES) . '"'
+                  . ' data-car-code="' . htmlspecialchars($row['car_code'], ENT_QUOTES) . '"'
+                  . ' data-status="' . htmlspecialchars($row['status'], ENT_QUOTES) . '"'
+                  . ' data-consignment="' . htmlspecialchars($consignment_filter, ENT_QUOTES) . '"'
+                  . ' data-loading-station="' . htmlspecialchars($loading_filter_station, ENT_QUOTES) . '"'
+                  . ' data-loading-location="' . htmlspecialchars($loading_filter_location, ENT_QUOTES) . '"'
+                  . ' data-unloading-station="' . htmlspecialchars($unloading_filter_station, ENT_QUOTES) . '"'
+                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '">';
 
       // column 1 - list of locations where the selected job can set cars out
       $data_table .= '<td>' . get_job_setout_locations($dbc, $job, $row_count, $default_loc) . '</td>';
@@ -115,7 +173,7 @@
       $data_table .= '<td>' . $row['car_code'] . '</td>';
 
       // column 5 - loading location - if this is a non-revenue move, display N/A, otherwise display the loading location
-      if (substr($row['waybill_number'], 4, 1) == 'E')
+      if ($is_non_revenue)
       {
         $data_table .= '<td>N/A</td>';
       }
@@ -140,18 +198,9 @@
       $data_table .= '<td><span class="status-' . strtolower($row['status']) . '">' . $row['status'] . '</span></td>';
 
       // column 7 - unloading location - if this is a non-revenue move, display it's final destination which is stored in the car order's shipment column
-      if (substr($row['waybill_number'], 4, 1) == 'E')
+      if ($is_non_revenue)
       {
-        // run two quick queries to get this car's final destination
-        // because it isn't linked to a shipment, it's unloading location is stored in the car order's shipment field
-        $sql2 = 'select code from locations where id = "' . $row['shipment'] . '"';
-        $rs2 = mysqli_query($dbc, $sql2);
-        $row2 = mysqli_fetch_array($rs2);
-
-        $sql3 = 'select routing.station from routing, locations where locations.id = "' . $row['shipment'] . '" and routing.id = locations.station';
-        $rs3 = mysqli_query($dbc, $sql3);
-        $row3 = mysqli_fetch_array($rs3);
-        $data_table .= '<td style="' . set_colors($dbc, $row2['code']) . '"><b>' . $row3['station'] . '<br />' . $row2['code'] . '</b></td>';
+        $data_table .= '<td style="' . set_colors($dbc, $non_revenue_unloading_location) . '"><b>' . $non_revenue_unloading_station . '<br />' . $non_revenue_unloading_location . '</b></td>';
       }
       else
       {
@@ -171,7 +220,7 @@
       }
 
       // column 8 - consignment - if this is a non-revenue move, display Non-Revenue, otherwise display the consignment
-      if (substr($row['waybill_number'], 4, 1) == 'E')
+      if ($is_non_revenue)
       {
         $data_table .= '<td>Non-Revenue</td>';
       }

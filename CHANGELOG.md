@@ -2,6 +2,28 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.10] - 2026-07-04
+
+- Simplified filter dropdown labels on Pick Up Cars and Set Out Cars.
+
+## [0.4.9] - 2026-07-04
+
+- Added station-level and location-level choices to pickup, loading, and unloading location filters.
+
+## [0.4.8] - 2026-07-04
+
+- Expanded Pick Up Cars and Set Out Cars filters to include pickup location, reporting marks, car code, status, and consignment.
+- Moved Set Out Cars filters below the instruction and bulk set-out section.
+
+## [0.4.7] - 2026-07-04
+
+- Added loading and unloading station filters to Pick Up Cars and Set Out Cars job tables.
+- Limited pickup check-all and set-out bulk location actions to visible filtered rows.
+
+## [0.4.6] - 2026-07-04
+
+- Restored the original main menu icon order.
+
 ## [0.4.5] - 2026-07-04
 
 - Swapped Database Management and Club Operations on the main menu.
