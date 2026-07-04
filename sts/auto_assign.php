@@ -43,7 +43,7 @@
   $row  = mysqli_fetch_array($rs);
   $job_name = $row['name'];
 
-  print '<a href="http://localhost/sts/build_switchlists.php">Return to Assign Cars</a><br /><br />';
+  print '<a href="build_switchlists.php">Return to Assign Cars</a><br /><br />';
   
   // decide if this is the second time this page was called (after the assign button was clicked)
   if (isset($_GET['assign_cars']))

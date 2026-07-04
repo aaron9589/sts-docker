@@ -2,6 +2,10 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.13] - 2026-07-04
+
+- Fix Auto-Assign return link to use a relative URL so it works on non-default ports.
+
 ## [0.4.12] - 2026-07-04
 
 - Keep hero logos and page titles on one row at narrow viewport widths on Reports, Database, DB Maintenance, Club Operations, and About pages.
