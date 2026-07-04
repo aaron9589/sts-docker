@@ -159,7 +159,7 @@
       <div class="ops-toolbar">
         <div class="ops-toolbar-section">
           <label for="bulk_job" class="form-label fw-semibold mb-1">Assign all visible cars to</label>
-          <select id="bulk_job" name="bulk_job" class="form-select form-select-sm" style="max-width: 20rem;" onchange="updateAllJobs(this.value)">
+          <select id="bulk_job" name="bulk_job" class="form-select" style="max-width: 20rem;" onchange="updateAllJobs(this.value)">
             <option value="">Select train/job</option>
           </select>
         </div>

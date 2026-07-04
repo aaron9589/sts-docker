@@ -1,5 +1,21 @@
 /* Shared operations page styling (pick up, set out, build switch lists) */
 
+.ops-filters .form-control,
+.ops-filters .form-select,
+.ops-toolbar .form-select {
+  border-radius: 0.375rem;
+  border: 1.5px solid #dee2e6;
+  min-height: 44px;
+  font-size: 16px;
+}
+
+.ops-filters .form-control:focus,
+.ops-filters .form-select:focus,
+.ops-toolbar .form-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
 .ops-panel {
   background: #fff;
   border: 1px solid #dee2e6;

@@ -302,7 +302,7 @@
         <div class="ops-toolbar">
           <div class="ops-toolbar-section">
             <label for="bulk_location" class="form-label fw-semibold mb-1">Set all locations to</label>
-            <select id="bulk_location" name="bulk_location" class="form-select form-select-sm" style="max-width: 20rem;" onchange="updateAllLocations(this.value)">
+            <select id="bulk_location" name="bulk_location" class="form-select" style="max-width: 20rem;" onchange="updateAllLocations(this.value)">
               <option value="">Select location</option>
             </select>
           </div>
