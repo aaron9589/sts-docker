@@ -2,6 +2,12 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.5] - 2026-07-04
+
+- Swapped Database Management and Club Operations on the main menu.
+- Matched Traffic and Routing header styling to the Reference Data section.
+- Show the configured railroad name on the main menu when Settings provides one.
+
 ## [0.4.4] - 2026-07-04
 
 - Generalized versioning language and main menu heading for upstream-friendly UI improvements.

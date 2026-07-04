@@ -86,9 +86,28 @@
       xmlhttp.open('GET', 'get_session_nbr.php', true);
       xmlhttp.send();
     }
+
+    function get_railroad_name() {
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          const railroadName = this.responseText.trim();
+          if (railroadName) {
+            document.getElementById("railroad_name").innerText = railroadName;
+          }
+        }
+      }
+      xmlhttp.open('GET', 'get_railroad_name.php', true);
+      xmlhttp.send();
+    }
+
+    function initialize_home_page() {
+      get_session_nbr();
+      get_railroad_name();
+    }
   </script>
 </head>
-<body onload="get_session_nbr();">
+<body onload="initialize_home_page();">
   <nav class="navbar navbar-dark" style="background-color: #2e7d32;">
     <div class="container-fluid">
       <span class="navbar-brand"><i class="bi bi-house"></i> STS Main Menu</span>
@@ -114,7 +133,7 @@
         </div>
       </div>
       <div class="p-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="mb-0">Shipper-driven Traffic Simulator</h5>
+        <h5 class="mb-0" id="railroad_name">Shipper-driven Traffic Simulator</h5>
         <span class="session-badge"><i class="bi bi-calendar-check"></i> Operating Session <span id="os_number"></span></span>
       </div>
     </div>
@@ -142,11 +161,11 @@
         </div>
 
         <div class="col-md-4">
-          <a href="database.html" class="menu-btn brown-link">
-            <i class="bi bi-database menu-icon"></i>
+          <a href="club_index.html" class="menu-btn orange-link">
+            <i class="bi bi-people menu-icon"></i>
             <div>
-              <div class="menu-btn-title">Database Management</div>
-              <div class="menu-btn-desc">Browse cars, shipments, locations, jobs, and routing</div>
+              <div class="menu-btn-title">Club Operations</div>
+              <div class="menu-btn-desc">Tools for multi-user or club operating sessions</div>
             </div>
           </a>
         </div>
@@ -162,11 +181,11 @@
         </div>
 
         <div class="col-md-4">
-          <a href="club_index.html" class="menu-btn orange-link">
-            <i class="bi bi-people menu-icon"></i>
+          <a href="database.html" class="menu-btn brown-link">
+            <i class="bi bi-database menu-icon"></i>
             <div>
-              <div class="menu-btn-title">Club Operations</div>
-              <div class="menu-btn-desc">Tools for multi-user or club operating sessions</div>
+              <div class="menu-btn-title">Database Management</div>
+              <div class="menu-btn-desc">Browse cars, shipments, locations, jobs, and routing</div>
             </div>
           </a>
         </div>
