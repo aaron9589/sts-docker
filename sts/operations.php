@@ -31,9 +31,12 @@ mysqli_close($dbc);
       border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       overflow: hidden;
+      width: 100%;
+      min-width: 0;
     }
     .op-btn {
-      display: flex;
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) 5.25rem;
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
@@ -42,24 +45,33 @@ mysqli_close($dbc);
       text-decoration: none;
       color: #333;
       transition: background-color 0.15s;
+      min-width: 0;
     }
     .op-btn:last-child { border-bottom: none; }
     .op-btn:hover { background-color: #f0fff4; color: #333; text-decoration: none; }
-    .op-btn i.op-icon { font-size: 1.4rem; color: #2e7d32; width: 26px; flex-shrink: 0; }
-    .op-btn-body { flex: 1; min-width: 0; }
-    .op-btn-title { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
+    .op-btn i.op-icon { font-size: 1.4rem; color: #2e7d32; width: 26px; justify-self: center; }
+    .op-btn-body { min-width: 0; }
+    .op-btn-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.25;
+      overflow-wrap: break-word;
+    }
     .op-btn-stat-cols {
       display: flex;
-      flex-shrink: 0;
       align-items: center;
+      justify-content: center;
       gap: 10px;
-      margin-left: auto;
       padding-left: 12px;
       border-left: 1px solid #e9ecef;
+      box-sizing: border-box;
+      width: 5.25rem;
+      min-width: 5.25rem;
+      max-width: 5.25rem;
     }
     .op-stat-col {
       text-align: center;
-      min-width: 2.75rem;
+      width: 100%;
     }
     .op-stat-label {
       font-size: 0.65rem;
@@ -74,8 +86,19 @@ mysqli_close($dbc);
       line-height: 1.2;
       margin-top: 2px;
     }
-    .op-btn-stat-cols-multi .op-stat-col {
-      min-width: 3.25rem;
+    .ops-columns > .col {
+      min-width: 0;
+      display: flex;
+    }
+    @media (min-width: 768px) {
+      .ops-columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .ops-columns > .col {
+        width: 100%;
+        max-width: 100%;
+      }
     }
   </style>
 </head>
@@ -98,10 +121,10 @@ mysqli_close($dbc);
   </nav>
 
   <div class="container mt-4" style="max-width: 960px;">
-    <div class="row g-4">
+    <div class="row g-4 ops-columns row-cols-1 row-cols-md-3">
 
       <!-- Before Operations -->
-      <div class="col-md-4">
+      <div class="col">
         <div class="op-group">
           <div class="section-header"><i class="bi bi-clock-history"></i> Before Operations</div>
           <a href="generate.php" class="op-btn">
@@ -129,7 +152,7 @@ mysqli_close($dbc);
       </div>
 
       <!-- During Operations -->
-      <div class="col-md-4">
+      <div class="col">
         <div class="op-group">
           <div class="section-header"><i class="bi bi-play-circle"></i> During Operations</div>
           <a href="build_switchlists.php" class="op-btn">
@@ -164,7 +187,7 @@ mysqli_close($dbc);
       </div>
 
       <!-- After Operations -->
-      <div class="col-md-4">
+      <div class="col">
         <div class="op-group">
           <div class="section-header"><i class="bi bi-check-circle"></i> After Operations</div>
           <a href="load_unload.php" class="op-btn">
