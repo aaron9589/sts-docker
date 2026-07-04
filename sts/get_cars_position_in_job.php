@@ -95,6 +95,24 @@
         $unloading_filter_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
       }
 
+      $final_dest_station = '';
+      $final_dest_location = '';
+      if ($is_non_revenue)
+      {
+        $final_dest_station = $non_revenue_unloading_station;
+        $final_dest_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
+      }
+      elseif ($row['status'] == 'Ordered')
+      {
+        $final_dest_station = $row['loading_station'];
+        $final_dest_location = $row['loading_station'] . ' - ' . $row['loading_location'];
+      }
+      elseif ($row['status'] == 'Loaded')
+      {
+        $final_dest_station = $row['unloading_station'];
+        $final_dest_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
+      }
+
         // insert a group header row when the pickup location changes
         $group_key = $row['current_station'] . ' | ' . $row['current_location'];
         if ($group_key !== $current_pickup_group)
@@ -116,7 +134,9 @@
                   . ' data-loading-station="' . htmlspecialchars($loading_filter_station, ENT_QUOTES) . '"'
                   . ' data-loading-location="' . htmlspecialchars($loading_filter_location, ENT_QUOTES) . '"'
                   . ' data-unloading-station="' . htmlspecialchars($unloading_filter_station, ENT_QUOTES) . '"'
-                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '">';
+                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '"'
+                  . ' data-final-destination-station="' . htmlspecialchars($final_dest_station, ENT_QUOTES) . '"'
+                  . ' data-final-destination-location="' . htmlspecialchars($final_dest_location, ENT_QUOTES) . '">';
 
       // column 1 - check box to indicate that the car was picked up
       $data_table .= '<td style="text-align: center;"><input id="check' . $row_count . '" name="check' . $row_count . '" type="checkbox"></td>';

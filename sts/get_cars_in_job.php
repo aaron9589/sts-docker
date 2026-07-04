@@ -139,6 +139,24 @@
         $unloading_filter_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
       }
 
+      $final_dest_station = '';
+      $final_dest_location = '';
+      if ($is_non_revenue)
+      {
+        $final_dest_station = $non_revenue_unloading_station;
+        $final_dest_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
+      }
+      elseif ($row['status'] == 'Ordered')
+      {
+        $final_dest_station = $row['loading_station'];
+        $final_dest_location = $row['loading_station'] . ' - ' . $row['loading_location'];
+      }
+      elseif ($row['status'] == 'Loaded')
+      {
+        $final_dest_station = $row['unloading_station'];
+        $final_dest_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
+      }
+
       // generate the table rows
       $data_table .= '<tr class="job-car-row"'
                   . ' data-pickup-station="' . htmlspecialchars($pickup_filter_station, ENT_QUOTES) . '"'
@@ -150,7 +168,9 @@
                   . ' data-loading-station="' . htmlspecialchars($loading_filter_station, ENT_QUOTES) . '"'
                   . ' data-loading-location="' . htmlspecialchars($loading_filter_location, ENT_QUOTES) . '"'
                   . ' data-unloading-station="' . htmlspecialchars($unloading_filter_station, ENT_QUOTES) . '"'
-                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '">';
+                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '"'
+                  . ' data-final-destination-station="' . htmlspecialchars($final_dest_station, ENT_QUOTES) . '"'
+                  . ' data-final-destination-location="' . htmlspecialchars($final_dest_location, ENT_QUOTES) . '">';
 
       // column 1 - list of locations where the selected job can set cars out
       $data_table .= '<td>' . get_job_setout_locations($dbc, $job, $row_count, $default_loc) . '</td>';

@@ -338,6 +338,12 @@
       </select>
       </div>
       <div class="col-md-3">
+      <label for="final_destination_filter" class="form-label fw-semibold">Final destination</label>
+      <select id="final_destination_filter" class="form-select" onchange="applyStationFilters()">
+      <option value="">All</option>
+      </select>
+      </div>
+      <div class="col-md-3">
       <label for="loading_station_filter" class="form-label fw-semibold">Loading station / location</label>
       <select id="loading_station_filter" class="form-select" onchange="applyStationFilters()">
       <option value="">All</option>
@@ -451,6 +457,7 @@
         populateStationFilterOptions('car_code_filter', 'carCode', 'car codes');
         populateStationFilterOptions('status_filter', 'status', 'statuses');
         populateStationFilterOptions('consignment_filter', 'consignment', 'consignments');
+        populateStationLocationFilterOptions('final_destination_filter', 'finalDestinationStation', 'finalDestinationLocation', 'final destinations');
         populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation', 'loading stations / locations');
         populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation', 'unloading stations / locations');
         document.getElementById('reporting_marks_filter').value = '';
@@ -531,6 +538,7 @@
         const carCode = document.getElementById('car_code_filter').value;
         const status = document.getElementById('status_filter').value;
         const consignment = document.getElementById('consignment_filter').value;
+        const finalDestinationFilter = document.getElementById('final_destination_filter').value;
         const loadingLocationFilter = document.getElementById('loading_station_filter').value;
         const unloadingLocationFilter = document.getElementById('unloading_station_filter').value;
         const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
@@ -542,9 +550,10 @@
           const matchesCarCode = !carCode || row.dataset.carCode === carCode;
           const matchesStatus = !status || row.dataset.status === status;
           const matchesConsignment = !consignment || row.dataset.consignment === consignment;
+          const matchesFinalDestination = matchesStationLocationFilter(row, finalDestinationFilter, 'finalDestinationStation', 'finalDestinationLocation');
           const matchesLoading = matchesStationLocationFilter(row, loadingLocationFilter, 'loadingStation', 'loadingLocation');
           const matchesUnloading = matchesStationLocationFilter(row, unloadingLocationFilter, 'unloadingStation', 'unloadingLocation');
-          const isVisible = matchesPickup && matchesMarks && matchesCarCode && matchesStatus && matchesConsignment && matchesLoading && matchesUnloading;
+          const isVisible = matchesPickup && matchesMarks && matchesCarCode && matchesStatus && matchesConsignment && matchesFinalDestination && matchesLoading && matchesUnloading;
 
           row.hidden = !isVisible;
           const stationList = row.querySelector('select[name^="station_list"]');
@@ -586,6 +595,7 @@
         document.getElementById('car_code_filter').value = '';
         document.getElementById('status_filter').value = '';
         document.getElementById('consignment_filter').value = '';
+        document.getElementById('final_destination_filter').value = '';
         document.getElementById('loading_station_filter').value = '';
         document.getElementById('unloading_station_filter').value = '';
         applyStationFilters();
