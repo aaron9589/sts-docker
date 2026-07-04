@@ -2,6 +2,14 @@
 require 'open_db.php';
 require 'drop_down_list_functions.php';
 
+function render_all_filled_message()
+{
+    return '<div class="alert alert-success d-flex align-items-center justify-content-between gap-3 flex-wrap">'
+         . '<span><i class="bi bi-check-circle"></i> All car orders have been filled!</span>'
+         . '<a class="btn btn-success" href="build_switchlists.php">Go to Build Switch Lists</a>'
+         . '</div>';
+}
+
 $dbc = open_db();
 
 // Pull in all open car orders
@@ -168,12 +176,17 @@ $rs = mysqli_query($dbc, $sql);
         <p class="text-muted mb-3">Select an order to see available cars, then click a car to assign it.</p>
 
         <?php if (mysqli_num_rows($rs) > 0) { ?>
-            <div class="mb-4 p-3 bg-light border rounded">
+            <div id="openOrdersSummary" class="mb-4 p-3 bg-light border rounded d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <p class="mb-0">
                     <strong><?php echo mysqli_num_rows($rs); ?> open car orders</strong><br/>
                     Click on any order below to see available cars. Click on a car to assign it to the order.
                 </p>
+                <button id="autoAssignBtn" type="button" class="btn btn-success btn-lg" onclick="autoAssignAll()">
+                    <i class="bi bi-lightning-charge"></i> Auto Assign
+                </button>
             </div>
+
+            <div id="autoAssignStatus" class="alert d-none mb-3" role="alert"></div>
 
             <div id="ordersContainer">
                 <?php
@@ -250,13 +263,91 @@ $rs = mysqli_query($dbc, $sql);
                 ?>
             </div>
         <?php } else { ?>
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> There are no car orders that need to be filled.
+            <div id="allFilledMessage">
+                <?php echo render_all_filled_message(); ?>
             </div>
         <?php } ?>
     </div>
 
     <script>
+        function renderAllFilledMessageHtml()
+        {
+            return <?php echo json_encode(render_all_filled_message()); ?>;
+        }
+
+        function showAllFilledState()
+        {
+            const ordersContainer = document.getElementById('ordersContainer');
+            const openOrdersSummary = document.getElementById('openOrdersSummary');
+            const autoAssignStatus = document.getElementById('autoAssignStatus');
+
+            if (openOrdersSummary) {
+                openOrdersSummary.classList.add('d-none');
+            }
+            if (ordersContainer) {
+                ordersContainer.innerHTML = renderAllFilledMessageHtml();
+            }
+            if (autoAssignStatus) {
+                autoAssignStatus.classList.add('d-none');
+            }
+        }
+
+        function autoAssignAll()
+        {
+            const autoAssignBtn = document.getElementById('autoAssignBtn');
+            const autoAssignStatus = document.getElementById('autoAssignStatus');
+
+            autoAssignBtn.disabled = true;
+            autoAssignStatus.className = 'alert alert-info mb-3';
+            autoAssignStatus.classList.remove('d-none');
+            autoAssignStatus.innerHTML = '<div class="d-flex align-items-center gap-2">'
+                + '<div class="spinner-border spinner-border-sm" role="status"></div>'
+                + '<span>Auto assigning the first available car to each open order...</span>'
+                + '</div>';
+
+            $.ajax({
+                url: 'auto_fill_orders_ajax.php',
+                type: 'POST',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.all_filled) {
+                        showAllFilledState();
+                        return;
+                    }
+
+                    let message = response.filled_count + ' car order(s) auto assigned.';
+                    if (response.skipped_count > 0) {
+                        message += ' ' + response.skipped_count + ' order(s) still need manual attention.';
+                    }
+                    autoAssignStatus.className = 'alert alert-warning mb-3';
+                    autoAssignStatus.innerHTML = message;
+                    autoAssignBtn.disabled = false;
+
+                    response.filled.forEach(function(item) {
+                        const card = document.querySelector('[data-waybill="' + item.waybill_number + '"]');
+                        if (card) {
+                            card.remove();
+                        }
+                    });
+
+                    const summary = document.querySelector('.mb-4.p-3.bg-light.border.rounded strong');
+                    if (summary) {
+                        summary.textContent = response.remaining_count + ' open car orders';
+                    }
+
+                    if (response.remaining_count === 0) {
+                        showAllFilledState();
+                    }
+                },
+                error: function(error) {
+                    autoAssignStatus.className = 'alert alert-danger mb-3';
+                    autoAssignStatus.innerHTML = 'Error auto assigning cars. Please try again.';
+                    autoAssignBtn.disabled = false;
+                    console.error('Error:', error);
+                }
+            });
+        }
+
         function toggleOrder(headerElement) {
             const card = headerElement.closest('.order-card');
             const details = card.querySelector('.order-details');
@@ -365,10 +456,8 @@ $rs = mysqli_query($dbc, $sql);
                     setTimeout(() => {
                         card.remove();
 
-                        // Check if there are any orders left
                         if (document.querySelectorAll('.order-card').length === 0) {
-                            document.getElementById('ordersContainer').innerHTML =
-                                '<div class="alert alert-success"><i class="bi bi-check-circle"></i> All car orders have been filled!</div>';
+                            showAllFilledState();
                         }
                     }, 300);
                 },

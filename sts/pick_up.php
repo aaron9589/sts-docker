@@ -6,6 +6,8 @@
     <title>STS - Pick Up Cars</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="operations_ui.css" rel="stylesheet">
+    <script src="operations_table_filters.js"></script>
     <style>
       tr {vertical-align: top;}
       th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
@@ -182,67 +184,15 @@
             print '</div>';
     ?>
       <!-- print button is in the navbar -->
-      <div id="instructions" class="alert alert-info d-none mt-2">
-      Mark the cars that have been picked up with check marks and then click the <b>PICK UP</b> button.<br /><br />
-      After picking up the cars, click <a href="organize_cars.php"><b>here</b></a> to update the positions of the cars in the train.<br /><br />
-      Click <a href="display_switchlist.php"><b>here</b></a> to generate an updated switch list if desired.
+      <div id="instructions" class="ops-panel noprint d-none">
+        <p class="ops-panel-text mb-0">
+          Check the cars picked up, then click <strong>PICK UP</strong>.
+          After pickup, <a href="organize_cars.php">organize train positions</a> or
+          <a href="display_switchlist.php">print an updated switch list</a>.
+        </p>
       </div>
-      <div id="station_filters" class="card card-body noprint d-none mb-3">
-        <div class="row g-2 align-items-end">
-          <div class="col-md-3">
-            <label for="pickup_location_filter" class="form-label fw-semibold">Pickup station / location</label>
-            <select id="pickup_location_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="reporting_marks_filter" class="form-label fw-semibold">Reporting marks</label>
-            <input id="reporting_marks_filter" type="text" class="form-control" placeholder="Filter marks" oninput="applyStationFilters()">
-          </div>
-          <div class="col-md-3">
-            <label for="car_code_filter" class="form-label fw-semibold">Car code</label>
-            <select id="car_code_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="status_filter" class="form-label fw-semibold">Status</label>
-            <select id="status_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="consignment_filter" class="form-label fw-semibold">Consignment</label>
-            <select id="consignment_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="final_destination_filter" class="form-label fw-semibold">Final destination</label>
-            <select id="final_destination_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="loading_station_filter" class="form-label fw-semibold">Loading station / location</label>
-            <select id="loading_station_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="unloading_station_filter" class="form-label fw-semibold">Unloading station / location</label>
-            <select id="unloading_station_filter" class="form-select" onchange="applyStationFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
-          <div class="col-md-3 d-flex align-items-end gap-2">
-            <button type="button" class="btn btn-outline-secondary" onclick="clearStationFilters()">Clear Filters</button>
-            <span id="station_filter_count" class="text-muted small"></span>
-          </div>
-        </div>
-      </div>
+      <?php require 'operations_station_filters.inc.php'; ?>
     </div>
-    <br />
     <div id="job_table_div">
       <!-- the guts of the table are filled in by the HttpRequest call-back function -->
     </div>
@@ -286,7 +236,7 @@
 
           // tell the user that there aren't any cars in this job
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for " + job_name + " doesn't contain any cars.</td></tr>";
-          document.getElementById("station_filters").classList.add("d-none");
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
         }
         else
         {
@@ -305,9 +255,7 @@
         const filters = document.getElementById('station_filters');
 
         if (!filters || rows.length === 0) {
-          if (filters) {
-            filters.classList.add('d-none');
-          }
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
           return;
         }
 
@@ -319,7 +267,7 @@
         populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation', 'loading stations / locations');
         populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation', 'unloading stations / locations');
         document.getElementById('reporting_marks_filter').value = '';
-        filters.classList.remove('d-none');
+        integrateStationFiltersIntoTable('job_table', 'station_filters', 'station_filters_mount');
         applyStationFilters();
       }
 

@@ -40,8 +40,10 @@
                  loc01.code as current_location,
                  sta02.station as loading_station,
                  loc02.code as loading_location,
+                 shipments.loading_location as loading_location_id,
                  sta03.station as unloading_station,
                  loc03.code as unloading_location,
+                 shipments.unloading_location as unloading_location_id,
                  (select pickup_sta.station
                     from history pickup_history
                     left join locations pickup_loc on pickup_loc.id = pickup_history.location
@@ -89,12 +91,13 @@
   {
     $data_table = '<div class="table-responsive"><table id="job_table" class="table table-sm table-bordered table-hover">';
     $data_table .= '<tr>
-                     <td colspan="8">';
+                     <td colspan="9">';
 //    $data_table .= 'JOB INSTRUCTIONS FOR '. $job_name . '<hr />' . $job_instructions; // replaced by a link to show_job_description.php
     $data_table .= 'Click <a href="show_job_description.php?job_id=' . $job . '" target="_blank">HERE</a> for Job Instructions<hr />';
     $data_table .= '  </td>
                    </tr>';
     $data_table .= '<tr style="position: sticky; top: 0; background-color: #F5F5F5">
+                     <th style="text-align: center;">Check All <input id="check_all" name="check_all" type="checkbox" onchange="checkall_setout();"></th>
                      <th>Set-out Location</th>
                      <th>Position</th>
                      <th>Reporting Marks</th>
@@ -157,6 +160,20 @@
         $final_dest_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
       }
 
+      $final_dest_location_id = '';
+      if ($is_non_revenue)
+      {
+        $final_dest_location_id = $row['shipment'];
+      }
+      elseif ($row['status'] == 'Ordered')
+      {
+        $final_dest_location_id = $row['loading_location_id'];
+      }
+      elseif ($row['status'] == 'Loaded')
+      {
+        $final_dest_location_id = $row['unloading_location_id'];
+      }
+
       // generate the table rows
       $data_table .= '<tr class="job-car-row"'
                   . ' data-pickup-station="' . htmlspecialchars($pickup_filter_station, ENT_QUOTES) . '"'
@@ -170,9 +187,13 @@
                   . ' data-unloading-station="' . htmlspecialchars($unloading_filter_station, ENT_QUOTES) . '"'
                   . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '"'
                   . ' data-final-destination-station="' . htmlspecialchars($final_dest_station, ENT_QUOTES) . '"'
-                  . ' data-final-destination-location="' . htmlspecialchars($final_dest_location, ENT_QUOTES) . '">';
+                  . ' data-final-destination-location="' . htmlspecialchars($final_dest_location, ENT_QUOTES) . '"'
+                  . ' data-final-destination-id="' . htmlspecialchars($final_dest_location_id, ENT_QUOTES) . '">';
 
-      // column 1 - list of locations where the selected job can set cars out
+      // column 1 - checkbox for bulk set-out actions
+      $data_table .= '<td style="text-align: center;"><input class="form-check-input setout-row-check" type="checkbox" aria-label="Include car in bulk set-out actions"></td>';
+
+      // column 2 - list of locations where the selected job can set cars out
       $data_table .= '<td>' . get_job_setout_locations($dbc, $job, $row_count, $default_loc) . '</td>';
 
       // column 2 - position of the car in the train

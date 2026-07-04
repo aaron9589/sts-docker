@@ -6,6 +6,8 @@
     <title>STS - Build Switch Lists</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="operations_ui.css" rel="stylesheet">
+    <script src="operations_table_filters.js"></script>
     <style>
       tr {vertical-align: top;}
       th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
@@ -146,25 +148,28 @@
       }
     ?>
     <br /><br />
-    <div id="nothing_to_move" class="alert alert-warning d-none">
+    <div id="nothing_to_move" class="ops-empty-note d-none">
       There are no cars at this location that are ready to move.
     </div>
-    <div id="instructions" class="alert alert-info d-none">
-      Select which job will pick up each of the cars and then click the <b>ASSIGN</b> button.<br />
-      The cars will be added to the selected job for pick up at this location.<br />
-      If the job column is left blank, the car will remain in place.<br />
-      The next destination in each car's route is displayed in <b>bold</b> text.
-      <div class="noprint mt-3">
-      <label for="bulk_job" class="form-label fw-semibold">Assign all cars to train/job:</label>
-      <select id="bulk_job" name="bulk_job" class="form-select" onchange="updateAllJobs(this.value)">
-        <option value="">Select train/job</option>
-      </select>
-      </div>
-      <div class="mt-2">
-      <button id="build_btn" name="build_btn" value="ASSIGN" type="submit" disabled
-        class="btn btn-success btn-lg">ASSIGN</button>
+    <div id="instructions" class="ops-panel noprint d-none">
+      <p class="ops-panel-text mb-0">
+        Choose a pickup job for each car, then click <strong>ASSIGN</strong>.
+        Leave a job blank to keep the car in place. The next route destination is shown in <strong>bold</strong>.
+      </p>
+      <div class="ops-toolbar">
+        <div class="ops-toolbar-section">
+          <label for="bulk_job" class="form-label fw-semibold mb-1">Assign all visible cars to</label>
+          <select id="bulk_job" name="bulk_job" class="form-select form-select-sm" style="max-width: 20rem;" onchange="updateAllJobs(this.value)">
+            <option value="">Select train/job</option>
+          </select>
+        </div>
+        <div class="ops-toolbar-section">
+          <button id="build_btn" name="build_btn" value="ASSIGN" type="submit" disabled
+            class="btn btn-success btn-lg">ASSIGN</button>
+        </div>
       </div>
     </div>
+    <?php require 'operations_station_filters.inc.php'; ?>
     <div id="car_table_div">
       <!-- the guts of the table are filled in by the HttpRequest call-back function -->
     </div>
@@ -212,6 +217,7 @@
           // hide the table that doesn't contain any cars
           document.getElementById("car_table_div").style.visibility = "hidden";
           document.getElementById("bulk_job").innerHTML = '<option value="">Select train/job</option>';
+          detachStationFilters('car_table', 'station_filters', 'station_filters_mount');
         }
         else
         {
@@ -226,8 +232,209 @@
           document.getElementById("car_table_div").style.visibility = "visible";
 
           // Populate after the table HTML exists.
-          setTimeout(populateBulkJobDropdown, 100);
+          setTimeout(function() {
+            populateBulkJobDropdown();
+            populateStationFilters();
+          }, 100);
         }
+      }
+
+      function populateStationFilters()
+      {
+        const rows = Array.from(document.querySelectorAll('#car_table tr.job-car-row'));
+        const filters = document.getElementById('station_filters');
+
+        if (!filters || rows.length === 0) {
+          detachStationFilters('car_table', 'station_filters', 'station_filters_mount');
+          return;
+        }
+
+        populateStationLocationFilterOptions('pickup_location_filter', 'pickupStation', 'pickupLocation');
+        populateStationFilterOptions('car_code_filter', 'carCode');
+        populateStationFilterOptions('status_filter', 'status');
+        populateStationFilterOptions('consignment_filter', 'consignment');
+        populateStationLocationFilterOptions('final_destination_filter', 'finalDestinationStation', 'finalDestinationLocation');
+        populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation');
+        populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation');
+        document.getElementById('reporting_marks_filter').value = '';
+        integrateStationFiltersIntoTable('car_table', 'station_filters', 'station_filters_mount');
+        applyStationFilters();
+      }
+
+      function populateStationLocationFilterOptions(selectId, stationKey, locationKey)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#car_table tr.job-car-row'));
+        const stations = new Map();
+
+        rows.forEach(function(row) {
+          const station = row.dataset[stationKey];
+          const location = row.dataset[locationKey];
+          if (!station) return;
+
+          if (!stations.has(station)) {
+            stations.set(station, new Set());
+          }
+          if (location) {
+            stations.get(station).add(location);
+          }
+        });
+
+        select.innerHTML = '';
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        Array.from(stations.keys()).sort().forEach(function(station) {
+          const stationOption = document.createElement('option');
+          stationOption.value = 'station::' + station;
+          stationOption.textContent = station;
+          select.appendChild(stationOption);
+
+          Array.from(stations.get(station)).sort().forEach(function(location) {
+            const locationOption = document.createElement('option');
+            locationOption.value = 'location::' + location;
+            locationOption.textContent = location;
+            select.appendChild(locationOption);
+          });
+        });
+
+        select.value = '';
+      }
+
+      function populateStationFilterOptions(selectId, datasetKey)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#car_table tr.job-car-row'));
+        const values = Array.from(new Set(rows.map(function(row) { return row.dataset[datasetKey]; }).filter(Boolean))).sort();
+
+        select.innerHTML = '';
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        values.forEach(function(value) {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          select.appendChild(option);
+        });
+
+        select.value = '';
+      }
+
+      function applyStationFilters()
+      {
+        const pickupLocationFilter = document.getElementById('pickup_location_filter').value;
+        const reportingMarks = document.getElementById('reporting_marks_filter').value.trim().toLowerCase();
+        const carCode = document.getElementById('car_code_filter').value;
+        const status = document.getElementById('status_filter').value;
+        const consignment = document.getElementById('consignment_filter').value;
+        const finalDestinationFilter = document.getElementById('final_destination_filter').value;
+        const loadingLocationFilter = document.getElementById('loading_station_filter').value;
+        const unloadingLocationFilter = document.getElementById('unloading_station_filter').value;
+        const rows = Array.from(document.querySelectorAll('#car_table tr.job-car-row'));
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+          const matchesPickup = matchesStationLocationFilter(row, pickupLocationFilter, 'pickupStation', 'pickupLocation');
+          const matchesMarks = !reportingMarks || row.dataset.reportingMarks.toLowerCase().includes(reportingMarks);
+          const matchesCarCode = !carCode || row.dataset.carCode === carCode;
+          const matchesStatus = !status || row.dataset.status === status;
+          const matchesConsignment = !consignment || row.dataset.consignment === consignment;
+          const matchesFinalDestination = matchesStationLocationFilter(row, finalDestinationFilter, 'finalDestinationStation', 'finalDestinationLocation');
+          const matchesLoading = matchesStationLocationFilter(row, loadingLocationFilter, 'loadingStation', 'loadingLocation');
+          const matchesUnloading = matchesStationLocationFilter(row, unloadingLocationFilter, 'unloadingStation', 'unloadingLocation');
+          const isVisible = matchesPickup && matchesMarks && matchesCarCode && matchesStatus && matchesConsignment && matchesFinalDestination && matchesLoading && matchesUnloading;
+
+          row.hidden = !isVisible;
+          const rowCheck = row.querySelector('.bulk-assign-row');
+          if (rowCheck) {
+            rowCheck.disabled = !isVisible;
+          }
+          const jobList = row.querySelector('select[name^="job_list"]');
+          if (jobList) {
+            jobList.disabled = !isVisible;
+          }
+          if (isVisible) {
+            visibleCount++;
+          }
+        });
+
+        updateLocationGroupHeaders();
+        updateStationFilterCount(visibleCount, rows.length);
+        updateSelectAllState();
+      }
+
+      function matchesStationLocationFilter(row, selectedValue, stationKey, locationKey)
+      {
+        if (!selectedValue) return true;
+        if (selectedValue.indexOf('station::') === 0) {
+          return row.dataset[stationKey] === selectedValue.substring(9);
+        }
+        if (selectedValue.indexOf('location::') === 0) {
+          return row.dataset[locationKey] === selectedValue.substring(10);
+        }
+        return true;
+      }
+
+      function updateLocationGroupHeaders()
+      {
+        const table = document.getElementById('car_table');
+        if (!table) return;
+
+        let groupHeader = null;
+        let groupVisibleRows = 0;
+
+        Array.from(table.rows).forEach(function(row) {
+          if (row.classList.contains('location-group-header')) {
+            if (groupHeader) {
+              groupHeader.hidden = groupVisibleRows === 0;
+            }
+            groupHeader = row;
+            groupVisibleRows = 0;
+            row.hidden = false;
+          }
+          else if (row.classList.contains('job-car-row') && !row.hidden) {
+            groupVisibleRows++;
+          }
+        });
+
+        if (groupHeader) {
+          groupHeader.hidden = groupVisibleRows === 0;
+        }
+      }
+
+      function updateStationFilterCount(visibleCount, totalCount)
+      {
+        const count = document.getElementById('station_filter_count');
+        if (count) {
+          count.textContent = visibleCount + ' of ' + totalCount + ' cars shown';
+        }
+      }
+
+      function updateSelectAllState()
+      {
+        const selectAll = document.getElementById('select_all_cars');
+        if (!selectAll) return;
+
+        const visibleChecks = Array.from(document.querySelectorAll('#car_table tr.job-car-row:not([hidden]) .bulk-assign-row'));
+        selectAll.checked = visibleChecks.length > 0 && visibleChecks.every(function(checkbox) { return checkbox.checked; });
+      }
+
+      function clearStationFilters()
+      {
+        document.getElementById('pickup_location_filter').value = '';
+        document.getElementById('reporting_marks_filter').value = '';
+        document.getElementById('car_code_filter').value = '';
+        document.getElementById('status_filter').value = '';
+        document.getElementById('consignment_filter').value = '';
+        document.getElementById('final_destination_filter').value = '';
+        document.getElementById('loading_station_filter').value = '';
+        document.getElementById('unloading_station_filter').value = '';
+        applyStationFilters();
       }
 
     </script>
@@ -250,7 +457,7 @@
 
       function updateAllJobs(selectedValue) {
         if (!selectedValue) return;
-        const dropdowns = document.querySelectorAll('select[name^="job_list"]');
+        const dropdowns = document.querySelectorAll('#car_table tr.job-car-row:not([hidden]) select[name^="job_list"]');
         dropdowns.forEach(dropdown => {
           const rowCheckbox = dropdown.closest('tr')?.querySelector('.bulk-assign-row');
           if (rowCheckbox && !rowCheckbox.checked) return;
@@ -262,7 +469,7 @@
       }
 
       function toggleAllCarAssignments(checked) {
-        document.querySelectorAll('.bulk-assign-row').forEach(checkbox => {
+        document.querySelectorAll('#car_table tr.job-car-row:not([hidden]) .bulk-assign-row').forEach(checkbox => {
           checkbox.checked = checked;
         });
       }

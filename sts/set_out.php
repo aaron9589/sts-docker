@@ -6,6 +6,8 @@
     <title>STS - Set Out Cars</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="operations_ui.css" rel="stylesheet">
+    <script src="operations_table_filters.js"></script>
     <style>
       tr {vertical-align: top;}
       th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
@@ -25,8 +27,8 @@
         }
 
         /* Hide lower-priority detail columns on tablet to reduce horizontal scroll. */
-        #job_table th:nth-child(6),
-        #job_table td:nth-child(6),
+        #job_table th:nth-child(7),
+        #job_table td:nth-child(7),
         #job_table th:nth-child(8),
         #job_table td:nth-child(8),
         #job_table th:nth-child(9),
@@ -292,75 +294,29 @@
       print drop_down_jobs("job_list", '', "get_jobs_and_cars();");
     ?>
       <!-- print button is in the navbar -->
-      <div id="instructions" class="alert alert-info d-none mt-2">
-      Mark where each car was left by selecting its set-out location from its drop-down list.<br /><br />
-      To update the current location of each car that was set out, click the <b>SET OUT</b> button.<br /><br />
-      After placing the cars, click <a href="organize_cars.php">here</a> to update the positions of the cars at the setout location
-      as well as those remaining in the train.
-      <div class="noprint mt-3">
-      <label for="bulk_location" class="form-label fw-semibold">Set all locations to:</label>
-      <select id="bulk_location" name="bulk_location" class="form-select" onchange="updateAllLocations(this.value)">
-        <option value="">Select location</option>
-      </select>
+      <div id="instructions" class="ops-panel noprint d-none">
+        <p class="ops-panel-text mb-0">
+          Choose a set-out location for each car, then click <strong>SET OUT</strong>.
+          After placing cars, <a href="organize_cars.php">organize positions</a> at the set-out location and in the train.
+        </p>
+        <div class="ops-toolbar">
+          <div class="ops-toolbar-section">
+            <label for="bulk_location" class="form-label fw-semibold mb-1">Set all locations to</label>
+            <select id="bulk_location" name="bulk_location" class="form-select form-select-sm" style="max-width: 20rem;" onchange="updateAllLocations(this.value)">
+              <option value="">Select location</option>
+            </select>
+          </div>
+          <div class="ops-toolbar-section d-flex flex-wrap align-items-center gap-2">
+            <span class="text-muted small">Assign checked cars to their final destinations.</span>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="assignFinalDestinations()">Assign</button>
+            <div id="final_dest_assign_status" class="text-muted small d-none"></div>
+          </div>
+          <div class="ops-toolbar-section">
+            <button id="finish_btn" name="finish_btn" value="SET OUT" type="submit" disabled class="btn btn-success btn-lg">SET OUT</button>
+          </div>
+        </div>
       </div>
-      <div class="mt-3">
-      <button id="finish_btn" name="finish_btn" value="SET OUT" type="submit" disabled class="btn btn-success btn-lg">SET OUT</button>
-      </div>
-      </div>
-      <div id="station_filters" class="card card-body noprint d-none mb-3">
-      <div class="row g-2 align-items-end">
-      <div class="col-md-3">
-      <label for="pickup_location_filter" class="form-label fw-semibold">Pickup station / location</label>
-      <select id="pickup_location_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="reporting_marks_filter" class="form-label fw-semibold">Reporting marks</label>
-      <input id="reporting_marks_filter" type="text" class="form-control" placeholder="Filter marks" oninput="applyStationFilters()">
-      </div>
-      <div class="col-md-3">
-      <label for="car_code_filter" class="form-label fw-semibold">Car code</label>
-      <select id="car_code_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="status_filter" class="form-label fw-semibold">Status</label>
-      <select id="status_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="consignment_filter" class="form-label fw-semibold">Consignment</label>
-      <select id="consignment_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="final_destination_filter" class="form-label fw-semibold">Final destination</label>
-      <select id="final_destination_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="loading_station_filter" class="form-label fw-semibold">Loading station / location</label>
-      <select id="loading_station_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3">
-      <label for="unloading_station_filter" class="form-label fw-semibold">Unloading station / location</label>
-      <select id="unloading_station_filter" class="form-select" onchange="applyStationFilters()">
-      <option value="">All</option>
-      </select>
-      </div>
-      <div class="col-md-3 d-flex align-items-end gap-2">
-      <button type="button" class="btn btn-outline-secondary" onclick="clearStationFilters()">Clear Filters</button>
-      <span id="station_filter_count" class="text-muted small"></span>
-      </div>
-      </div>
-      </div>
+      <?php require 'operations_station_filters.inc.php'; ?>
     </div>
     <div id="job_table_div">
       <!-- the guts of the table are filled in by the HttpRequest call-back function -->
@@ -374,7 +330,16 @@
       {
         document.getElementById('job_list').selectedIndex = "0";
         document.getElementById('job_table_div').innerHTML = "";
-        document.getElementById('station_filters').classList.add('d-none');
+        detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
+        hideFinalDestAssignStatus();
+      }
+
+      function checkall_setout()
+      {
+        const checked = document.getElementById('check_all').checked;
+        document.querySelectorAll('#job_table tr.job-car-row:not([hidden]) .setout-row-check').forEach(function(checkbox) {
+          checkbox.checked = checked;
+        });
       }
 
       // this javascript routine makes an HttpRequest that provides a list of cars in the selected
@@ -423,7 +388,7 @@
 
           // tell the user that there aren't any cars in this job
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for this job/train doesn't contain any cars.</td></tr>";
-          document.getElementById("station_filters").classList.add("d-none");
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
         }
         else
         {
@@ -437,6 +402,7 @@
           setTimeout(function() {
             populateBulkDropdown();
             populateStationFilters();
+            hideFinalDestAssignStatus();
           }, 100);
         }
       }
@@ -447,9 +413,7 @@
         const filters = document.getElementById('station_filters');
 
         if (!filters || rows.length === 0) {
-          if (filters) {
-            filters.classList.add('d-none');
-          }
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
           return;
         }
 
@@ -461,7 +425,7 @@
         populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation', 'loading stations / locations');
         populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation', 'unloading stations / locations');
         document.getElementById('reporting_marks_filter').value = '';
-        filters.classList.remove('d-none');
+        integrateStationFiltersIntoTable('job_table', 'station_filters', 'station_filters_mount');
         applyStationFilters();
       }
 
@@ -560,12 +524,26 @@
           if (stationList) {
             stationList.disabled = !isVisible;
           }
+          const rowCheck = row.querySelector('.setout-row-check');
+          if (rowCheck) {
+            rowCheck.disabled = !isVisible;
+          }
           if (isVisible) {
             visibleCount++;
           }
         });
 
         updateStationFilterCount(visibleCount, rows.length);
+        updateCheckAllSetoutState();
+      }
+
+      function updateCheckAllSetoutState()
+      {
+        const checkAll = document.getElementById('check_all');
+        if (!checkAll) return;
+
+        const visibleChecks = Array.from(document.querySelectorAll('#job_table tr.job-car-row:not([hidden]) .setout-row-check'));
+        checkAll.checked = visibleChecks.length > 0 && visibleChecks.every(function(checkbox) { return checkbox.checked; });
       }
 
       function matchesStationLocationFilter(row, selectedValue, stationKey, locationKey)
@@ -610,7 +588,18 @@
           const bulkDropdown = document.getElementById('bulk_location');
           if (!bulkDropdown) return;
           bulkDropdown.innerHTML = '<option value="">Select location</option>';
-          Array.from(firstDropdown.options).forEach(option => {
+
+          const hasKeepInTrain = Array.from(firstDropdown.options).some(function(option) {
+            return option.value === '';
+          });
+          if (hasKeepInTrain) {
+            const keepOption = document.createElement('option');
+            keepOption.value = '__keep__';
+            keepOption.textContent = 'KEEP IN TRAIN';
+            bulkDropdown.appendChild(keepOption);
+          }
+
+          Array.from(firstDropdown.options).forEach(function(option) {
               if (option.value) {
                   const newOption = document.createElement('option');
                   newOption.value = option.value;
@@ -622,13 +611,95 @@
 
       function updateAllLocations(selectedValue) {
           if (!selectedValue) return;
+          const locationValue = selectedValue === '__keep__' ? '' : selectedValue;
           const dropdowns = document.querySelectorAll('#job_table tr.job-car-row:not([hidden]) select[name^="station_list"]');
-          dropdowns.forEach(dropdown => {
-              const optionExists = Array.from(dropdown.options).some(option => option.value === selectedValue);
+          dropdowns.forEach(function(dropdown) {
+              const optionExists = Array.from(dropdown.options).some(function(option) {
+                return option.value === locationValue;
+              });
               if (optionExists) {
-                  dropdown.value = selectedValue;
+                  dropdown.value = locationValue;
               }
           });
+      }
+
+      function hideFinalDestAssignStatus() {
+          const status = document.getElementById('final_dest_assign_status');
+          if (status) {
+              status.classList.add('d-none');
+              status.textContent = '';
+          }
+      }
+
+      function assignFinalDestinations() {
+          const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row:not([hidden])'));
+          let assignedCount = 0;
+          let skippedCount = 0;
+          let uncheckedCount = 0;
+          const skippedLabels = [];
+
+          rows.forEach(function(row) {
+              const checkbox = row.querySelector('.setout-row-check');
+              if (!checkbox || !checkbox.checked) {
+                  uncheckedCount++;
+                  return;
+              }
+
+              const destinationId = row.dataset.finalDestinationId;
+              if (!destinationId) {
+                  skippedCount++;
+                  return;
+              }
+
+              const dropdown = row.querySelector('select[name^="station_list"]');
+              if (!dropdown) {
+                  skippedCount++;
+                  return;
+              }
+
+              const matchingOption = Array.from(dropdown.options).find(function(option) {
+                return option.value === destinationId;
+              });
+              if (matchingOption) {
+                  dropdown.value = destinationId;
+                  assignedCount++;
+              } else {
+                  skippedCount++;
+                  const label = row.dataset.finalDestinationLocation || row.dataset.reportingMarks;
+                  if (label && skippedLabels.indexOf(label) === -1) {
+                      skippedLabels.push(label);
+                  }
+              }
+          });
+
+          const status = document.getElementById('final_dest_assign_status');
+          if (!status) return;
+
+          status.classList.remove('d-none');
+          const checkedCount = rows.length - uncheckedCount;
+          if (checkedCount === 0) {
+              status.textContent = 'Check one or more cars to assign final destinations.';
+              return;
+          }
+          if (assignedCount === 0 && skippedCount === 0) {
+              status.textContent = 'No checked cars have a final destination to assign.';
+              return;
+          }
+
+          let message = assignedCount + ' checked car(s) assigned to final destination.';
+          if (skippedCount > 0) {
+              message += ' ' + skippedCount + ' checked car(s) skipped';
+              if (skippedLabels.length > 0) {
+                  message += ' (destination not available on this job: ' + skippedLabels.slice(0, 3).join(', ');
+                  if (skippedLabels.length > 3) {
+                      message += ', ...';
+                  }
+                  message += ')';
+              } else {
+                  message += ' (no final destination or location unavailable).';
+              }
+          }
+          status.textContent = message;
       }
     </script>
   </div>

@@ -56,8 +56,7 @@
   {
     $data_table = '<div class="table-responsive"><table id="job_table" class="table table-sm table-bordered table-hover">';
     $data_table .= '<tr style="position: sticky; top: 0; background-color: #F5F5F5">
-                     <th>Picked Up<br /><hr />
-                     Check All <input id="check_all" name="check_all" type="checkbox" onchange="checkall();"></th>
+                     <th>Check All <input id="check_all" name="check_all" type="checkbox" onchange="checkall();"></th>
                      <th>Pickup Location</th>
                      <th>Reporting Marks</th>
                      <th>Car Code</th>

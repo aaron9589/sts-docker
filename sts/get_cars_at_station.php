@@ -77,18 +77,74 @@
 
     while ($row = mysqli_fetch_array($rs))
     {
+      $is_non_revenue = substr($row['waybill_number'], 4, 1) == 'E';
+      $loading_filter_station = ($is_non_revenue ? '' : $row['loading_station']);
+      $loading_filter_location = ($is_non_revenue ? '' : $row['loading_station'] . ' - ' . $row['loading_location']);
+      $unloading_filter_station = $row['unloading_station'];
+      $unloading_filter_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
+      $pickup_filter_station = $row['current_station'];
+      $pickup_filter_location = $row['current_station'] . ' - ' . $row['current_location'];
+      $consignment_filter = ($is_non_revenue ? 'Non-Revenue' : $row['consignment']);
+      $non_revenue_unloading_station = '';
+      $non_revenue_unloading_location = '';
+
+      if ($is_non_revenue)
+      {
+        $sql2 = 'select code from locations where locations.id = "' . $row['shipment_id'] . '"';
+        $rs2 = mysqli_query($dbc, $sql2);
+        $row2 = mysqli_fetch_array($rs2);
+        $non_revenue_unloading_location = $row2['code'];
+
+        $sql3 = 'select routing.station from routing, locations where (locations.id = ' . $row['shipment_id'] . ') and (routing.id = locations.station)';
+        $rs3 = mysqli_query($dbc, $sql3);
+        $row3 = mysqli_fetch_array($rs3);
+        $non_revenue_unloading_station = $row3['station'];
+        $unloading_filter_station = $non_revenue_unloading_station;
+        $unloading_filter_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
+      }
+
+      $final_dest_station = '';
+      $final_dest_location = '';
+      if ($is_non_revenue)
+      {
+        $final_dest_station = $non_revenue_unloading_station;
+        $final_dest_location = $non_revenue_unloading_station . ' - ' . $non_revenue_unloading_location;
+      }
+      elseif ($row['status'] == 'Ordered')
+      {
+        $final_dest_station = $row['loading_station'];
+        $final_dest_location = $row['loading_station'] . ' - ' . $row['loading_location'];
+      }
+      elseif ($row['status'] == 'Loaded')
+      {
+        $final_dest_station = $row['unloading_station'];
+        $final_dest_location = $row['unloading_station'] . ' - ' . $row['unloading_location'];
+      }
+
       // insert a group header row when the current location changes
       $group_key = $row['current_location'];
       if ($group_key !== $current_location_group)
       {
         $current_location_group = $group_key;
-        $data_table .= '<tr class="table-dark"><td colspan="9" class="fw-semibold">'
+        $data_table .= '<tr class="table-dark location-group-header"><td colspan="9" class="fw-semibold">'
             . htmlspecialchars($row['current_station']) . ' &mdash; ' . htmlspecialchars($row['current_location'])
             . '</td></tr>';
       }
 
       // generate the table rows
-      $data_table .= '<tr>';
+      $data_table .= '<tr class="job-car-row"'
+                  . ' data-pickup-station="' . htmlspecialchars($pickup_filter_station, ENT_QUOTES) . '"'
+                  . ' data-pickup-location="' . htmlspecialchars($pickup_filter_location, ENT_QUOTES) . '"'
+                  . ' data-reporting-marks="' . htmlspecialchars($row['reporting_marks'], ENT_QUOTES) . '"'
+                  . ' data-car-code="' . htmlspecialchars($row['car_code'], ENT_QUOTES) . '"'
+                  . ' data-status="' . htmlspecialchars($row['status'], ENT_QUOTES) . '"'
+                  . ' data-consignment="' . htmlspecialchars($consignment_filter, ENT_QUOTES) . '"'
+                  . ' data-loading-station="' . htmlspecialchars($loading_filter_station, ENT_QUOTES) . '"'
+                  . ' data-loading-location="' . htmlspecialchars($loading_filter_location, ENT_QUOTES) . '"'
+                  . ' data-unloading-station="' . htmlspecialchars($unloading_filter_station, ENT_QUOTES) . '"'
+                  . ' data-unloading-location="' . htmlspecialchars($unloading_filter_location, ENT_QUOTES) . '"'
+                  . ' data-final-destination-station="' . htmlspecialchars($final_dest_station, ENT_QUOTES) . '"'
+                  . ' data-final-destination-location="' . htmlspecialchars($final_dest_location, ENT_QUOTES) . '">';
 
       // column 1 - include this row when using the bulk job selector
       $data_table .= '<td class="text-center"><input class="form-check-input bulk-assign-row" type="checkbox" aria-label="Include this car in bulk assignment"></td>';
