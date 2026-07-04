@@ -2,6 +2,14 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.12] - 2026-07-04
+
+- Keep hero logos and page titles on one row at narrow viewport widths on Reports, Database, DB Maintenance, Club Operations, and About pages.
+
+## [0.4.11] - 2026-07-04
+
+- Keep the three home page hero images on one row at narrow screen widths.
+
 ## [0.4.10] - 2026-07-04
 
 - Simplified filter dropdown labels on Pick Up Cars and Set Out Cars.
