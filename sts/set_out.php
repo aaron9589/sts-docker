@@ -280,7 +280,7 @@
             }
           }
         }
-        print '<div class="alert alert-success noprint d-flex align-items-center justify-content-between gap-3 flex-wrap">';
+        print '<div class="alert alert-success noprint ops-workflow-alert">';
         print '<span>' . $num_cars_set_out . ' car(s) set out.</span>';
         print '<a class="btn btn-success" href="build_switchlists.php">Return to Build Switch Lists</a>';
         print '</div>';

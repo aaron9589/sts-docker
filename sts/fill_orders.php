@@ -32,7 +32,7 @@ $sql = 'SELECT co.waybill_number as waybill_number,
         FROM (
           SELECT DISTINCT waybill_number, shipment
           FROM car_orders
-          WHERE car = "" OR car IS NULL
+          WHERE car = "" OR car IS NULL OR car = "0"
         ) as co
         LEFT JOIN shipments ON shipments.id = co.shipment
         LEFT JOIN commodities ON commodities.id = shipments.consignment
@@ -244,7 +244,13 @@ $rs = mysqli_query($dbc, $sql);
                             </div>
 
                             <div class="mt-3">
-                                <h6>Available Cars:</h6>
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                    <h6 class="mb-0">Available Cars:</h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick='cancelOrder(<?php echo json_encode($row['waybill_number']); ?>, this)'>
+                                        <i class="bi bi-x-circle"></i> Cancel Order
+                                    </button>
+                                </div>
                                 <div class="cars-container">
                                     <div class="spinner-container">
                                         <div class="spinner-border" role="status">
@@ -269,6 +275,8 @@ $rs = mysqli_query($dbc, $sql);
         <?php } ?>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function renderAllFilledMessageHtml()
         {
@@ -290,6 +298,34 @@ $rs = mysqli_query($dbc, $sql);
             if (autoAssignStatus) {
                 autoAssignStatus.classList.add('d-none');
             }
+        }
+
+        function updateOpenOrdersCount()
+        {
+            const remainingCount = document.querySelectorAll('.order-card').length;
+            const summary = document.querySelector('#openOrdersSummary strong');
+            if (summary) {
+                summary.textContent = remainingCount + ' open car orders';
+            }
+            if (remainingCount === 0) {
+                showAllFilledState();
+            }
+        }
+
+        function removeOrderCard(waybill)
+        {
+            const card = document.querySelector('[data-waybill="' + waybill + '"]');
+            if (!card) {
+                return;
+            }
+
+            card.style.transition = 'opacity 0.3s';
+            card.style.opacity = '0';
+
+            setTimeout(function() {
+                card.remove();
+                updateOpenOrdersCount();
+            }, 300);
         }
 
         function autoAssignAll()
@@ -381,7 +417,7 @@ $rs = mysqli_query($dbc, $sql);
                     let html = '';
 
                     if (data.total_cars_found === 0) {
-                        html = '<div class="alert alert-warning">No eligible cars found on the system</div>';
+                        html = '<div class="alert alert-warning mb-0">No eligible cars found on the system</div>';
                     } else {
                         html = `<div class="mb-3 text-muted">
                             <small>
@@ -448,24 +484,45 @@ $rs = mysqli_query($dbc, $sql);
                 }),
                 dataType: 'json',
                 success: function(response) {
-                    // Remove the order card with fade out
-                    const card = document.querySelector(`[data-waybill="${waybill}"]`);
-                    card.style.transition = 'opacity 0.3s';
-                    card.style.opacity = '0';
-
-                    setTimeout(() => {
-                        card.remove();
-
-                        if (document.querySelectorAll('.order-card').length === 0) {
-                            showAllFilledState();
-                        }
-                    }, 300);
+                    removeOrderCard(waybill);
                 },
                 error: function(error) {
                     clickedElement.innerHTML = originalHtml;
                     clickedElement.style.pointerEvents = 'auto';
                     alert('Error assigning car. Please try again.');
                     console.error('Error:', error);
+                }
+            });
+        }
+
+        function cancelOrder(waybill, buttonElement) {
+            if (!confirm('Cancel car order ' + waybill + '?')) {
+                return;
+            }
+
+            const originalHtml = buttonElement.innerHTML;
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Canceling...';
+
+            $.ajax({
+                url: 'cancel_car_order_ajax.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    waybill_number: waybill
+                }),
+                dataType: 'json',
+                success: function(response) {
+                    removeOrderCard(waybill);
+                },
+                error: function(xhr) {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = originalHtml;
+                    let message = 'Error canceling order. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        message = xhr.responseJSON.error;
+                    }
+                    alert(message);
                 }
             });
         }
@@ -476,7 +533,5 @@ $rs = mysqli_query($dbc, $sql);
             font-size: 1.5rem;
         }
     </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

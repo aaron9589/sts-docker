@@ -179,7 +179,7 @@
   ///////////////////////////////////////////////////////////////////////
 
   // stations
-  function drop_down_stations($list_name, $tab_index, $on_click)
+  function drop_down_stations($list_name, $tab_index, $on_click, $include_all = false)
   {
     // get a database connection
     $dbc = open_db();
@@ -202,6 +202,11 @@
     }
 
     $select_string .= '<option value=""></option>';
+
+    if ($include_all)
+    {
+      $select_string .= '<option value="all">All Stations</option>';
+    }
 
     if (mysqli_num_rows($rs) > 0)
     {

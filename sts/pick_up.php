@@ -170,7 +170,7 @@
             }
           }
         }
-        print '<div class="alert alert-success noprint d-flex align-items-center justify-content-between gap-3 flex-wrap">';
+        print '<div class="alert alert-success noprint ops-workflow-alert">';
         print '<span>' . $num_cars_picked_up . ' car(s) picked up.</span>';
         print '<a class="btn btn-success" href="set_out.php">Go to Set Out Cars</a>';
         print '</div>';

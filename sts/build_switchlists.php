@@ -57,8 +57,8 @@
       <div class="card h-100">
         <div class="card-header fw-semibold"><i class="bi bi-geo-alt"></i> Assign Cars Station-by-Station</div>
         <div class="card-body">
-          <p class="card-text text-muted small">Select a station to assign cars to jobs/trains for pickup.</p>
-          <?php print drop_down_stations('station_list', '', 'get_cars_and_jobs();'); ?>
+          <p class="card-text text-muted small">Select a station (or All Stations) to assign cars to jobs/trains for pickup.</p>
+          <?php print drop_down_stations('station_list', '', 'get_cars_and_jobs();', true); ?>
         </div>
       </div>
     </div>
@@ -141,7 +141,7 @@
             }
           }
         }
-        print '<div class="alert alert-success noprint d-flex align-items-center justify-content-between gap-3 flex-wrap">';
+        print '<div class="alert alert-success noprint ops-workflow-alert">';
         print '<span>' . $num_cars_assigned . ' car(s) assigned to pickup jobs.</span>';
         print '<a class="btn btn-success" href="pick_up.php">Go to Pick Up Cars</a>';
         print '</div>';

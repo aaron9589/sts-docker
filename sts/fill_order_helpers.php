@@ -248,7 +248,7 @@ function fill_order_get_unfilled_waybills($dbc)
 {
     $sql = 'SELECT DISTINCT waybill_number
             FROM car_orders
-            WHERE car = "" OR car IS NULL
+            WHERE car = "" OR car IS NULL OR car = "0"
             ORDER BY waybill_number';
     $rs = mysqli_query($dbc, $sql);
     $waybills = [];
@@ -256,6 +256,37 @@ function fill_order_get_unfilled_waybills($dbc)
         $waybills[] = $row['waybill_number'];
     }
     return $waybills;
+}
+
+function fill_order_is_unfilled($car_value)
+{
+    return $car_value === '' || $car_value === null || $car_value === '0' || $car_value == 0;
+}
+
+function fill_order_cancel_order($dbc, $waybill_number)
+{
+    $waybill_number = mysqli_real_escape_string($dbc, $waybill_number);
+
+    $sql = 'SELECT car FROM car_orders WHERE waybill_number = "' . $waybill_number . '"';
+    $rs = mysqli_query($dbc, $sql);
+    if (!$rs || mysqli_num_rows($rs) <= 0) {
+        return ['success' => false, 'error' => 'Order not found'];
+    }
+
+    $row = mysqli_fetch_array($rs);
+    if (!fill_order_is_unfilled($row['car'])) {
+        return ['success' => false, 'error' => 'Order already has a car assigned'];
+    }
+
+    $sql = 'DELETE FROM car_orders WHERE waybill_number = "' . $waybill_number . '"';
+    if (!mysqli_query($dbc, $sql)) {
+        return ['success' => false, 'error' => 'Delete error: ' . mysqli_error($dbc)];
+    }
+
+    return [
+        'success' => true,
+        'waybill_number' => $waybill_number,
+    ];
 }
 
 ?>

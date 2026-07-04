@@ -10,19 +10,35 @@
 
   // get the incoming parameter
   $station = urldecode($_REQUEST['station']);
+  $all_stations = ($station === 'all');
 
-  // build a query to get the routing instructions for this station
-  $sql = 'select instructions from routing where id = "' . $station . '"';
-  $rs = mysqli_query($dbc, $sql);
-  $row = mysqli_fetch_row($rs);
-  if (strlen($row[0]) > 0)
+  if ($all_stations)
   {
-    $instructions = 'Routing Instructions:<br /><br /> ' . $row[0];
+    $instructions = 'Showing cars at all stations ready for pickup assignment.';
   }
   else
   {
-    $instructions = 'Routing Instruction: None';
+    // build a query to get the routing instructions for this station
+    $sql = 'select instructions from routing where id = "' . $station . '"';
+    $rs = mysqli_query($dbc, $sql);
+    $row = mysqli_fetch_row($rs);
+    if ($row && strlen($row[0]) > 0)
+    {
+      $instructions = 'Routing Instructions:<br /><br /> ' . $row[0];
+    }
+    else
+    {
+      $instructions = 'Routing Instruction: None';
+    }
   }
+
+  $station_filter = '';
+  if (!$all_stations)
+  {
+    $station_filter = 'and cars.current_location_id in (select id from locations where station = "' . $station . '")';
+  }
+
+  $order_by = $all_stations ? 'sta01.station, loc01.code' : 'loc01.code';
 
   // build a query to find all cars currently at the designated station
   $sql = 'select cars.id as id,
@@ -30,6 +46,7 @@
                  cars.status as status,
                  car_orders.waybill_number as waybill_number,
                  car_orders.shipment as shipment_id,
+                 sta01.id as current_station_id,
                  sta01.station as current_station,
                  loc01.code as current_location,
                  sta02.station as loading_station,
@@ -49,10 +66,10 @@
           left join routing sta03 on sta03.id = loc03.station
           left join commodities on commodities.id = shipments.consignment
           left join car_codes on car_codes.id = cars.car_code_id
-          where cars.current_location_id in (select id from locations where station = "' . $station . '")
-            and cars.status in ("Ordered", "Loaded")
+          where cars.status in ("Ordered", "Loaded")
             and (cars.handled_by_job_id = 0)
-          order by current_location';
+            ' . $station_filter . '
+          order by ' . $order_by;
 //print 'SQL: ' . $sql . '<br /><br />';
   $rs = mysqli_query($dbc, $sql);
 
@@ -122,7 +139,7 @@
       }
 
       // insert a group header row when the current location changes
-      $group_key = $row['current_location'];
+      $group_key = $row['current_station'] . '|' . $row['current_location'];
       if ($group_key !== $current_location_group)
       {
         $current_location_group = $group_key;
@@ -150,7 +167,8 @@
       $data_table .= '<td class="text-center"><input class="form-check-input bulk-assign-row" type="checkbox" aria-label="Include this car in bulk assignment"></td>';
 
       // column 2 - list of eligible jobs
-      $data_table .= '<td>' . get_jobs_at_station($dbc, $station, $row_count) . '</td>';
+      $job_station = $all_stations ? $row['current_station_id'] : $station;
+      $data_table .= '<td>' . get_jobs_at_station($dbc, $job_station, $row_count) . '</td>';
 
       // column 3 - reporting marks
       if (file_exists('./ImageStore/DB_Images/RollingStock/' . $row['id'] . '.jpg'))
