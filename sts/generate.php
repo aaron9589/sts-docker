@@ -159,6 +159,82 @@
       $row = mysqli_fetch_array($rs);
       $session_number = $row['setting_value'];
 
+      function run_automatic_car_order_generation($dbc, $session_number, $waybill_counter)
+      {
+        $orders_created = 0;
+
+        $sql = 'select id as id,
+                       shipments.code as code,
+                       shipments.last_ship_date as last_ship_date,
+                       shipments.min_interval as min_interval,
+                       shipments.max_interval as max_interval,
+                       shipments.min_amount as min_amount,
+                       shipments.max_amount as max_amount
+                  from shipments';
+        $rs_shipments = mysqli_query($dbc, $sql);
+        if (!$rs_shipments || mysqli_num_rows($rs_shipments) <= 0) {
+          return 0;
+        }
+
+        while ($row = mysqli_fetch_array($rs_shipments))
+        {
+          $last_ship_date = $row['last_ship_date'];
+          $min_interval = $row['min_interval'];
+          $max_interval = $row['max_interval'];
+          $min_amount = $row['min_amount'];
+          $max_amount = $row['max_amount'];
+
+          $interval = round(mt_rand($min_interval * 100, $max_interval * 100)/100);
+          $ship_date = $last_ship_date + $interval;
+
+          if ($ship_date <= $session_number)
+          {
+            $sql = 'update shipments set last_ship_date = ' . $session_number . ' where id = "' . $row['id'] . '"';
+            if (!mysqli_query($dbc, $sql))
+            {
+              print 'Update Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
+            }
+
+            $num_cars = round(mt_rand($min_amount * 100, $max_amount * 100)/100);
+
+            for ($i=0; $i<$num_cars; $i++)
+            {
+              $waybill_counter++;
+              $wb_nbr = str_pad($session_number, 3, '0', STR_PAD_LEFT) . "-" . str_pad($waybill_counter, 3, '0', STR_PAD_LEFT);
+
+              $sql = 'insert into car_orders (waybill_number, shipment, car) values ("' . $wb_nbr . '", "' . $row['id'] . '", "0")';
+              if (!mysqli_query($dbc, $sql))
+              {
+                print 'Insert Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
+              }
+              else
+              {
+                $orders_created++;
+              }
+            }
+          }
+        }
+
+        return $orders_created;
+      }
+
+      function get_next_auto_waybill_counter($dbc, $session_number)
+      {
+        $session_prefix = str_pad($session_number, 3, '0', STR_PAD_LEFT) . '-';
+        $session_prefix = mysqli_real_escape_string($dbc, $session_prefix);
+        $sql = 'select max(cast(substr(waybill_number, 5, 3) as unsigned)) as max_counter
+                from car_orders
+                where waybill_number like "' . $session_prefix . '___"
+                  and substr(waybill_number, 5, 1) != "M"';
+        $rs = mysqli_query($dbc, $sql);
+        $row = mysqli_fetch_array($rs);
+        if (!$row || $row['max_counter'] === null) {
+          return 0;
+        }
+
+        return (int)$row['max_counter'];
+      }
+
 //-------------------------------------------- process the request -------------------------------------------
 
       if (isset($_POST['autogenerate_btn']))      // --------------------------------------------- was the "Auto Generate" button clicked?
@@ -175,69 +251,24 @@
           print 'Setting not found - Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
         }
 
-        // initialize a counter for the number of waybills generated this session
-        $waybill_counter = 0;
-
-        // go through the shippers and generate car orders as appropriate
-        $sql = 'select id as id,
-                       shipments.code as code,
-                       shipments.last_ship_date as last_ship_date,
-                       shipments.min_interval as min_interval,
-                       shipments.max_interval as max_interval,
-                       shipments.min_amount as min_amount,
-                       shipments.max_amount as max_amount
-                  from shipments';
-        $rs_shipments = mysqli_query($dbc, $sql);
-        if (mysqli_num_rows($rs_shipments) > 0)
+        $generated_order_count = run_automatic_car_order_generation($dbc, $session_number, 0);
+        print $generated_order_count . ' car orders generated<br /><br />';
+        $orders_generated = true;
+      }
+      elseif (isset($_POST['autogenerate_no_session_btn']))
+      {
+        if ((int)$session_number <= 0)
         {
-          while ($row = mysqli_fetch_array($rs_shipments))
-          {
-            // do the math
-            $last_ship_date = $row['last_ship_date'];
-            $min_interval = $row['min_interval'];
-            $max_interval = $row['max_interval'];
-            $min_amount = $row['min_amount'];
-            $max_amount = $row['max_amount'];
+          print 'Cannot generate orders without a session. Use Generate Session first.<br /><br />';
+        }
+        else
+        {
+          print 'Auto-generating car orders for Operating Session ' . $session_number . ' (session not incremented)...</br><br >';
 
-            // find a random number between the min and max intervals and round any fraction either up or down
-            $interval = round(mt_rand($min_interval * 100, $max_interval * 100)/100);
-
-            // add the random number to the last ship date
-            $ship_date = $last_ship_date + $interval;
-
-            // is it time to ship?
-            if ($ship_date <= $session_number)
-            {
-              // store this session number as the new last ship date
-              $sql = 'update shipments set last_ship_date = ' . $session_number . ' where id = "' . $row['id'] . '"';
-              if (!mysqli_query($dbc, $sql))
-              {
-                print 'Update Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
-              }
-
-              // determine the number of cars to order and round either up or down
-              $num_cars = round(mt_rand($min_amount * 100, $max_amount * 100)/100);
-
-              for ($i=0; $i<$num_cars; $i++)
-              {
-                // increment the waybill counter
-                $waybill_counter++;
-
-                // build the waybill number
-                $wb_nbr = str_pad($session_number, 3, '0', STR_PAD_LEFT) . "-" . str_pad($waybill_counter, 3, '0', STR_PAD_LEFT);
-
-                $sql = 'insert into car_orders (waybill_number, shipment, car) values ("' . $wb_nbr . '", "' . $row['id'] . '", "0")';
-                if (!mysqli_query($dbc, $sql))
-                {
-                  print 'Insert Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
-                }
-              }
-            }
-          }
-          // display the number of car orders created
-          print $waybill_counter . ' car orders generated<br /><br />';
+          $waybill_counter = get_next_auto_waybill_counter($dbc, $session_number);
+          $generated_order_count = run_automatic_car_order_generation($dbc, $session_number, $waybill_counter);
+          print $generated_order_count . ' car orders generated<br /><br />';
           $orders_generated = true;
-          $generated_order_count = $waybill_counter;
         }
       }
       elseif (isset($_POST['mangenerate_btn']))         // -------------------------------- was the "Manual Generate" button clicked?
@@ -311,9 +342,25 @@
 
       // start the auto-generate form
       print '<form name="automatic" id="automatic" method="post" action="generate.php">';
-      print '<p class="text-muted">Ready to generate car orders automatically.</p>';
-      print '<input name="autogenerate_btn" id="autogenerate_btn" value="AUTOMATIC" type="submit"
-             class="btn btn-success btn-lg"><br /><br />';
+      if ((int)$session_number <= 0)
+      {
+        print '<p class="text-muted">No operating session yet. Start session 1 and generate car orders.</p>';
+      }
+      else
+      {
+        print '<p class="text-muted">Ready to generate car orders automatically for session ' . htmlspecialchars($session_number) . '.</p>';
+      }
+      print '<div class="d-flex gap-2 flex-wrap mb-3">';
+      print '<input name="autogenerate_btn" id="autogenerate_btn" value="Generate Session" type="submit"
+             class="btn btn-success btn-lg">';
+      if ((int)$session_number > 0)
+      {
+        print '<input name="autogenerate_no_session_btn" id="autogenerate_no_session_btn"
+               value="Generate Orders" type="submit"
+               class="btn btn-outline-success btn-lg"
+               title="Generate orders for the current session without incrementing the session number">';
+      }
+      print '</div>';
       print '</form>';
 
       print '</div>';
