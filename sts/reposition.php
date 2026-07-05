@@ -21,8 +21,8 @@
       .status-unavailable{ display:inline-block; background-color:#d63031; color:white; padding:3px 7px; border-radius:3px; font-weight:600; font-size:0.82rem; }
       #repo_off_home_btn.active {
         color: #fff;
-        background-color: #fd7e14;
-        border-color: #fd7e14;
+        background-color: #b45309;
+        border-color: #b45309;
       }
     </style>
     <?php
@@ -254,8 +254,16 @@
     </nav>
     <div class="px-4">
     <h5 class="mb-2">Reposition Empty Cars</h5>
-    <p class="text-muted small mb-3">Select a destination for each empty car, then click <strong>Update</strong>. Leave the destination blank to keep a car in place.<br>
-    Use <strong>Reposition to Home</strong> to bill visible off-home cars to their home locations. Filters apply to both actions.</p>
+    <p class="text-muted">Select a destination for each empty car that is to be repositioned and then click the UPDATE button.<br />
+    Leave the destination blank if the car is to remain at its current location.<br /><br />
+    To reposition all cars that are NOT at their home location to their home, click the REPOSITION TO HOME button.<br />
+    Filters apply to both Update and Reposition to Home — only visible cars are affected.<br /><br />
+    The list of cars can be filtered by car code, current location, home location, or reporting marks.<br />
+    To view only those cars not at their home locations, click the <strong>Not at home</strong> button.<br />
+    To remove all filters, click the <strong>Clear</strong> button.<br /><br />
+    If all empty cars are displayed, those that are not at their home locations are highlighted. These cars<br />
+    should be sent to their home locations if they are not needed for revenue moves. They may also be blocking<br />
+    an unloading location.</p>
     <form method="post" action="reposition.php" onsubmit="return prepareRepositionSubmit();">
     <?php
       require 'open_db.php';
@@ -400,7 +408,7 @@
                        <input id="repo_marks_filter" type="text" class="form-control" placeholder="Filter" oninput="applyRepositionFilters()">
                      </div>
                      <div class="ops-filter-item ops-filter-actions">
-                       <button type="button" class="btn btn-outline-warning btn-sm" id="repo_off_home_btn" onclick="toggleOffHomeOnly()">Not at home</button>
+                       <button type="button" class="btn btn-outline-secondary btn-sm" id="repo_off_home_btn" onclick="toggleOffHomeOnly()">Not at home</button>
                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearRepositionFilters()">Clear</button>
                        <span id="repo_filter_count" class="text-muted small"></span>
                      </div>
