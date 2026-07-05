@@ -2,6 +2,11 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.18] - 2026-07-05
+
+- Fix Reposition Empty Cars filters with ops-style car code, location, and marks filters plus a Not at home toggle.
+- Scope Update and Reposition to Home actions to visible filtered cars only.
+
 ## [0.4.17] - 2026-07-05
 
 - Fix Build Switch Lists car filters by restoring populateStationLocationFilterOptions and matchesStationLocationFilter logic.
