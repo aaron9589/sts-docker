@@ -2,6 +2,10 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.17] - 2026-07-05
+
+- Fix Build Switch Lists car filters by restoring populateStationLocationFilterOptions and matchesStationLocationFilter logic.
+
 ## [0.4.16] - 2026-07-05
 
 - Added separate car filters to Fill Car Orders for manual assignment and auto-assign: car source checkboxes (Pool, Priority, Station, System), current station, current location, and car type, independent of order filters.
