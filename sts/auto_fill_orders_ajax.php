@@ -1,5 +1,5 @@
 <?php
-// auto_fill_orders_ajax.php — assign the first eligible car to each open car order
+// auto_fill_orders_ajax.php — assign eligible cars to open car orders
 
 require 'open_db.php';
 require 'fill_order_helpers.php';
@@ -12,11 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$categories = fill_order_parse_categories($_POST['categories'] ?? null);
+$filters = fill_order_parse_filters($_POST['filters'] ?? null);
+
 $dbc = open_db();
 $waybills = fill_order_get_unfilled_waybills($dbc);
 
 $filled = [];
 $skipped = [];
+$filtered_out = 0;
 
 foreach ($waybills as $waybill_number) {
     $order_row = fill_order_get_details($dbc, $waybill_number);
@@ -28,17 +32,22 @@ foreach ($waybills as $waybill_number) {
         continue;
     }
 
+    if (!fill_order_matches_filters($order_row, $filters)) {
+        $filtered_out++;
+        continue;
+    }
+
     $available_cars = fill_order_get_available_cars($dbc, $order_row);
-    if (count($available_cars) === 0) {
+    $selected_car = fill_order_pick_car_for_categories($available_cars, $categories);
+    if ($selected_car === null) {
         $skipped[] = [
             'waybill_number' => $waybill_number,
-            'reason' => 'No eligible cars',
+            'reason' => 'No eligible cars in selected categories',
         ];
         continue;
     }
 
-    $first_car = $available_cars[0];
-    $result = fill_order_assign_car($dbc, $waybill_number, $first_car['car_id']);
+    $result = fill_order_assign_car($dbc, $waybill_number, $selected_car['car_id']);
     if (!$result['success']) {
         $skipped[] = [
             'waybill_number' => $waybill_number,
@@ -49,9 +58,10 @@ foreach ($waybills as $waybill_number) {
 
     $filled[] = [
         'waybill_number' => $waybill_number,
-        'car_id' => $first_car['car_id'],
+        'car_id' => $selected_car['car_id'],
         'reporting_marks' => $result['car_reporting_marks'],
         'car_code' => $result['car_code'],
+        'category' => $selected_car['category'],
     ];
 }
 
@@ -62,10 +72,13 @@ echo json_encode([
     'success' => true,
     'filled_count' => count($filled),
     'skipped_count' => count($skipped),
+    'filtered_out_count' => $filtered_out,
     'remaining_count' => count($remaining),
     'all_filled' => count($remaining) === 0,
     'filled' => $filled,
     'skipped' => $skipped,
+    'categories' => $categories,
+    'filters' => $filters,
 ]);
 
 ?>

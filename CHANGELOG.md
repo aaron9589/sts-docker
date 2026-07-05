@@ -2,6 +2,11 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.14] - 2026-07-04
+
+- Added car source checkboxes and order filters to Fill Car Orders auto-assign, using Pool → Priority → Station → System priority (System unchecked by default).
+- Replaced the Generate Car Orders Select column header with a select-all toggle for visible shipments.
+
 ## [0.4.13] - 2026-07-04
 
 - Fix Auto-Assign return link to use a relative URL so it works on non-default ports.

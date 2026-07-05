@@ -434,7 +434,9 @@
         print '<div class="table-responsive"><table id="ship_tbl" class="table table-sm table-bordered table-hover sortable">
                  <thead>
                    <tr style="position: sticky; top: 0; background-color: #F5F5F5">
-                     <th class="sorttable_nosort">Select</th>
+                     <th class="sorttable_nosort" style="text-align:center;">
+                       <input type="checkbox" id="selectAllShipments" title="Select all visible shipments" aria-label="Select all visible shipments">
+                     </th>
                      <th><i>Shipment<br />Code</th>
                      <th><i>Description</th>
                      <th><i>Commodity</th>
@@ -453,7 +455,7 @@
         while ($row = mysqli_fetch_array($rs_shipments))
         {
           print '<tr>
-                   <td style="text-align:center;"><input type="checkbox" name="select' . $row_count . '" id="select' . $row_count . '"></th>
+                   <td style="text-align:center;"><input type="checkbox" class="shipment-select" name="select' . $row_count . '" id="select' . $row_count . '"></td>
                    <td>' .
                      $row['code'] . '<input type="hidden" name="id' . $row_count . '" id="id' . $row_count . '" value="' . $row['id'] . '">
                    </td>
@@ -499,8 +501,55 @@
       });
       [['commodity_filter',3],['car_code_filter',4],['loading_loc_filter',5],['unloading_loc_filter',6]].forEach(function(f) {
         var el = document.getElementById(f[0]);
-        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; }); }
+        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; updateSelectAllState(); }); }
       });
+
+      var selectAll = document.getElementById('selectAllShipments');
+      if (selectAll) {
+        selectAll.addEventListener('change', function() {
+          document.querySelectorAll('#ship_tbl tbody tr').forEach(function(row) {
+            if (row.style.display === 'none') {
+              return;
+            }
+            var cb = row.querySelector('.shipment-select');
+            if (cb) {
+              cb.checked = selectAll.checked;
+            }
+          });
+        });
+
+        document.querySelectorAll('.shipment-select').forEach(function(cb) {
+          cb.addEventListener('change', updateSelectAllState);
+        });
+      }
+
+      function updateSelectAllState() {
+        var selectAll = document.getElementById('selectAllShipments');
+        if (!selectAll) {
+          return;
+        }
+
+        var visible = [];
+        document.querySelectorAll('#ship_tbl tbody tr').forEach(function(row) {
+          if (row.style.display === 'none') {
+            return;
+          }
+          var cb = row.querySelector('.shipment-select');
+          if (cb) {
+            visible.push(cb);
+          }
+        });
+
+        if (visible.length === 0) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+          return;
+        }
+
+        var checkedCount = visible.filter(function(cb) { return cb.checked; }).length;
+        selectAll.checked = checkedCount === visible.length;
+        selectAll.indeterminate = checkedCount > 0 && checkedCount < visible.length;
+      }
     });
   </script>
 </body>

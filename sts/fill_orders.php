@@ -44,6 +44,29 @@ $sql = 'SELECT co.waybill_number as waybill_number,
         ORDER BY co.waybill_number';
 
 $rs = mysqli_query($dbc, $sql);
+$open_orders = [];
+while ($row = mysqli_fetch_array($rs)) {
+    $open_orders[] = $row;
+}
+
+function fill_orders_unique_values($orders, $field)
+{
+    $values = [];
+    foreach ($orders as $order) {
+        $value = trim((string) ($order[$field] ?? ''));
+        if ($value !== '') {
+            $values[$value] = true;
+        }
+    }
+    $keys = array_keys($values);
+    sort($keys, SORT_NATURAL | SORT_FLAG_CASE);
+    return $keys;
+}
+
+$filter_loading_options = fill_orders_unique_values($open_orders, 'loading_location');
+$filter_unloading_options = fill_orders_unique_values($open_orders, 'unloading_location');
+$filter_consignment_options = fill_orders_unique_values($open_orders, 'consignment');
+$filter_car_code_options = fill_orders_unique_values($open_orders, 'car_code');
 
 ?>
 
@@ -155,6 +178,23 @@ $rs = mysqli_query($dbc, $sql);
             text-align: center;
             padding: 2rem;
         }
+        .auto-assign-panel {
+            min-width: 280px;
+        }
+        .auto-assign-options {
+            border-top: 1px solid #dee2e6;
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .order-card.filtered-out {
+            display: none;
+        }
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -175,27 +215,99 @@ $rs = mysqli_query($dbc, $sql);
         <h5 class="mb-1">Fill Car Orders</h5>
         <p class="text-muted mb-3">Select an order to see available cars, then click a car to assign it.</p>
 
-        <?php if (mysqli_num_rows($rs) > 0) { ?>
-            <div id="openOrdersSummary" class="mb-4 p-3 bg-light border rounded d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <p class="mb-0">
-                    <strong><?php echo mysqli_num_rows($rs); ?> open car orders</strong><br/>
-                    Click on any order below to see available cars. Click on a car to assign it to the order.
-                </p>
-                <button id="autoAssignBtn" type="button" class="btn btn-success btn-lg" onclick="autoAssignAll()">
-                    <i class="bi bi-lightning-charge"></i> Auto Assign
-                </button>
+        <?php if (count($open_orders) > 0) { ?>
+            <div id="openOrdersSummary" class="mb-4 p-3 bg-light border rounded">
+                <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                    <p class="mb-0">
+                        <strong id="openOrdersCount"><?php echo count($open_orders); ?> open car orders</strong>
+                        <span id="filteredOrdersNote" class="text-muted"></span><br/>
+                        Click on any order below to see available cars. Click on a car to assign it to the order.
+                    </p>
+                    <div class="auto-assign-panel">
+                        <button id="autoAssignBtn" type="button" class="btn btn-success btn-lg w-100" onclick="autoAssignAll()">
+                            <i class="bi bi-lightning-charge"></i> Auto Assign
+                        </button>
+                        <div class="auto-assign-options">
+                            <div class="filter-label mb-1">Car source</div>
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input auto-category" type="checkbox" value="pool" id="catPool" checked>
+                                    <label class="form-check-label" for="catPool">Pool</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input auto-category" type="checkbox" value="priority" id="catPriority" checked>
+                                    <label class="form-check-label" for="catPriority">Priority</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input auto-category" type="checkbox" value="station" id="catStation" checked>
+                                    <label class="form-check-label" for="catStation">Station</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input auto-category" type="checkbox" value="system" id="catSystem">
+                                    <label class="form-check-label" for="catSystem">System</label>
+                                </div>
+                            </div>
+                            <div class="filter-label mb-1">Auto-assign order filters</div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1" for="filterLoading">Loading</label>
+                                    <select id="filterLoading" class="form-select form-select-sm order-filter">
+                                        <option value="">All loading locations</option>
+                                        <?php foreach ($filter_loading_options as $value) { ?>
+                                            <option value="<?php echo htmlspecialchars($value); ?>"><?php echo htmlspecialchars($value); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1" for="filterUnloading">Unloading</label>
+                                    <select id="filterUnloading" class="form-select form-select-sm order-filter">
+                                        <option value="">All unloading locations</option>
+                                        <?php foreach ($filter_unloading_options as $value) { ?>
+                                            <option value="<?php echo htmlspecialchars($value); ?>"><?php echo htmlspecialchars($value); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1" for="filterConsignment">Commodity</label>
+                                    <select id="filterConsignment" class="form-select form-select-sm order-filter">
+                                        <option value="">All commodities</option>
+                                        <?php foreach ($filter_consignment_options as $value) { ?>
+                                            <option value="<?php echo htmlspecialchars($value); ?>"><?php echo htmlspecialchars($value); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1" for="filterCarCode">Car type</label>
+                                    <select id="filterCarCode" class="form-select form-select-sm order-filter">
+                                        <option value="">All car types</option>
+                                        <?php foreach ($filter_car_code_options as $value) { ?>
+                                            <option value="<?php echo htmlspecialchars($value); ?>"><?php echo htmlspecialchars($value); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearOrderFilters()">Clear filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="autoAssignStatus" class="alert d-none mb-3" role="alert"></div>
 
             <div id="ordersContainer">
                 <?php
-                $row_count = 0;
-                while ($row = mysqli_fetch_array($rs)) {
+                foreach ($open_orders as $row) {
                     $is_pool = $row['pool_count'] > 0 ? true : false;
                     $pool_class = $is_pool ? 'pool' : '';
                     ?>
-                    <div class="order-card <?php echo $pool_class; ?>" data-waybill="<?php echo htmlspecialchars($row['waybill_number']); ?>">
+                    <div class="order-card <?php echo $pool_class; ?>"
+                         data-waybill="<?php echo htmlspecialchars($row['waybill_number']); ?>"
+                         data-loading-location="<?php echo htmlspecialchars($row['loading_location']); ?>"
+                         data-unloading-location="<?php echo htmlspecialchars($row['unloading_location']); ?>"
+                         data-consignment="<?php echo htmlspecialchars($row['consignment']); ?>"
+                         data-car-code="<?php echo htmlspecialchars($row['car_code']); ?>">
                         <div class="order-header" onclick="toggleOrder(this)">
                             <div>
                                 <div style="font-weight: bold; font-size: 1.1rem;">
@@ -263,7 +375,6 @@ $rs = mysqli_query($dbc, $sql);
                         </div>
                     </div>
                     <?php
-                    $row_count++;
                 }
                 mysqli_close($dbc);
                 ?>
@@ -303,14 +414,96 @@ $rs = mysqli_query($dbc, $sql);
         function updateOpenOrdersCount()
         {
             const remainingCount = document.querySelectorAll('.order-card').length;
-            const summary = document.querySelector('#openOrdersSummary strong');
-            if (summary) {
-                summary.textContent = remainingCount + ' open car orders';
+            const visibleCount = document.querySelectorAll('.order-card:not(.filtered-out)').length;
+            const countEl = document.getElementById('openOrdersCount');
+            if (countEl) {
+                countEl.textContent = remainingCount + ' open car orders';
             }
+            updateFilteredOrdersNote(visibleCount, remainingCount);
             if (remainingCount === 0) {
                 showAllFilledState();
             }
         }
+
+        function getSelectedCategories()
+        {
+            const categories = [];
+            document.querySelectorAll('.auto-category:checked').forEach(function(input) {
+                categories.push(input.value);
+            });
+            return categories;
+        }
+
+        function getOrderFilters()
+        {
+            return {
+                loading_location: document.getElementById('filterLoading').value,
+                unloading_location: document.getElementById('filterUnloading').value,
+                consignment: document.getElementById('filterConsignment').value,
+                car_code: document.getElementById('filterCarCode').value
+            };
+        }
+
+        function orderMatchesFilters(card, filters)
+        {
+            return (!filters.loading_location || card.dataset.loadingLocation === filters.loading_location)
+                && (!filters.unloading_location || card.dataset.unloadingLocation === filters.unloading_location)
+                && (!filters.consignment || card.dataset.consignment === filters.consignment)
+                && (!filters.car_code || card.dataset.carCode === filters.car_code);
+        }
+
+        function applyOrderFilters()
+        {
+            const filters = getOrderFilters();
+            let visibleCount = 0;
+
+            document.querySelectorAll('.order-card').forEach(function(card) {
+                const matches = orderMatchesFilters(card, filters);
+                card.classList.toggle('filtered-out', !matches);
+                if (matches) {
+                    visibleCount++;
+                }
+            });
+
+            const totalCount = document.querySelectorAll('.order-card').length;
+            updateFilteredOrdersNote(visibleCount, totalCount);
+        }
+
+        function updateFilteredOrdersNote(visibleCount, totalCount)
+        {
+            const note = document.getElementById('filteredOrdersNote');
+            if (!note) {
+                return;
+            }
+
+            const filters = getOrderFilters();
+            const filtersActive = filters.loading_location
+                || filters.unloading_location
+                || filters.consignment
+                || filters.car_code;
+
+            if (!filtersActive) {
+                note.textContent = '';
+                return;
+            }
+
+            note.textContent = ' (' + visibleCount + ' match current filters)';
+        }
+
+        function clearOrderFilters()
+        {
+            document.getElementById('filterLoading').value = '';
+            document.getElementById('filterUnloading').value = '';
+            document.getElementById('filterConsignment').value = '';
+            document.getElementById('filterCarCode').value = '';
+            applyOrderFilters();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.order-filter').forEach(function(select) {
+                select.addEventListener('change', applyOrderFilters);
+            });
+        });
 
         function removeOrderCard(waybill)
         {
@@ -332,19 +525,31 @@ $rs = mysqli_query($dbc, $sql);
         {
             const autoAssignBtn = document.getElementById('autoAssignBtn');
             const autoAssignStatus = document.getElementById('autoAssignStatus');
+            const categories = getSelectedCategories();
+
+            if (categories.length === 0) {
+                autoAssignStatus.className = 'alert alert-danger mb-3';
+                autoAssignStatus.classList.remove('d-none');
+                autoAssignStatus.innerHTML = 'Select at least one car source: Pool, Priority, Station, or System.';
+                return;
+            }
 
             autoAssignBtn.disabled = true;
             autoAssignStatus.className = 'alert alert-info mb-3';
             autoAssignStatus.classList.remove('d-none');
             autoAssignStatus.innerHTML = '<div class="d-flex align-items-center gap-2">'
                 + '<div class="spinner-border spinner-border-sm" role="status"></div>'
-                + '<span>Auto assigning the first available car to each open order...</span>'
+                + '<span>Auto assigning cars using selected sources and filters...</span>'
                 + '</div>';
 
             $.ajax({
                 url: 'auto_fill_orders_ajax.php',
                 type: 'POST',
                 dataType: 'json',
+                data: {
+                    categories: categories,
+                    filters: getOrderFilters()
+                },
                 success: function(response) {
                     if (response.all_filled) {
                         showAllFilledState();
@@ -354,6 +559,9 @@ $rs = mysqli_query($dbc, $sql);
                     let message = response.filled_count + ' car order(s) auto assigned.';
                     if (response.skipped_count > 0) {
                         message += ' ' + response.skipped_count + ' order(s) still need manual attention.';
+                    }
+                    if (response.filtered_out_count > 0) {
+                        message += ' ' + response.filtered_out_count + ' order(s) skipped by filters.';
                     }
                     autoAssignStatus.className = 'alert alert-warning mb-3';
                     autoAssignStatus.innerHTML = message;
@@ -366,14 +574,7 @@ $rs = mysqli_query($dbc, $sql);
                         }
                     });
 
-                    const summary = document.querySelector('.mb-4.p-3.bg-light.border.rounded strong');
-                    if (summary) {
-                        summary.textContent = response.remaining_count + ' open car orders';
-                    }
-
-                    if (response.remaining_count === 0) {
-                        showAllFilledState();
-                    }
+                    updateOpenOrdersCount();
                 },
                 error: function(error) {
                     autoAssignStatus.className = 'alert alert-danger mb-3';

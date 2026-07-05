@@ -167,7 +167,95 @@ function fill_order_get_available_cars($dbc, $order_row)
         $system_cars[] = array_merge($row, ['category' => 'system']);
     }
 
-    return array_merge($pool_cars, $station_cars, $priority_cars, $system_cars);
+    return array_merge($pool_cars, $priority_cars, $station_cars, $system_cars);
+}
+
+function fill_order_valid_categories()
+{
+    return ['pool', 'station', 'priority', 'system'];
+}
+
+function fill_order_parse_categories($input)
+{
+    $valid = fill_order_valid_categories();
+    if (!is_array($input)) {
+        return $valid;
+    }
+
+    $selected = [];
+    foreach ($input as $category) {
+        $category = strtolower(trim((string) $category));
+        if (in_array($category, $valid, true)) {
+            $selected[] = $category;
+        }
+    }
+
+    return count($selected) > 0 ? $selected : $valid;
+}
+
+function fill_order_parse_filters($input)
+{
+    if (!is_array($input)) {
+        return [];
+    }
+
+    $filters = [];
+    $fields = [
+        'loading_location',
+        'unloading_location',
+        'consignment',
+        'car_code',
+    ];
+
+    foreach ($fields as $field) {
+        if (!empty($input[$field])) {
+            $filters[$field] = trim((string) $input[$field]);
+        }
+    }
+
+    return $filters;
+}
+
+function fill_order_matches_filters($order_row, $filters)
+{
+    if (empty($filters)) {
+        return true;
+    }
+
+    foreach ($filters as $field => $value) {
+        if ($value === '') {
+            continue;
+        }
+        if (!isset($order_row[$field]) || (string) $order_row[$field] !== (string) $value) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function fill_order_pick_car_for_categories($available_cars, $categories)
+{
+    $tier_order = [
+        ['tier' => 'pool', 'key' => 'pool'],
+        ['tier' => 'priority', 'key' => 'priority'],
+        ['tier' => 'station', 'key' => 'station'],
+        ['tier' => 'system', 'key' => 'system'],
+    ];
+
+    foreach ($tier_order as $entry) {
+        if (!in_array($entry['key'], $categories, true)) {
+            continue;
+        }
+
+        foreach ($available_cars as $car) {
+            if ($car['category'] === $entry['tier']) {
+                return $car;
+            }
+        }
+    }
+
+    return null;
 }
 
 function fill_order_assign_car($dbc, $waybill_number, $car_id)
