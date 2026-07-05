@@ -2,6 +2,11 @@
 
 All notable changes use semantic versioning (`x.y.z`).
 
+## [0.4.16] - 2026-07-05
+
+- Added separate car filters to Fill Car Orders for manual assignment and auto-assign: car source checkboxes (Pool, Priority, Station, System), current station, current location, and car type, independent of order filters.
+- Reorganized Fill Car Orders layout with display and auto-assign panels side by side under the order summary; car type options follow visible display filters.
+
 ## [0.4.15] - 2026-07-05
 
 - Modernized operations workflow pages (Build Switch Lists, Pick Up, Set Out, Load/Unload) with shared instruction panels, pale-green bulk/filter toolbars, location group checkboxes, and filter-aware bulk actions.
