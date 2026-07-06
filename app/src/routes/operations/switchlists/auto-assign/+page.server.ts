@@ -45,9 +45,12 @@ export const actions: Actions = {
 	assign: async ({ request }) => {
 		const form = await request.formData();
 		const jobId = parseInt(String(form.get('job') ?? ''), 10);
-		const carIds = form.getAll('car').map((v) => parseInt(String(v), 10));
+		if (Number.isNaN(jobId)) throw error(400, 'Missing job');
+		const carIds = [
+			...new Set(form.getAll('car').map((v) => parseInt(String(v), 10)).filter((n) => !Number.isNaN(n)))
+		];
 		for (const carId of carIds) {
-			if (!Number.isNaN(carId)) assignCarToJob(carId, jobId);
+			assignCarToJob(carId, jobId);
 		}
 		throw redirect(303, `/operations/switchlists?assigned=${carIds.length}`);
 	}

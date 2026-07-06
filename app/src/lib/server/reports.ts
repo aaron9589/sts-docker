@@ -91,7 +91,7 @@ export function carHistory(carId: number): HistoryEntry[] {
 			 LEFT JOIN locations l ON l.id = h.location_id
 			 LEFT JOIN stations st ON st.id = l.station_id
 			 WHERE h.car_id = ?
-			 ORDER BY h.event_date DESC`
+			 ORDER BY h.session_nbr DESC, h.id DESC`
 		)
 		.all(carId) as HistoryEntry[];
 }

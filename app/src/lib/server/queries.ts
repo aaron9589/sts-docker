@@ -2,7 +2,7 @@
  * Read-side queries backing the operations pages and reports.
  * Tier logic and display rules follow docs/SPEC.md §5–§6.
  */
-import { db, sessionNumber, randInt } from './db';
+import { db, sessionNumber } from './db';
 import type {
 	CarRow,
 	CarTier,
@@ -295,11 +295,12 @@ export function loadUnloadList(): (CarRow & { suggested: boolean })[] {
 
 	return rows.map((r) => {
 		let suggested = false;
+		// Deterministic hint: ready once the minimum spotting time has elapsed.
+		// (Re-rolling rand() here made the flag flicker between page loads.)
 		if (r.status === 'Loading') {
-			suggested = r.last_spotted + randInt(r.min_load_time ?? 0, r.max_load_time ?? 0) <= session;
+			suggested = r.last_spotted + (r.min_load_time ?? 0) <= session;
 		} else if (r.status === 'Unloading') {
-			suggested =
-				r.last_spotted + randInt(r.min_unload_time ?? 0, r.max_unload_time ?? 0) <= session;
+			suggested = r.last_spotted + (r.min_unload_time ?? 0) <= session;
 		}
 		return { ...r, is_reposition: !!r.is_reposition, suggested };
 	});
@@ -411,6 +412,7 @@ export function autoAssignCandidates(jobId: number): AutoAssignCandidate[] {
 	}[];
 
 	const out: AutoAssignCandidate[] = [];
+	const seen = new Set<number>();
 	for (const cr of criteria) {
 		const rows = asCarRows(
 			d
@@ -442,6 +444,10 @@ export function autoAssignCandidates(jobId: number): AutoAssignCandidate[] {
 				})
 		);
 		for (const row of rows) {
+			// A car can satisfy several criteria; keep the first match so the
+			// keyed {#each} on the page never sees a duplicate car id.
+			if (seen.has(row.id)) continue;
+			seen.add(row.id);
 			out.push({ ...row, pickup_station: cr.pickup_station, step_nbr: cr.step_nbr });
 		}
 	}

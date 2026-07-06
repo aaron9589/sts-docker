@@ -8,7 +8,6 @@ import {
 	sessionNumber,
 	setSetting,
 	randAmount,
-	randInt,
 	pad2,
 	pad3,
 	nextLetterWaybillCounter,
@@ -167,20 +166,21 @@ export function undoPickUpCar(carId: number, jobId: number): void {
 	d.transaction(() => {
 		const hist = d
 			.prepare(
-				`SELECT location_id FROM history
+				`SELECT id, location_id FROM history
 				 WHERE car_id = ? AND event LIKE 'Picked up by Job%'
-				 ORDER BY rowid DESC LIMIT 1`
+				 ORDER BY id DESC LIMIT 1`
 			)
-			.get(carId) as { location_id: number | null } | undefined;
-		const locationId = hist?.location_id ?? null;
+			.get(carId) as { id: number; location_id: number | null } | undefined;
+		// If the pickup history row has been trimmed away (max_history cap) we
+		// can't recover the original spot — leave the car where it is rather
+		// than stranding it at NULL location.
+		if (!hist || hist.location_id === null) return;
 		d.prepare('UPDATE cars SET current_location_id = ?, handled_by_job_id = ? WHERE id = ?').run(
-			locationId,
+			hist.location_id,
 			jobId,
 			carId
 		);
-		d.prepare(`DELETE FROM history WHERE car_id = ? AND event LIKE 'Picked up by Job%' AND rowid = (
-			SELECT rowid FROM history WHERE car_id = ? AND event LIKE 'Picked up by Job%' ORDER BY rowid DESC LIMIT 1
-		)`).run(carId, carId);
+		d.prepare('DELETE FROM history WHERE id = ?').run(hist.id);
 	})();
 }
 
@@ -232,7 +232,12 @@ export function setOutCar(carId: number, locationId: number): void {
 			)
 			.run(carId);
 		if (repoDone.changes > 0) {
-			d.prepare('DELETE FROM car_orders WHERE car_id = ?').run(carId);
+			// Delete only the reposition order that just arrived, not any other
+			// order the car may still hold.
+			d.prepare(
+				`DELETE FROM car_orders
+				 WHERE car_id = ? AND destination_location_id = ?`
+			).run(carId, locationId);
 		}
 
 		// Instant load/unload: negative min or max time skips the in-progress state.
@@ -260,7 +265,10 @@ export function setOutCar(carId: number, locationId: number): void {
 			}
 			if (cur.status === 'Unloading' && (cur.min_unload_time < 0 || cur.max_unload_time < 0)) {
 				d.prepare("UPDATE cars SET status = 'Empty', last_spotted = 0 WHERE id = ?").run(carId);
-				d.prepare('DELETE FROM car_orders WHERE car_id = ?').run(carId);
+				// Delete only the revenue order being unloaded, not any other order.
+				d.prepare('DELETE FROM car_orders WHERE car_id = ? AND shipment_id IS NOT NULL').run(
+					carId
+				);
 			}
 		}
 	})();
@@ -277,27 +285,35 @@ export function completeLoadUnload(carId: number, currentStatus: string): void {
 		let newStatus = currentStatus;
 		if (currentStatus === 'Loading') {
 			newStatus = 'Loaded';
-		} else if (currentStatus === 'Unloading' || currentStatus === 'Empty') {
+		} else if (currentStatus === 'Unloading') {
 			newStatus = 'Empty';
-			d.prepare('DELETE FROM car_orders WHERE car_id = ?').run(carId);
+			// Revenue order complete: delete the shipment order, not a coexisting reposition.
+			d.prepare('DELETE FROM car_orders WHERE car_id = ? AND shipment_id IS NOT NULL').run(carId);
+		} else if (currentStatus === 'Empty') {
+			newStatus = 'Empty';
+			// Reposition car reached its destination: delete the reposition order only.
+			d.prepare(
+				'DELETE FROM car_orders WHERE car_id = ? AND destination_location_id IS NOT NULL'
+			).run(carId);
 		}
 		d.prepare('UPDATE cars SET status = ?, last_spotted = 0 WHERE id = ?').run(newStatus, carId);
 	})();
 }
 
 /**
- * load_unload.php pre-check suggestion: a car is "ready" when
- * last_spotted + rand(min_time, max_time) <= current session.
+ * load_unload.php pre-check suggestion: a car is "ready" once the minimum
+ * spotting time has elapsed (last_spotted + min_time <= current session).
+ * Deterministic so the hint doesn't flicker between renders.
  */
 export function suggestReady(
 	status: string,
 	lastSpotted: number,
 	minTime: number,
-	maxTime: number,
+	_maxTime: number,
 	session = sessionNumber()
 ): boolean {
 	if (status !== 'Loading' && status !== 'Unloading') return false;
-	return lastSpotted + randInt(minTime, maxTime) <= session;
+	return lastSpotted + minTime <= session;
 }
 
 /** reposition.php: create an E-waybill sending an empty car to a destination. */

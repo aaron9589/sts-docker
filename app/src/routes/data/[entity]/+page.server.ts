@@ -32,15 +32,19 @@ export const load: PageServerLoad = ({ params }) => {
 	};
 };
 
+class FieldError extends Error {}
+
 function valueFor(
-	field: { type: string; nullable?: boolean },
+	field: { type: string; label: string; nullable?: boolean },
 	raw: FormDataEntryValue | null
 ): unknown {
 	const s = raw === null ? '' : String(raw);
 	if (field.type === 'number' || field.type === 'select') {
 		if (s === '') return field.nullable ? null : field.type === 'number' ? 0 : null;
 		const n = Number(s);
-		return Number.isNaN(n) ? s : n;
+		// Never bind a non-numeric string into a numeric/FK column.
+		if (Number.isNaN(n)) throw new FieldError(`${field.label} must be a number`);
+		return n;
 	}
 	return s === '' && field.nullable ? null : s;
 }
@@ -56,7 +60,12 @@ export const actions: Actions = {
 				return fail(400, { error: `${f.label} is required` });
 			}
 		}
-		const values = d.fields.map((f) => valueFor(f, form.get(f.name)));
+		let values;
+		try {
+			values = d.fields.map((f) => valueFor(f, form.get(f.name)));
+		} catch (e) {
+			return fail(400, { error: (e as Error).message });
+		}
 		try {
 			db()
 				.prepare(
@@ -107,7 +116,12 @@ export const actions: Actions = {
 		if (!id) return fail(400, { error: 'Missing id' });
 		const keyCol = ['pool', 'empty_locations', 'ownership'].includes(d.table) ? 'rowid' : 'id';
 		const sets = d.fields.map((f) => `${f.name} = ?`).join(', ');
-		const values = d.fields.map((f) => valueFor(f, form.get(f.name)));
+		let values;
+		try {
+			values = d.fields.map((f) => valueFor(f, form.get(f.name)));
+		} catch (e) {
+			return fail(400, { error: (e as Error).message });
+		}
 		try {
 			db().prepare(`UPDATE ${d.table} SET ${sets} WHERE ${keyCol} = ?`).run(...values, id);
 		} catch (e) {

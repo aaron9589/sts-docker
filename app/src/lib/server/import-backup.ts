@@ -63,8 +63,21 @@ function parseValueList(src: string): string[] {
 				const ch = src[i];
 				if (ch === '\\' && i + 1 < src.length) {
 					const next = src[i + 1];
+					// Recognised C-style escapes; for anything else (including a
+					// literal backslash, e.g. a Windows path) keep the backslash
+					// so data isn't silently dropped.
 					value +=
-						next === 'n' ? '\n' : next === 'r' ? '\r' : next === 't' ? '\t' : next === '0' ? '\0' : next;
+						next === 'n'
+							? '\n'
+							: next === 'r'
+								? '\r'
+								: next === 't'
+									? '\t'
+									: next === '0'
+										? '\0'
+										: next === '\\' || next === '"' || next === "'"
+											? next
+											: '\\' + next;
 					i += 2;
 				} else if (ch === quote) {
 					i++;

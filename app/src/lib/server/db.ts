@@ -85,11 +85,13 @@ export function pad2(n: number): string {
 /** Next counter for SSS-{M|E}NN waybills in the given session. */
 export function nextLetterWaybillCounter(letter: 'M' | 'E', session: number): number {
 	const prefix = `${pad3(session)}-${letter}`;
+	// Suffix can grow past two digits, so take the numeric max of the suffix
+	// rather than a lexical ORDER BY (which sorts 'M9' after 'M10').
 	const row = db()
 		.prepare(
-			`SELECT waybill_number FROM car_orders
-			 WHERE waybill_number LIKE ? ORDER BY waybill_number DESC LIMIT 1`
+			`SELECT MAX(CAST(SUBSTR(waybill_number, ?) AS INTEGER)) AS n FROM car_orders
+			 WHERE waybill_number LIKE ?`
 		)
-		.get(`${prefix}__`) as { waybill_number: string } | undefined;
-	return row ? parseInt(row.waybill_number.slice(-2), 10) + 1 : 1;
+		.get(prefix.length + 1, `${prefix}%`) as { n: number | null };
+	return (row.n ?? 0) + 1;
 }
