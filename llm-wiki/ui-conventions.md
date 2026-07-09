@@ -1,7 +1,6 @@
 ---
 title: STS UI Conventions (legacy PHP app)
-purpose:
-  Canonical UI/CSS/JS conventions for sts/ pages — visual and behavioural
+purpose: Canonical UI/CSS/JS conventions for sts/ pages — visual and behavioural
   consistency.
 load_when:
   touching any page/template in sts/ — CSS, layout, print styles, status badges,
