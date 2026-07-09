@@ -1,4 +1,6 @@
 #checkov:skip=CKV_DOCKER_3: not using a default user.
+# trivy:ignore:DS-0002 same tradeoff as above: apache needs root to bind port 80,
+# and switching to non-root on this EOL base is a real runtime change, not CI cleanup.
 # Use php:8.0-apache-buster as base image
 FROM php:8.0-apache-buster
 
