@@ -6,6 +6,8 @@
     <title>STS - Pick Up Cars</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="operations_ui.css" rel="stylesheet">
+    <script src="operations_table_filters.js"></script>
     <style>
       tr {vertical-align: top;}
       th, td { font-size: 0.875rem; padding: 6px 8px; white-space: nowrap; }
@@ -50,22 +52,16 @@
       // this javascript function is triggered by the user changing the "All" checkbox
       function checkall()
       {
-        var row_count = document.getElementById('job_table').rows.length-1;
-        if (document.getElementById('check_all').checked == true)
-        {
-          for (var i=0; i < row_count; i++)
-          {
-            var checkbox_name = "check" + i.toString();
-            document.getElementById(checkbox_name).checked = true;
+        var visibleRows = document.querySelectorAll('#job_table tr.job-car-row:not([hidden])');
+        var checked = document.getElementById('check_all').checked;
+        visibleRows.forEach(function(row) {
+          var checkbox = row.querySelector('.pickup-row-check');
+          if (checkbox) {
+            checkbox.checked = checked;
           }
-        }
-        else
-        {
-          for (var i=0; i < row_count; i++)
-          {
-            var checkbox_name = "check" + i.toString();
-            document.getElementById(checkbox_name).checked = false;
-          }
+        });
+        if (typeof updatePickupLocationGroupHeaders === 'function') {
+          updatePickupLocationGroupHeaders();
         }
       }
     </script>
@@ -81,15 +77,17 @@
           <a href="index.html" class="btn btn-outline-light btn-sm me-2">
             <i class="bi bi-house"></i> Home
           </a>
-          <button class="btn btn-light btn-sm noprint" onclick="window.print()">
+          <button class="btn btn-light btn-sm noprint me-2" onclick="window.print()">
             <i class="bi bi-printer"></i> Print
           </button>
+          <a href="index-t.html" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-diagram-3"></i> Site Map
+          </a>
         </div>
       </div>
     </nav>
-    <div class="px-4">
-    <h5 class="mb-2">Pick Up Cars</h5>
-    <div class="noprint text-muted mb-3">Select a job to do the pickups</div>
+    <div class="px-4 py-3">
+    <h5 class="mb-3">Pick Up Cars</h5>
     <form action="pick_up.php" method="get">
     <?php
       // bring in the utility files
@@ -98,10 +96,12 @@
 
       // get a database connection
       $dbc = open_db();
+      $workflow_alert_html = '';
 
       // was the Finish button clicked?
       if (isset($_GET['finish_btn']))
       {
+        $num_cars_picked_up = 0;
         // only try to pick cars if there were some to be picked up in the first place
         if (isset($_GET['row_count']))
         {
@@ -169,26 +169,58 @@
               {
                 print 'Insert error: ' . mysqli_error($dbc) . ' SQL: ' . $sql . '<br /><br />';
               }
+              else
+              {
+                $num_cars_picked_up++;
+              }
             }
           }
         }
+        $workflow_alert_html = '<div class="alert alert-success noprint ops-workflow-alert mb-4">'
+            . '<span>' . htmlspecialchars((string)$num_cars_picked_up) . ' car(s) picked up.</span>'
+            . '<a class="btn btn-success" href="set_out.php">Go to Set Out Cars</a>'
+            . '</div>';
       }
-      print '<div class="noprint mb-3">';
-      // generate the list of jobs from which the user can choose
-            print '<div class="d-flex flex-wrap align-items-center gap-2">';
-            print drop_down_jobs("job_list", '', "get_jobs_and_cars();");
-            print '<button id="finish_btn" name="finish_btn" value="PICK UP" type="submit" disabled
-              class="btn btn-success btn-lg">PICK UP</button>';
-            print '</div>';
+      print '<div class="row g-3 mb-4 noprint">';
+      print '<div class="col-md-6">';
+      print '<div class="card h-100">';
+      print '<div class="card-header fw-semibold"><i class="bi bi-train-front"></i> Select Job / Train</div>';
+      print '<div class="card-body">';
+      print '<p class="card-text text-muted small mb-2">Choose the job or train doing the pickups.</p>';
+      print drop_down_jobs("job_list", '', "get_jobs_and_cars();", "pickup");
+      print '</div></div></div></div>';
+
+      if ($workflow_alert_html !== '')
+      {
+        print $workflow_alert_html;
+      }
     ?>
-      <!-- print button is in the navbar -->
-      <div id="instructions" class="alert alert-info d-none mt-2">
-      Mark the cars that have been picked up with check marks and then click the <b>PICK UP</b> button.<br /><br />
-      After picking up the cars, click <a href="organize_cars.php"><b>here</b></a> to update the positions of the cars in the train.<br /><br />
-      Click <a href="display_switchlist.php"><b>here</b></a> to generate an updated switch list if desired.
+      <div id="instructions" class="ops-workflow noprint d-none">
+        <div class="ops-panel">
+          <p class="ops-panel-text mb-0">
+            Check the cars picked up, then click <strong>PICK UP</strong>.
+            After pickup, <a href="organize_cars.php">organize train positions</a> or
+            <a href="display_switchlist.php">print an updated switch list</a>.
+          </p>
+          <div class="mt-3">
+            <button id="finish_btn" name="finish_btn" value="PICK UP" type="submit" disabled
+              class="btn btn-success btn-lg">PICK UP</button>
+          </div>
+        </div>
+        <div class="ops-panel-action ops-panel-tools">
+          <div class="ops-toolbar ops-toolbar-stack">
+            <div class="ops-toolbar-section ops-toolbar-bulk">
+              <label for="bulk_pickup_location" class="form-label fw-semibold mb-1">Check all boxes at:</label>
+              <select id="bulk_pickup_location" name="bulk_pickup_location" class="form-select" style="max-width: 20rem;" onchange="checkRowsAtPickupLocation(this.value)">
+                <option value="">Select pickup location</option>
+              </select>
+            </div>
+            <div class="ops-toolbar-section ops-toolbar-filters">
+              <?php require 'operations_station_filters.inc.php'; ?>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <br />
     <div id="job_table_div">
       <!-- the guts of the table are filled in by the HttpRequest call-back function -->
     </div>
@@ -231,7 +263,10 @@
           job_name = document.getElementById("job_list").value;
 
           // tell the user that there aren't any cars in this job
+          document.getElementById("instructions").classList.add("d-none");
           document.getElementById("job_table_div").innerHTML = "<tr><td>The switchlist for " + job_name + " doesn't contain any cars.</td></tr>";
+          document.getElementById("bulk_pickup_location").innerHTML = getBulkPickupDefaultOptions();
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
         }
         else
         {
@@ -240,7 +275,267 @@
 
           // display the table being returned from the server
           document.getElementById("job_table_div").innerHTML = xmlhttp.responseText;
+
+          setTimeout(function() {
+            populateStationFilters();
+          }, 100);
         }
+      }
+
+      function populateStationFilters()
+      {
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const filters = document.getElementById('station_filters');
+
+        if (!filters || rows.length === 0) {
+          detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
+          return;
+        }
+
+        populateStationLocationFilterOptions('pickup_location_filter', 'pickupStation', 'pickupLocation', 'pickup stations / locations');
+        populateStationFilterOptions('car_code_filter', 'carCode', 'car codes');
+        populateStationFilterOptions('status_filter', 'status', 'statuses');
+        populateStationFilterOptions('consignment_filter', 'consignment', 'consignments');
+        populateStationLocationFilterOptions('final_destination_filter', 'finalDestinationStation', 'finalDestinationLocation', 'final destinations');
+        populateStationLocationFilterOptions('loading_station_filter', 'loadingStation', 'loadingLocation', 'loading stations / locations');
+        populateStationLocationFilterOptions('unloading_station_filter', 'unloadingStation', 'unloadingLocation', 'unloading stations / locations');
+        document.getElementById('reporting_marks_filter').value = '';
+        populateBulkPickupDropdown();
+        mountStationFiltersInToolbar();
+        applyStationFilters();
+        attachPickupCheckboxListeners();
+      }
+
+      function mountStationFiltersInToolbar()
+      {
+        detachStationFilters('job_table', 'station_filters', 'station_filters_mount');
+        const filters = document.getElementById('station_filters');
+        if (filters) {
+          filters.classList.remove('d-none');
+        }
+      }
+
+      function populateStationLocationFilterOptions(selectId, stationKey, locationKey, allLabel)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const stations = new Map();
+
+        rows.forEach(row => {
+          const station = row.dataset[stationKey];
+          const location = row.dataset[locationKey];
+          if (!station) return;
+
+          if (!stations.has(station)) {
+            stations.set(station, new Set());
+          }
+          if (location) {
+            stations.get(station).add(location);
+          }
+        });
+
+        select.innerHTML = '';
+
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        Array.from(stations.keys()).sort().forEach(station => {
+          const stationOption = document.createElement('option');
+          stationOption.value = 'station::' + station;
+          stationOption.textContent = station;
+          select.appendChild(stationOption);
+
+          Array.from(stations.get(station)).sort().forEach(location => {
+            const locationOption = document.createElement('option');
+            locationOption.value = 'location::' + location;
+            locationOption.textContent = location;
+            select.appendChild(locationOption);
+          });
+        });
+
+        select.value = '';
+      }
+
+      function populateStationFilterOptions(selectId, datasetKey, allLabel)
+      {
+        const select = document.getElementById(selectId);
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        const stations = Array.from(new Set(rows.map(row => row.dataset[datasetKey]).filter(Boolean))).sort();
+
+        select.innerHTML = '';
+
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All';
+        select.appendChild(allOption);
+
+        stations.forEach(station => {
+          const option = document.createElement('option');
+          option.value = station;
+          option.textContent = station;
+          select.appendChild(option);
+        });
+
+        select.value = '';
+      }
+
+      function applyStationFilters()
+      {
+        const pickupLocationFilter = document.getElementById('pickup_location_filter').value;
+        const reportingMarks = document.getElementById('reporting_marks_filter').value.trim().toLowerCase();
+        const carCode = document.getElementById('car_code_filter').value;
+        const status = document.getElementById('status_filter').value;
+        const consignment = document.getElementById('consignment_filter').value;
+        const finalDestinationFilter = document.getElementById('final_destination_filter').value;
+        const loadingLocationFilter = document.getElementById('loading_station_filter').value;
+        const unloadingLocationFilter = document.getElementById('unloading_station_filter').value;
+        const rows = Array.from(document.querySelectorAll('#job_table tr.job-car-row'));
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+          const matchesPickup = matchesStationLocationFilter(row, pickupLocationFilter, 'pickupStation', 'pickupLocation');
+          const matchesMarks = !reportingMarks || row.dataset.reportingMarks.toLowerCase().includes(reportingMarks);
+          const matchesCarCode = !carCode || row.dataset.carCode === carCode;
+          const matchesStatus = !status || row.dataset.status === status;
+          const matchesConsignment = !consignment || row.dataset.consignment === consignment;
+          const matchesFinalDestination = matchesStationLocationFilter(row, finalDestinationFilter, 'finalDestinationStation', 'finalDestinationLocation');
+          const matchesLoading = matchesStationLocationFilter(row, loadingLocationFilter, 'loadingStation', 'loadingLocation');
+          const matchesUnloading = matchesStationLocationFilter(row, unloadingLocationFilter, 'unloadingStation', 'unloadingLocation');
+          const isVisible = matchesPickup && matchesMarks && matchesCarCode && matchesStatus && matchesConsignment && matchesFinalDestination && matchesLoading && matchesUnloading;
+
+          row.hidden = !isVisible;
+          const checkbox = row.querySelector('.pickup-row-check');
+          if (checkbox) {
+            checkbox.disabled = !isVisible;
+          }
+          if (isVisible) {
+            visibleCount++;
+          }
+        });
+
+        updatePickupLocationGroupHeaders();
+        updateStationFilterCount(visibleCount, rows.length);
+        updateCheckAllState();
+      }
+
+      function updatePickupLocationGroupHeaders()
+      {
+        updateTableGroupHeaderVisibility('job_table', 'pickup-group-header');
+        updateLocationGroupHeaderStates('job_table', 'pickup-group-header', '.pickup-row-check');
+      }
+
+      function togglePickupLocationGroup(headerCheckbox)
+      {
+        toggleLocationGroupCheck(headerCheckbox, {
+          tableId: 'job_table',
+          rowCheckboxSelector: '.pickup-row-check',
+          updateGroupHeaders: updatePickupLocationGroupHeaders,
+          updateCheckAll: updateCheckAllState
+        });
+      }
+
+      function attachPickupCheckboxListeners()
+      {
+        document.querySelectorAll('#job_table .pickup-row-check').forEach(function(checkbox) {
+          checkbox.addEventListener('change', function() {
+            updateCheckAllState();
+            updatePickupLocationGroupHeaders();
+          });
+        });
+      }
+
+      function matchesStationLocationFilter(row, selectedValue, stationKey, locationKey)
+      {
+        if (!selectedValue) return true;
+        if (selectedValue.indexOf('station::') === 0) {
+          return row.dataset[stationKey] === selectedValue.substring(9);
+        }
+        if (selectedValue.indexOf('location::') === 0) {
+          return row.dataset[locationKey] === selectedValue.substring(10);
+        }
+        return true;
+      }
+
+      function updateStationFilterCount(visibleCount, totalCount)
+      {
+        const count = document.getElementById('station_filter_count');
+        if (count) {
+          count.textContent = visibleCount + ' of ' + totalCount + ' cars shown';
+        }
+      }
+
+      function updateCheckAllState()
+      {
+        const checkAll = document.getElementById('check_all');
+        if (!checkAll) return;
+
+        const visibleCheckboxes = Array.from(document.querySelectorAll('#job_table tr.job-car-row:not([hidden]) .pickup-row-check'));
+        checkAll.checked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(checkbox => checkbox.checked);
+      }
+
+      function clearStationFilters()
+      {
+        document.getElementById('pickup_location_filter').value = '';
+        document.getElementById('reporting_marks_filter').value = '';
+        document.getElementById('car_code_filter').value = '';
+        document.getElementById('status_filter').value = '';
+        document.getElementById('consignment_filter').value = '';
+        document.getElementById('final_destination_filter').value = '';
+        document.getElementById('loading_station_filter').value = '';
+        document.getElementById('unloading_station_filter').value = '';
+        applyStationFilters();
+      }
+
+      function getBulkPickupDefaultOptions() {
+        return '<option value="">Select pickup location</option>';
+      }
+
+      function populateBulkPickupDropdown() {
+        const bulkDropdown = document.getElementById('bulk_pickup_location');
+        if (!bulkDropdown) return;
+        bulkDropdown.innerHTML = getBulkPickupDefaultOptions();
+
+        const locations = new Set();
+        document.querySelectorAll('#job_table tr.job-car-row').forEach(function(row) {
+          const location = row.dataset.pickupLocation;
+          if (location) {
+            locations.add(location);
+          }
+        });
+
+        Array.from(locations).sort().forEach(function(location) {
+          const option = document.createElement('option');
+          option.value = location;
+          option.textContent = location;
+          bulkDropdown.appendChild(option);
+        });
+      }
+
+      function checkRowsAtPickupLocation(selectedValue) {
+        if (!selectedValue) {
+          document.querySelectorAll('#job_table .pickup-row-check').forEach(function(checkbox) {
+            checkbox.checked = false;
+          });
+          const checkAll = document.getElementById('check_all');
+          if (checkAll) {
+            checkAll.checked = false;
+          }
+          updatePickupLocationGroupHeaders();
+          return;
+        }
+
+        document.querySelectorAll('#job_table tr.job-car-row:not([hidden])').forEach(function(row) {
+          if (row.dataset.pickupLocation !== selectedValue) return;
+          const checkbox = row.querySelector('.pickup-row-check');
+          if (checkbox && !checkbox.disabled) {
+            checkbox.checked = true;
+          }
+        });
+
+        updateCheckAllState();
+        updatePickupLocationGroupHeaders();
       }
 
     </script>

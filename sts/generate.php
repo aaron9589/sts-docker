@@ -50,34 +50,17 @@
       <a href="operations.html" class="btn btn-outline-light btn-sm me-2">
         <i class="bi bi-arrow-left"></i> Operations
       </a>
-      <a href="index.html" class="btn btn-outline-light btn-sm">
+      <a href="index.html" class="btn btn-outline-light btn-sm me-2">
         <i class="bi bi-house"></i> Home
+      </a>
+      <a href="index-t.html" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-diagram-3"></i> Site Map
       </a>
     </div>
   </div>
 </nav>
 <div class="px-4 py-3">
 <h5 class="mb-3">Generate Car Orders</h5>
-<div class="row g-3 mb-3">
-  <div class="col-sm-6">
-    <div class="card h-100">
-      <div class="card-body d-flex flex-column">
-        <h6 class="card-title"><i class="bi bi-lightning-charge"></i> Automatic Generation</h6>
-        <p class="card-text text-muted small">Increment the operating session number and automatically generate car orders based on shipment schedules.</p>
-        <button class="btn btn-success mt-auto w-100" onclick="show_auto();">AUTOMATIC</button>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6">
-    <div class="card h-100">
-      <div class="card-body d-flex flex-column">
-        <h6 class="card-title"><i class="bi bi-list-check"></i> Manual Generation</h6>
-        <p class="card-text text-muted small">Choose specific shipments and click MANUAL to generate car orders for those shipments only.</p>
-        <button class="btn btn-success mt-auto w-100" onclick="show_manual();">MANUAL</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script type="text/javascript">
   function show_auto()
@@ -94,7 +77,7 @@
 
   function confirm_manual_order()
   {
-    alert('Click "OK" to order these cars. Otherwise click the browser back button to cancel.');
+    return confirm('Click OK to order these cars. Click Cancel to go back without ordering.');
   }
 
   // generate some javascript that will hide rows
@@ -146,6 +129,9 @@
 
       // get a database connection
       $dbc = open_db();
+      $orders_generated = false;
+      $generated_order_count = 0;
+      $orders_generated_alert_html = '';
 
       // bring in and display the current operating session number
       $sql = 'select setting_value from settings where setting_name = "session_nbr"';
@@ -156,6 +142,82 @@
       }
       $row = mysqli_fetch_array($rs);
       $session_number = $row['setting_value'];
+
+      function run_automatic_car_order_generation($dbc, $session_number, $waybill_counter)
+      {
+        $orders_created = 0;
+
+        $sql = 'select id as id,
+                       shipments.code as code,
+                       shipments.last_ship_date as last_ship_date,
+                       shipments.min_interval as min_interval,
+                       shipments.max_interval as max_interval,
+                       shipments.min_amount as min_amount,
+                       shipments.max_amount as max_amount
+                  from shipments';
+        $rs_shipments = mysqli_query($dbc, $sql);
+        if (!$rs_shipments || mysqli_num_rows($rs_shipments) <= 0) {
+          return 0;
+        }
+
+        while ($row = mysqli_fetch_array($rs_shipments))
+        {
+          $last_ship_date = $row['last_ship_date'];
+          $min_interval = $row['min_interval'];
+          $max_interval = $row['max_interval'];
+          $min_amount = $row['min_amount'];
+          $max_amount = $row['max_amount'];
+
+          $interval = round(mt_rand($min_interval * 100, $max_interval * 100)/100);
+          $ship_date = $last_ship_date + $interval;
+
+          if ($ship_date <= $session_number)
+          {
+            $sql = 'update shipments set last_ship_date = ' . $session_number . ' where id = "' . $row['id'] . '"';
+            if (!mysqli_query($dbc, $sql))
+            {
+              print 'Update Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
+            }
+
+            $num_cars = round(mt_rand($min_amount * 100, $max_amount * 100)/100);
+
+            for ($i=0; $i<$num_cars; $i++)
+            {
+              $waybill_counter++;
+              $wb_nbr = str_pad($session_number, 3, '0', STR_PAD_LEFT) . "-" . str_pad($waybill_counter, 3, '0', STR_PAD_LEFT);
+
+              $sql = 'insert into car_orders (waybill_number, shipment, car) values ("' . $wb_nbr . '", "' . $row['id'] . '", "0")';
+              if (!mysqli_query($dbc, $sql))
+              {
+                print 'Insert Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
+              }
+              else
+              {
+                $orders_created++;
+              }
+            }
+          }
+        }
+
+        return $orders_created;
+      }
+
+      function get_next_auto_waybill_counter($dbc, $session_number)
+      {
+        $session_prefix = str_pad($session_number, 3, '0', STR_PAD_LEFT) . '-';
+        $session_prefix = mysqli_real_escape_string($dbc, $session_prefix);
+        $sql = 'select max(cast(substr(waybill_number, 5, 3) as unsigned)) as max_counter
+                from car_orders
+                where waybill_number like "' . $session_prefix . '___"
+                  and substr(waybill_number, 5, 1) != "M"';
+        $rs = mysqli_query($dbc, $sql);
+        $row = mysqli_fetch_array($rs);
+        if (!$row || $row['max_counter'] === null) {
+          return 0;
+        }
+
+        return (int)$row['max_counter'];
+      }
 
 //-------------------------------------------- process the request -------------------------------------------
 
@@ -173,72 +235,48 @@
           print 'Setting not found - Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
         }
 
-        // initialize a counter for the number of waybills generated this session
-        $waybill_counter = 0;
-
-        // go through the shippers and generate car orders as appropriate
-        $sql = 'select id as id,
-                       shipments.code as code,
-                       shipments.last_ship_date as last_ship_date,
-                       shipments.min_interval as min_interval,
-                       shipments.max_interval as max_interval,
-                       shipments.min_amount as min_amount,
-                       shipments.max_amount as max_amount
-                  from shipments';
-        $rs_shipments = mysqli_query($dbc, $sql);
-        if (mysqli_num_rows($rs_shipments) > 0)
+        $generated_order_count = run_automatic_car_order_generation($dbc, $session_number, 0);
+        print $generated_order_count . ' car orders generated<br /><br />';
+        $orders_generated = true;
+      }
+      elseif (isset($_POST['autogenerate_no_session_btn']))
+      {
+        if ((int)$session_number <= 0)
         {
-          while ($row = mysqli_fetch_array($rs_shipments))
-          {
-            // do the math
-            $last_ship_date = $row['last_ship_date'];
-            $min_interval = $row['min_interval'];
-            $max_interval = $row['max_interval'];
-            $min_amount = $row['min_amount'];
-            $max_amount = $row['max_amount'];
+          print 'Cannot generate orders without a session. Use Generate Session first.<br /><br />';
+        }
+        else
+        {
+          print 'Auto-generating car orders for Operating Session ' . $session_number . ' (session not incremented)...</br><br >';
 
-            // find a random number between the min and max intervals and round any fraction either up or down
-            $interval = round(mt_rand($min_interval * 100, $max_interval * 100)/100);
+          $waybill_counter = get_next_auto_waybill_counter($dbc, $session_number);
+          $generated_order_count = run_automatic_car_order_generation($dbc, $session_number, $waybill_counter);
+          print $generated_order_count . ' car orders generated<br /><br />';
+          $orders_generated = true;
+        }
+      }
+      elseif (isset($_POST['increment_session_btn']))
+      {
+        $previous_session = (int)$session_number;
+        $session_number = $previous_session + 1;
 
-            // add the random number to the last ship date
-            $ship_date = $last_ship_date + $interval;
-
-            // is it time to ship?
-            if ($ship_date <= $session_number)
-            {
-              // store this session number as the new last ship date
-              $sql = 'update shipments set last_ship_date = ' . $session_number . ' where id = "' . $row['id'] . '"';
-              if (!mysqli_query($dbc, $sql))
-              {
-                print 'Update Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
-              }
-
-              // determine the number of cars to order and round either up or down
-              $num_cars = round(mt_rand($min_amount * 100, $max_amount * 100)/100);
-
-              for ($i=0; $i<$num_cars; $i++)
-              {
-                // increment the waybill counter
-                $waybill_counter++;
-
-                // build the waybill number
-                $wb_nbr = str_pad($session_number, 3, '0', STR_PAD_LEFT) . "-" . str_pad($waybill_counter, 3, '0', STR_PAD_LEFT);
-
-                $sql = 'insert into car_orders (waybill_number, shipment, car) values ("' . $wb_nbr . '", "' . $row['id'] . '", "0")';
-                if (!mysqli_query($dbc, $sql))
-                {
-                  print 'Insert Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
-                }
-              }
-            }
-          }
-          // display the number of car orders created
-          print $waybill_counter . ' car orders generated<br /><br />';
+        $sql = 'update settings set setting_value = ' . $session_number . ' where setting_name = "session_nbr"';
+        if (!mysqli_query($dbc, $sql))
+        {
+          print 'Setting not found - Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
+        }
+        else
+        {
+          print '<div class="alert alert-info noprint">Operating session advanced from '
+              . htmlspecialchars((string)$previous_session) . ' to '
+              . htmlspecialchars((string)$session_number) . '.</div>';
+          print '<script>document.addEventListener("DOMContentLoaded", function() { show_manual(); });</script>';
         }
       }
       elseif (isset($_POST['mangenerate_btn']))         // -------------------------------- was the "Manual Generate" button clicked?
       {
         // initialize the waybill counter
+        $manual_generated_count = 0;
         $sql = 'select max(substr(waybill_number, 6, 2)) from car_orders where waybill_number like "' . str_pad($session_number, 3, '0', STR_PAD_LEFT) . '-M__"';
         $rs = mysqli_query($dbc, $sql);
         $row = mysqli_fetch_row($rs);
@@ -282,9 +320,49 @@
                 print 'Insert Error: [' . mysqli_error($dbc) . '] SQL: ' . $sql . '<br /><br />';
                 die();
               }
+              $manual_generated_count++;
             }
           }
         }
+        print $manual_generated_count . ' manual car orders generated<br /><br />';
+        $orders_generated = true;
+        $generated_order_count = $manual_generated_count;
+      }
+
+      if ($orders_generated)
+      {
+        $orders_generated_alert_html = '<div class="alert alert-success noprint d-flex align-items-center justify-content-between gap-3 flex-wrap mb-3">'
+            . '<span>' . htmlspecialchars((string)$generated_order_count) . ' car order(s) ready for filling.</span>'
+            . '<a class="btn btn-success" href="fill_orders.php">Go to Fill Car Orders</a>'
+            . '</div>';
+      }
+
+      $next_session_number = (int)$session_number + 1;
+
+      print '<div class="row g-3 mb-3">
+                 <div class="col-sm-6">
+                   <div class="card h-100">
+                     <div class="card-body d-flex flex-column">
+                       <h6 class="card-title"><i class="bi bi-lightning-charge"></i> Automatic Generation</h6>
+                       <p class="card-text text-muted small">Increment the operating session number and automatically generate car orders based on shipment schedules.</p>
+                       <button type="button" class="btn btn-success mt-auto w-100" onclick="show_auto();">AUTOMATIC</button>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="col-sm-6">
+                   <div class="card h-100">
+                     <div class="card-body d-flex flex-column">
+                       <h6 class="card-title"><i class="bi bi-list-check"></i> Manual Generation</h6>
+                       <p class="card-text text-muted small">Choose specific shipments and click MANUAL to generate car orders for those shipments only.</p>
+                       <button type="button" class="btn btn-success mt-auto w-100" onclick="show_manual();">MANUAL</button>
+                     </div>
+                   </div>
+                 </div>
+               </div>';
+
+      if ($orders_generated_alert_html !== '')
+      {
+        print $orders_generated_alert_html;
       }
 
 //-------------------------------------------- automatic generation -------------------------------------------
@@ -294,9 +372,27 @@
 
       // start the auto-generate form
       print '<form name="automatic" id="automatic" method="post" action="generate.php">';
-      print '<p class="text-muted">Ready to generate car orders automatically.</p>';
-      print '<input name="autogenerate_btn" id="autogenerate_btn" value="AUTOMATIC" type="submit"
-             class="btn btn-success btn-lg"><br /><br />';
+      if ((int)$session_number <= 0)
+      {
+        print '<p class="text-muted mb-2">Current operating session: <strong>' . htmlspecialchars((string)$session_number) . '</strong></p>';
+        print '<p class="text-muted">No operating session yet. Start session 1 and generate car orders.</p>';
+      }
+      else
+      {
+        print '<p class="text-muted mb-2">Current operating session: <strong>' . htmlspecialchars((string)$session_number) . '</strong></p>';
+        print '<p class="text-muted">Ready to generate car orders automatically for session ' . htmlspecialchars((string)$session_number) . '.</p>';
+      }
+      print '<div class="d-flex gap-2 flex-wrap mb-3">';
+      print '<input name="autogenerate_btn" id="autogenerate_btn" value="Generate Session" type="submit"
+             class="btn btn-success btn-lg">';
+      if ((int)$session_number > 0)
+      {
+        print '<input name="autogenerate_no_session_btn" id="autogenerate_no_session_btn"
+               value="Generate Orders" type="submit"
+               class="btn btn-outline-success btn-lg"
+               title="Generate orders for the current session without incrementing the session number">';
+      }
+      print '</div>';
       print '</form>';
 
       print '</div>';
@@ -305,9 +401,6 @@
 
       // set up the manual car order generation div
       print '<div id="manual" name="manual" style="display:none;">';
-
-      // start the manual generation form
-      print '<form name="manual" id="manual" method="post" action="generate.php">';
 
       // pull in all shipments
       $sql = 'select shipments.id as id,
@@ -336,10 +429,20 @@
       $rs_shipments = mysqli_query($dbc, $sql);
       if (mysqli_num_rows($rs_shipments) > 0)
       {
-        print '<p class="text-muted">Check shipments to order cars for, then click MANUAL.</p>';
-        // put a submit button on the top and the bottom of the div
-        print '<input name="mangenerate_btn" value="MANUAL" type="submit" onmouseup="confirm_manual_order();"
-               class="btn btn-success btn-lg mb-3"><br /><br />';
+        print '<p class="text-muted">Check Shipments to order cars for session <strong>' . htmlspecialchars((string)$session_number) . '</strong>, then click MANUAL.</p>';
+        print '<div class="d-flex gap-2 flex-wrap mb-3">';
+        print '<input name="mangenerate_btn" value="MANUAL" type="submit" form="manualOrderForm" onclick="return confirm_manual_order();"
+               class="btn btn-success btn-lg">';
+        print '<form method="post" action="generate.php" class="mb-0 next-session-form" data-next-session="' . htmlspecialchars((string)$next_session_number) . '">';
+        print '<input type="hidden" name="increment_session_btn" value="Next Session">';
+        print '<button type="button" class="btn btn-outline-success btn-lg next-session-btn">
+                 Next Session
+               </button>';
+        print '</form>';
+        print '</div>';
+
+        // start the manual generation form
+        print '<form name="manualOrderForm" id="manualOrderForm" method="post" action="generate.php">';
         // filter panel above the table
         print '<div class="card mb-3">
                  <div class="card-body py-2">
@@ -370,7 +473,9 @@
         print '<div class="table-responsive"><table id="ship_tbl" class="table table-sm table-bordered table-hover sortable">
                  <thead>
                    <tr style="position: sticky; top: 0; background-color: #F5F5F5">
-                     <th class="sorttable_nosort">Select</th>
+                     <th class="sorttable_nosort" style="text-align:center;">
+                       <input type="checkbox" id="selectAllShipments" title="Select all visible shipments" aria-label="Select all visible shipments">
+                     </th>
                      <th><i>Shipment<br />Code</th>
                      <th><i>Description</th>
                      <th><i>Commodity</th>
@@ -389,7 +494,7 @@
         while ($row = mysqli_fetch_array($rs_shipments))
         {
           print '<tr>
-                   <td style="text-align:center;"><input type="checkbox" name="select' . $row_count . '" id="select' . $row_count . '"></th>
+                   <td style="text-align:center;"><input type="checkbox" class="shipment-select" name="select' . $row_count . '" id="select' . $row_count . '"></td>
                    <td>' .
                      $row['code'] . '<input type="hidden" name="id' . $row_count . '" id="id' . $row_count . '" value="' . $row['id'] . '">
                    </td>
@@ -415,7 +520,7 @@
         // save the row count for the next time around
         print '<input type="hidden" name="row_count" id="row_count" value="' . $row_count . '">';
         // put a submit button at the bottom as well as the top of the div
-        print '<br /><input name="mangenerate_btn" value="MANUAL" type="submit" onclick="return confirm(\'Order these cars?\');" class="btn btn-success btn-lg mt-2"><br /><br />';
+        print '<br /><input name="mangenerate_btn" value="MANUAL" type="submit" onclick="return confirm_manual_order();" class="btn btn-success btn-lg mt-2"><br /><br />';
       }
       else
       {
@@ -425,18 +530,129 @@
       print '</div>';
     ?>
 </div>
+
+<div class="modal fade noprint" id="nextSessionModal" tabindex="-1" aria-labelledby="nextSessionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nextSessionModalLabel">Start Next Session</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="nextSessionModalMessage" class="mb-3"></p>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="nextSessionConfirmCheck">
+          <label class="form-check-label" for="nextSessionConfirmCheck" id="nextSessionConfirmLabel"></label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="nextSessionConfirmBtn" disabled>Start Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      var pendingNextSessionForm = null;
+      var nextSessionModalEl = document.getElementById('nextSessionModal');
+      var nextSessionModal = nextSessionModalEl ? new bootstrap.Modal(nextSessionModalEl) : null;
+      var nextSessionConfirmCheck = document.getElementById('nextSessionConfirmCheck');
+      var nextSessionConfirmBtn = document.getElementById('nextSessionConfirmBtn');
+      var nextSessionModalMessage = document.getElementById('nextSessionModalMessage');
+      var nextSessionConfirmLabel = document.getElementById('nextSessionConfirmLabel');
+
+      function openNextSessionConfirm(form) {
+        if (!nextSessionModal || !form) {
+          return;
+        }
+
+        pendingNextSessionForm = form;
+        var nextSession = form.dataset.nextSession || '';
+        nextSessionModalMessage.textContent = 'Are you ready to start session ' + nextSession + '?';
+        nextSessionConfirmLabel.textContent = 'Confirm';
+        nextSessionConfirmCheck.checked = false;
+        nextSessionConfirmBtn.disabled = true;
+        nextSessionModal.show();
+      }
+
+      document.querySelectorAll('.next-session-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openNextSessionConfirm(btn.closest('.next-session-form'));
+        });
+      });
+
+      if (nextSessionConfirmCheck && nextSessionConfirmBtn) {
+        nextSessionConfirmCheck.addEventListener('change', function() {
+          nextSessionConfirmBtn.disabled = !nextSessionConfirmCheck.checked;
+        });
+
+        nextSessionConfirmBtn.addEventListener('click', function() {
+          if (pendingNextSessionForm && nextSessionConfirmCheck.checked) {
+            nextSessionModal.hide();
+            pendingNextSessionForm.submit();
+          }
+        });
+      }
+
       document.querySelectorAll("select").forEach(function(el) {
         el.classList.add("form-select", "form-select-sm");
         el.style.removeProperty("width");
       });
       [['commodity_filter',3],['car_code_filter',4],['loading_loc_filter',5],['unloading_loc_filter',6]].forEach(function(f) {
         var el = document.getElementById(f[0]);
-        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; }); }
+        if (el) { el.addEventListener('change', function() { filter_rows(f[1], this.options[this.selectedIndex].text); this.disabled = true; updateSelectAllState(); }); }
       });
+
+      var selectAll = document.getElementById('selectAllShipments');
+      if (selectAll) {
+        selectAll.addEventListener('change', function() {
+          document.querySelectorAll('#ship_tbl tbody tr').forEach(function(row) {
+            if (row.style.display === 'none') {
+              return;
+            }
+            var cb = row.querySelector('.shipment-select');
+            if (cb) {
+              cb.checked = selectAll.checked;
+            }
+          });
+        });
+
+        document.querySelectorAll('.shipment-select').forEach(function(cb) {
+          cb.addEventListener('change', updateSelectAllState);
+        });
+      }
+
+      function updateSelectAllState() {
+        var selectAll = document.getElementById('selectAllShipments');
+        if (!selectAll) {
+          return;
+        }
+
+        var visible = [];
+        document.querySelectorAll('#ship_tbl tbody tr').forEach(function(row) {
+          if (row.style.display === 'none') {
+            return;
+          }
+          var cb = row.querySelector('.shipment-select');
+          if (cb) {
+            visible.push(cb);
+          }
+        });
+
+        if (visible.length === 0) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+          return;
+        }
+
+        var checkedCount = visible.filter(function(cb) { return cb.checked; }).length;
+        selectAll.checked = checkedCount === visible.length;
+        selectAll.indeterminate = checkedCount > 0 && checkedCount < visible.length;
+      }
     });
   </script>
 </body>
