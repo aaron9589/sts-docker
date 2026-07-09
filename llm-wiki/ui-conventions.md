@@ -1,21 +1,25 @@
 ---
 title: STS UI Conventions (legacy PHP app)
-purpose: Canonical UI/CSS/JS conventions for sts/ pages — visual and behavioural consistency.
-load_when: touching any page/template in sts/ — CSS, layout, print styles, status badges, drag-and-drop, mobile/tablet behaviour
+purpose:
+  Canonical UI/CSS/JS conventions for sts/ pages — visual and behavioural
+  consistency.
+load_when:
+  touching any page/template in sts/ — CSS, layout, print styles, status badges,
+  drag-and-drop, mobile/tablet behaviour
 owner: shared
 last_updated: 09/07/2026
 ---
 
 # STS UI Conventions
 
-> Applies to the legacy `sts/` PHP app. Every new or refactored page in
-> `sts/` must follow these conventions to maintain visual and behavioural
-> consistency. For the v2 rebuild (`app/`), consult `docs/SPEC.md` instead —
-> it uses SvelteKit components, not raw Bootstrap/jQuery templates.
+> Applies to the legacy `sts/` PHP app. Every new or refactored page in `sts/`
+> must follow these conventions to maintain visual and behavioural consistency.
+> For the v2 rebuild (`app/`), consult `docs/SPEC.md` instead — it uses
+> SvelteKit components, not raw Bootstrap/jQuery templates.
 >
 > Derived from: `display_station_report.php`, `wheel_report.php`,
-> `db_list_cars.php`, and the deleted `printable_station_report.php`
-> (merged into `display_station_report.php`).
+> `db_list_cars.php`, and the deleted `printable_station_report.php` (merged
+> into `display_station_report.php`).
 
 ## 1. Technology Stack
 
@@ -48,7 +52,8 @@ last_updated: 09/07/2026
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 ```
 
-> **Note:** Always include the `viewport` meta tag. It prevents iOS zoom on form inputs and enables responsive breakpoints.
+> **Note:** Always include the `viewport` meta tag. It prevents iOS zoom on form
+> inputs and enables responsive breakpoints.
 
 ---
 
@@ -191,7 +196,9 @@ Cards are the primary content container. No visible border; shadow only:
 }
 ```
 
-> **Sticky headers:** Apply `position: sticky` to `<th>` elements directly, **not** `<thead>`. Always set `background-color` on `<th>` (not just `<thead>`) to prevent content bleeding through.
+> **Sticky headers:** Apply `position: sticky` to `<th>` elements directly,
+> **not** `<thead>`. Always set `background-color` on `<th>` (not just
+> `<thead>`) to prevent content bleeding through.
 
 ### 4.4 Data Editor Tables
 
@@ -250,7 +257,8 @@ echo '<span class="status-' . strtolower($row['status']) . '">' . htmlspecialcha
 </div>
 ```
 
-The print-header scrolls with the page on screen. It is styled for both screen (centred, decorative border) and print (left-aligned, compact, monospace).
+The print-header scrolls with the page on screen. It is styled for both screen
+(centred, decorative border) and print (left-aligned, compact, monospace).
 
 ### 4.7 Modal Overlay (Inline Editing)
 
@@ -280,7 +288,9 @@ For touch-friendly editing, use a fixed overlay with a centred panel:
 }
 ```
 
-> **Why not `<select>` inline?** Touch devices cannot programmatically open native `<select>` dropdowns. The modal overlay pattern lets the user tap an option list reliably.
+> **Why not `<select>` inline?** Touch devices cannot programmatically open
+> native `<select>` dropdowns. The modal overlay pattern lets the user tap an
+> option list reliably.
 
 ### 4.8 Editable Cells
 
@@ -305,29 +315,30 @@ Mark editable cells with a pencil icon that appears on hover:
 }
 ```
 
-> **Dropdown cache gotcha:** if editable cells populate their `<select>` from
-> a client-side cache (e.g. car codes, locations, jobs fetched once and
-> reused), the cache-loading function must actually be _called_ — and
-> awaited — before the dropdown is built. A real bug in `db_list_cars.php`
-> had `loadDropdownOptions()` defined but never invoked, so the cache stayed
-> empty and no options ever appeared on first click. Load eagerly at page
-> load, or make the cell-editor function async and await the load before
-> populating.
+> **Dropdown cache gotcha:** if editable cells populate their `<select>` from a
+> client-side cache (e.g. car codes, locations, jobs fetched once and reused),
+> the cache-loading function must actually be _called_ — and awaited — before
+> the dropdown is built. A real bug in `db_list_cars.php` had
+> `loadDropdownOptions()` defined but never invoked, so the cache stayed empty
+> and no options ever appeared on first click. Load eagerly at page load, or
+> make the cell-editor function async and await the load before populating.
 
 <!-- -->
 
-> **Return a display value after save, not just persist the ID.** For
-> editable cells backed by an FK (car code, location, job), the AJAX save
-> endpoint (e.g. `update_car_ajax.php`) must return the human-readable
-> display value in its response, not just confirm the write. If it only
-> echoes back the saved ID, the cell shows a raw number after saving instead
-> of the name the user picked.
+> **Return a display value after save, not just persist the ID.** For editable
+> cells backed by an FK (car code, location, job), the AJAX save endpoint (e.g.
+> `update_car_ajax.php`) must return the human-readable display value in its
+> response, not just confirm the write. If it only echoes back the saved ID, the
+> cell shows a raw number after saving instead of the name the user picked.
 
 ---
 
 ### 4.9 Operations Page Tables
 
-Operations pages (`build_switchlists.php`, `organize_cars.php`, `pick_up.php`, `set_out.php`, `load_unload.php`, `reposition.php`) render interactive car lists that may be wide. Use the following pattern — distinct from report tables (§4.3).
+Operations pages (`build_switchlists.php`, `organize_cars.php`, `pick_up.php`,
+`set_out.php`, `load_unload.php`, `reposition.php`) render interactive car lists
+that may be wide. Use the following pattern — distinct from report tables
+(§4.3).
 
 #### Bootstrap Classes
 
@@ -347,7 +358,10 @@ Operations pages (`build_switchlists.php`, `organize_cars.php`, `pick_up.php`, `
 </div>
 ```
 
-> **Note:** `position: sticky` here causes the header to stick to the top of the **scroll container** (the `.table-responsive` div), not the viewport. This is correct behaviour for wide, horizontally-scrollable tables on operations pages.
+> **Note:** `position: sticky` here causes the header to stick to the top of the
+> **scroll container** (the `.table-responsive` div), not the viewport. This is
+> correct behaviour for wide, horizontally-scrollable tables on operations
+> pages.
 
 #### Required CSS (in parent full-page file's `<style>` block)
 
@@ -384,7 +398,8 @@ Plus the full status badge block (see §4.5).
 
 ### 4.10 Operations Navbar Variant
 
-Operations pages use a **green** navbar to visually distinguish them from data-entry and report pages.
+Operations pages use a **green** navbar to visually distinguish them from
+data-entry and report pages.
 
 ```html
 <nav
@@ -420,7 +435,8 @@ Operations pages use a **green** navbar to visually distinguish them from data-e
 
 ### 4.11 Ajax Fragment Tables
 
-Several pages load car lists via AJAX into a `<div>` container. The response files return a raw HTML `<table>` fragment — not a full page.
+Several pages load car lists via AJAX into a `<div>` container. The response
+files return a raw HTML `<table>` fragment — not a full page.
 
 **Ajax response files:**
 
@@ -434,10 +450,15 @@ Several pages load car lists via AJAX into a `<div>` container. The response fil
 
 **Critical rules:**
 
-- ❌ **Never add `<style>` blocks to Ajax response files.** CSS defined inside an AJAX-injected fragment is applied globally and unpredictably — it will bleed into the parent page and persist across subsequent AJAX calls.
-- ✅ All CSS (including status badge styles, `th/td` padding, etc.) **must be defined in the parent full-page file**.
-- ✅ Ajax response files may use inline `style=""` attributes on individual elements where dynamic values are needed (e.g. `set_colors()` output).
-- ✅ Ajax response table classes must match what the parent page's CSS targets: `table table-sm table-bordered table-hover`.
+- ❌ **Never add `<style>` blocks to Ajax response files.** CSS defined inside
+  an AJAX-injected fragment is applied globally and unpredictably — it will
+  bleed into the parent page and persist across subsequent AJAX calls.
+- ✅ All CSS (including status badge styles, `th/td` padding, etc.) **must be
+  defined in the parent full-page file**.
+- ✅ Ajax response files may use inline `style=""` attributes on individual
+  elements where dynamic values are needed (e.g. `set_colors()` output).
+- ✅ Ajax response table classes must match what the parent page's CSS targets:
+  `table table-sm table-bordered table-hover`.
 
 ---
 
@@ -494,7 +515,9 @@ form.addEventListener("submit", function (e) {
 });
 ```
 
-> **Single-file pattern:** The same PHP file handles both the form page (normal load) and the report data (when `?generate_report=1` is set). The report path calls `exit` after output to prevent the form HTML from being appended.
+> **Single-file pattern:** The same PHP file handles both the form page (normal
+> load) and the report data (when `?generate_report=1` is set). The report path
+> calls `exit` after output to prevent the form HTML from being appended.
 
 ### Data Saving (jQuery AJAX)
 
@@ -617,7 +640,8 @@ $.ajax({
 - [ ] Table headers repeat via `display: table-header-group` on `<thead>`
 - [ ] `position: sticky` overridden to `static` in print
 - [ ] Status badges reset to plain text
-- [ ] Bold and underline formatting preserved (do not override `<strong>`, `<u>`)
+- [ ] Bold and underline formatting preserved (do not override `<strong>`,
+      `<u>`)
 - [ ] Font family set to `"Courier New", monospace`
 - [ ] Table uses `table-layout: fixed; width: 100%` to fit page
 
@@ -627,7 +651,8 @@ $.ajax({
 
 ### Single-File Report Pattern
 
-Reports that previously used two files (display + printable) are now consolidated into a single file:
+Reports that previously used two files (display + printable) are now
+consolidated into a single file:
 
 ```text
 same_page.php
@@ -635,7 +660,9 @@ same_page.php
 └── PHP: else → output full page with form + empty report container
 ```
 
-The form submits via `fetch()` to itself with `?generate_report=1`. The response HTML is injected into `#report-content`. The `#report-container` is toggled visible via a `.show` class.
+The form submits via `fetch()` to itself with `?generate_report=1`. The response
+HTML is injected into `#report-content`. The `#report-container` is toggled
+visible via a `.show` class.
 
 ### Page Structure Template
 
@@ -679,14 +706,20 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 - ✅ Consolidate display + printable into a single-file AJAX pattern
 - ✅ Use `set_colors.php` / `set_colors()` for location-based highlighting
 - ✅ Use `table table-sm table-bordered table-hover` on all operations tables
-- ✅ Wrap wide operations tables in `.table-responsive` to enable horizontal scroll
-- ✅ Use status badge `<span class="status-...">` for all car status values (see §4.5)
+- ✅ Wrap wide operations tables in `.table-responsive` to enable horizontal
+  scroll
+- ✅ Use status badge `<span class="status-...">` for all car status values (see
+  §4.5)
 - ✅ Use green navbar (`#2e7d32`) on all operations pages (see §4.10)
-- ✅ Define all CSS (including status badges) in the parent full-page file, not in Ajax response files (see §4.11)
+- ✅ Define all CSS (including status badges) in the parent full-page file, not
+  in Ajax response files (see §4.11)
 
 ### Don't
 
-- ❌ Wrap **report** tables in `.table-responsive` when viewport-sticky headers are needed — `overflow` creates a new scroll context and breaks `position: sticky` relative to the viewport. Operations tables (§4.9) are exempt: their sticky header intentionally sticks within the scroll container.
+- ❌ Wrap **report** tables in `.table-responsive` when viewport-sticky headers
+  are needed — `overflow` creates a new scroll context and breaks
+  `position: sticky` relative to the viewport. Operations tables (§4.9) are
+  exempt: their sticky header intentionally sticks within the scroll container.
 - ❌ Set `overflow-x: auto` on any ancestor of a report-table sticky header
 - ❌ Use inline `<select>` for touch-editable fields (won't open on tap)
 - ❌ Override `<u>` or `<strong>` formatting in print CSS
@@ -695,10 +728,12 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 - ❌ Forget `display: table-header-group` on `<thead>` in print CSS
 - ❌ Use hardcoded colours without referencing this palette
 - ❌ Create separate "printable" versions of report pages
-- ❌ Add `<style>` blocks to Ajax response files — CSS bleeds into the parent page (see §4.11)
+- ❌ Add `<style>` blocks to Ajax response files — CSS bleeds into the parent
+  page (see §4.11)
 - ❌ Use `<u>` tags in station/location table cells on operations pages
 - ❌ Use `<br/>`, `<u>`, or `<i>` inside `<th>` column headers
-- ❌ Apply `text-align: center` to data cells (car code, reporting marks, position number); keep it only on arrow/checkbox control cells
+- ❌ Apply `text-align: center` to data cells (car code, reporting marks,
+  position number); keep it only on arrow/checkbox control cells
 
 ---
 
@@ -726,7 +761,8 @@ The form submits via `fetch()` to itself with `?generate_report=1`. The response
 
 ## 13. Tablet Responsiveness (Operations Pages)
 
-Operations pages are regularly used on tablets. Apply this pattern to every operations table.
+Operations pages are regularly used on tablets. Apply this pattern to every
+operations table.
 
 ### CSS Pattern
 
@@ -754,7 +790,8 @@ Add inside the page's `<style>` block:
 }
 ```
 
-Mark non-critical `<th>` and `<td>` with `class="hide-tablet"`. Retain at minimum: car road/number, status, current location, and action controls.
+Mark non-critical `<th>` and `<td>` with `class="hide-tablet"`. Retain at
+minimum: car road/number, status, current location, and action controls.
 
 ### Applied Pages
 
@@ -768,7 +805,8 @@ Mark non-critical `<th>` and `<td>` with `class="hide-tablet"`. Retain at minimu
 
 ### Button / Dropdown Collision Fix
 
-When a page has a dropdown + action button side-by-side (e.g. `pick_up.php`), wrap them together:
+When a page has a dropdown + action button side-by-side (e.g. `pick_up.php`),
+wrap them together:
 
 ```html
 <div class="d-flex flex-wrap align-items-center gap-2">
@@ -787,7 +825,9 @@ This prevents the button from overlapping the dropdown on narrow viewports.
 
 ### Architecture
 
-`organize_cars.php` renders a two-mode view (by job / by location). Car rows are draggable to reorder; the new order is sent to `update_car_positions.php` and persisted in the `cars.position` database column.
+`organize_cars.php` renders a two-mode view (by job / by location). Car rows are
+draggable to reorder; the new order is sent to `update_car_positions.php` and
+persisted in the `cars.position` database column.
 
 **File roles:**
 
@@ -800,7 +840,9 @@ This prevents the button from overlapping the dropdown on narrow viewports.
 
 ### Drag Engine
 
-Use **document-level pointer/mouse/touch event listeners** — not element-level. Element-level listeners lose the drag if the pointer moves off the source element before the browser fires the event.
+Use **document-level pointer/mouse/touch event listeners** — not element-level.
+Element-level listeners lose the drag if the pointer moves off the source
+element before the browser fires the event.
 
 ```javascript
 function init_drag_sort() {
@@ -821,15 +863,21 @@ function init_drag_sort() {
 }
 ```
 
-> **Non-passive `touchmove`:** Required to call `e.preventDefault()` and suppress page scroll during a drag. Chrome logs a warning if you call `preventDefault()` on a passive listener — always register `touchmove` with `{ passive: false }`.
+> **Non-passive `touchmove`:** Required to call `e.preventDefault()` and
+> suppress page scroll during a drag. Chrome logs a warning if you call
+> `preventDefault()` on a passive listener — always register `touchmove` with
+> `{ passive: false }`.
 
 <!-- -->
 
-> **`body.drag-active` class:** Add `document.body.classList.add('drag-active')` on drag start and remove on end. Target `body.drag-active` in CSS to disable `user-select` and `cursor` globally during a drag.
+> **`body.drag-active` class:** Add `document.body.classList.add('drag-active')`
+> on drag start and remove on end. Target `body.drag-active` in CSS to disable
+> `user-select` and `cursor` globally during a drag.
 
 ### Row Reordering Logic
 
-Use **instant direction-based swapping** — do not wait until the pointer reaches the 50% midpoint of the next row. This makes reordering feel immediate.
+Use **instant direction-based swapping** — do not wait until the pointer reaches
+the 50% midpoint of the next row. This makes reordering feel immediate.
 
 ```javascript
 function move_row_by_pointer(clientY) {
@@ -870,11 +918,13 @@ function move_row_by_pointer(clientY) {
 }
 ```
 
-Apply `.row-flash` to `tr` elements that shifted position, and remove it after the animation ends.
+Apply `.row-flash` to `tr` elements that shifted position, and remove it after
+the animation ends.
 
 ### Save Feedback
 
-The save button should reflect three states: idle → saving (spinner) → success/error.
+The save button should reflect three states: idle → saving (spinner) →
+success/error.
 
 ```javascript
 function show_save_state(state) {
@@ -898,7 +948,11 @@ function show_save_state(state) {
 
 ### thead / tbody Separation (Ajax Fragment Files)
 
-`get_job_cars.php` and `get_location_cars.php` **must** use a proper `<thead>` containing only the header row and a `<tbody>` containing only data rows. Without this separation, the drag engine's row iterator will count the header as a draggable row and the Position column will display "1" instead of the header text.
+`get_job_cars.php` and `get_location_cars.php` **must** use a proper `<thead>`
+containing only the header row and a `<tbody>` containing only data rows.
+Without this separation, the drag engine's row iterator will count the header as
+a draggable row and the Position column will display "1" instead of the header
+text.
 
 ```html
 <table class="table table-sm table-bordered table-hover" id="car_table">
@@ -919,20 +973,28 @@ function show_save_state(state) {
 
 ### Persistence: Save by Car ID
 
-`update_car_positions.php` must use `cars.id` (not `reporting_marks`) as the key when writing positions back to the database:
+`update_car_positions.php` must use `cars.id` (not `reporting_marks`) as the key
+when writing positions back to the database:
 
 ```php
 // CORRECT: qualify the column to avoid ambiguous-column error in multi-join queries
 $sql = "UPDATE cars SET position = \"$car_pos\" WHERE cars.id = \"$car_id\"";
 ```
 
-> **Why not `reporting_marks`?** The drag engine sends `car_id[]` hidden inputs. The `reporting_marks` key was used in a previous (removed) implementation and will silently fail to match if the new drag HTML is in use.
+> **Why not `reporting_marks`?** The drag engine sends `car_id[]` hidden inputs.
+> The `reporting_marks` key was used in a previous (removed) implementation and
+> will silently fail to match if the new drag HTML is in use.
 
 <!-- -->
 
-> **Ambiguous column guard:** Multi-join queries that include `cars.id` and another table's `id` must always qualify every column reference in the WHERE clause to prevent `mysqli` from returning `false` with an "ambiguous column" error.
+> **Ambiguous column guard:** Multi-join queries that include `cars.id` and
+> another table's `id` must always qualify every column reference in the WHERE
+> clause to prevent `mysqli` from returning `false` with an "ambiguous column"
+> error.
 
 ---
 
-_Derived from: `feat/report_ui`, `feat/car_db_ui_refresh`, `feat/on_hand_report_updates`, `feat/ui_updates` branches._
-_Migrated from `.github/copilot-instructions.md` into the shared wiki on 06/07/2026 — see [decisions-log.md](decisions-log.md)._
+_Derived from: `feat/report_ui`, `feat/car_db_ui_refresh`,
+`feat/on_hand_report_updates`, `feat/ui_updates` branches._ _Migrated from
+`.github/copilot-instructions.md` into the shared wiki on 06/07/2026 — see
+[decisions-log.md](decisions-log.md)._

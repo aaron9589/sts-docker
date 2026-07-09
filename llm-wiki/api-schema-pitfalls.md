@@ -1,16 +1,20 @@
 ---
 title: STS Legacy DB Schema & API Notes
-purpose: Discovered MySQL schema, endpoint behaviour, and known pitfalls for the legacy sts/ app.
-load_when: writing or reviewing SQL/queries against the legacy sts/ MySQL schema, or working on sts/api/
+purpose:
+  Discovered MySQL schema, endpoint behaviour, and known pitfalls for the legacy
+  sts/ app.
+load_when:
+  writing or reviewing SQL/queries against the legacy sts/ MySQL schema, or
+  working on sts/api/
 owner: shared
 last_updated: 06/07/2026
 ---
 
 # STS Legacy DB Schema & API Notes
 
-> Applies to the legacy `sts/` PHP app's MySQL/mysqli schema and `sts/api/`.
-> The v2 rebuild (`app/`) uses its own SQLite schema — see `app/src/lib/server/db.ts`
-> and `docs/SPEC.md`, not this page.
+> Applies to the legacy `sts/` PHP app's MySQL/mysqli schema and `sts/api/`. The
+> v2 rebuild (`app/`) uses its own SQLite schema — see
+> `app/src/lib/server/db.ts` and `docs/SPEC.md`, not this page.
 
 ## Discovered Database Schema
 
@@ -73,31 +77,29 @@ CREATE TABLE IF NOT EXISTS history (
 
 ### GET /wagon/cargo/id/:tag_name
 
-**Purpose:** Scan car by reporting marks, RFID, or car ID
-**Input Formats:**
+**Purpose:** Scan car by reporting marks, RFID, or car ID **Input Formats:**
 
 - Reporting marks (e.g., "104-F") - uppercase
 - RFID code (e.g., "123456789")
 - Car ID format (e.g., "-123-") - extracts ID and looks up reporting marks
 
-**Query:** Replicates scan_car.php exactly with all joins
-**Returns:** All car details including orders, locations, stations, commodities
+**Query:** Replicates scan_car.php exactly with all joins **Returns:** All car
+details including orders, locations, stations, commodities
 
 ### GET /wagon/location/:location_name
 
-**Purpose:** Get location and all cars at that location
-**Input Formats:**
+**Purpose:** Get location and all cars at that location **Input Formats:**
 
 - Location code (e.g., "PORT1")
 - Location ID format (e.g., "%123%") - extracts ID and looks up code
 
-**Query:** Replicates scan_location.php query structure
-**Returns:** Location details + list of cars with position, car code, status
+**Query:** Replicates scan_location.php query structure **Returns:** Location
+details + list of cars with position, car code, status
 
 ### POST /wagon/load and /wagon/unload
 
-**Purpose:** Complete loading or unloading of a car
-**Display Query (which cars appear on page):**
+**Purpose:** Complete loading or unloading of a car **Display Query (which cars
+appear on page):**
 
 ```sql
 WHERE ((cars.status = "Loading")
@@ -118,12 +120,13 @@ if ($_POST['status'] == 'Loading') {
 UPDATE cars SET status = ?, last_spotted = 0 WHERE id = ?;
 ```
 
-**Required Fields:** waybill_number, reportingMarks, status (Loading or Unloading)
+**Required Fields:** waybill_number, reportingMarks, status (Loading or
+Unloading)
 
 ### POST /wagon/reposition
 
-**Purpose:** Reposition empty car to new location
-**Display Query (which cars appear on page):**
+**Purpose:** Reposition empty car to new location **Display Query (which cars
+appear on page):**
 
 ```sql
 WHERE status = "Empty"
@@ -144,14 +147,17 @@ WHERE status = "Empty"
 
 1. ❌ Use `station` (not `station_id`) in locations table joins
 2. ❌ Use `shipment` (not `destination`) in car_orders
-3. ❌ Always qualify column names in multi-join queries to avoid ambiguous-column errors
+3. ❌ Always qualify column names in multi-join queries to avoid
+   ambiguous-column errors
 4. ❌ History record `location` field stores a location ID (int), not a name
-5. ❌ Do not wrap job names in `lower()` in queries — job name case is preserved (a past bug)
+5. ❌ Do not wrap job names in `lower()` in queries — job name case is preserved
+   (a past bug)
 6. ❌ `update_car_positions.php` keys on `cars.id`, never `reporting_marks`
 
 ## Validation Testing Plan (REST API vs legacy pages)
 
-When changing `sts/api/` endpoint behaviour, verify parity against the equivalent legacy page:
+When changing `sts/api/` endpoint behaviour, verify parity against the
+equivalent legacy page:
 
 ### Phase 1: Through Existing Pages
 
@@ -181,4 +187,5 @@ When changing `sts/api/` endpoint behaviour, verify parity against the equivalen
 
 ---
 
-_Migrated from `.github/instructions/api-schema.instructions.md` into the shared wiki on 06/07/2026 — see [decisions-log.md](decisions-log.md)._
+_Migrated from `.github/instructions/api-schema.instructions.md` into the shared
+wiki on 06/07/2026 — see [decisions-log.md](decisions-log.md)._
