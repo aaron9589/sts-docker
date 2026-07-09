@@ -61,15 +61,15 @@ last_updated: 09/07/2026
 
 ### Primary Colours
 
-| Swatch             | Hex       | Usage                                                        |
-| ------------------ | --------- | ------------------------------------------------------------ |
-| 🔵 Primary Blue    | `#4a90e2` | Table headers (`thead`), job section headers, navbar accents |
-| ⚪ Page Background | `#f8f9fa` | `body` background, table row hover                           |
-| ⬜ Card Background | `#ffffff` | Cards, panels, modals                                        |
-| 🔲 Border Grey     | `#dee2e6` | Table cell borders, card borders, input borders              |
-| ◼️ Text Primary    | `#333`    | Headings, body text                                          |
-| ◾ Text Secondary  | `#666`    | Sub-headings                                                 |
-| ▫️ Text Muted      | `#999`    | Captions, small print                                        |
+| Name            | Hex       | Usage                                                        |
+| --------------- | --------- | ------------------------------------------------------------ |
+| Primary Blue    | `#4a90e2` | Table headers (`thead`), job section headers, navbar accents |
+| Page Background | `#f8f9fa` | `body` background, table row hover                           |
+| Card Background | `#ffffff` | Cards, panels, modals                                        |
+| Border Grey     | `#dee2e6` | Table cell borders, card borders, input borders              |
+| Text Primary    | `#333`    | Headings, body text                                          |
+| Text Secondary  | `#666`    | Sub-headings                                                 |
+| Text Muted      | `#999`    | Captions, small print                                        |
 
 ### Status Badge Colours
 
