@@ -292,6 +292,8 @@ Mark editable cells with a pencil icon that appears on hover:
 > load, or make the cell-editor function async and await the load before
 > populating.
 
+<!-- -->
+
 > **Return a display value after save, not just persist the ID.** For
 > editable cells backed by an FK (car code, location, job), the AJAX save
 > endpoint (e.g. `update_car_ajax.php`) must return the human-readable
@@ -557,7 +559,7 @@ $.ajax({
 
 Reports that previously used two files (display + printable) are now consolidated into a single file:
 
-```
+```text
 same_page.php
 ├── PHP: if ($_GET['generate_report']) → output report HTML → exit
 └── PHP: else → output full page with form + empty report container
@@ -743,6 +745,8 @@ function init_drag_sort() {
 
 > **Non-passive `touchmove`:** Required to call `e.preventDefault()` and suppress page scroll during a drag. Chrome logs a warning if you call `preventDefault()` on a passive listener — always register `touchmove` with `{ passive: false }`.
 
+<!-- -->
+
 > **`body.drag-active` class:** Add `document.body.classList.add('drag-active')` on drag start and remove on end. Target `body.drag-active` in CSS to disable `user-select` and `cursor` globally during a drag.
 
 ### Row Reordering Logic
@@ -835,6 +839,8 @@ $sql = "UPDATE cars SET position = \"$car_pos\" WHERE cars.id = \"$car_id\"";
 ```
 
 > **Why not `reporting_marks`?** The drag engine sends `car_id[]` hidden inputs. The `reporting_marks` key was used in a previous (removed) implementation and will silently fail to match if the new drag HTML is in use.
+
+<!-- -->
 
 > **Ambiguous column guard:** Multi-join queries that include `cars.id` and another table's `id` must always qualify every column reference in the WHERE clause to prevent `mysqli` from returning `false` with an "ambiguous column" error.
 

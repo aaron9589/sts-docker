@@ -14,7 +14,7 @@ When a true RAG is the better tool: corpora too large to fit a context window, o
 
 ## Architecture
 
-```
+```text
 your-kb/
   INDEX.md                  <- router; read this first
   about-me.md               <- who you are, stack, conventions
@@ -28,7 +28,7 @@ Three principles do the work:
 
 1. **One index that routes.** `INDEX.md` is a table of every page with a plain-English "load when" trigger. The assistant matches its task to a trigger and opens only that page.
 2. **Frontmatter on every page** so the assistant can route without reading the whole file:
-   ```
+   ```yaml
    ---
    title:
    purpose:        one line — what this page is for
@@ -78,7 +78,11 @@ The win: standards that used to be copy-pasted into every project's context file
 
 Copy-paste prompt:
 
-> Read the spec in `llm-wiki-spec.md`. Build me a local LLM-wiki knowledge base following it. First interview me about my work, my stack, my coding and writing conventions, and the tasks I repeat, so the pages reflect me and not generic filler. Then create `INDEX.md` plus a starting set of pages, each with the frontmatter shown. Finally, add the pointer block to my assistant's always-on instructions and any project context files, and verify every index link resolves. Keep every page dense and free of anything that goes stale.
+> Read the spec in `llm-wiki-spec.md`. Build me a local LLM-wiki knowledge base following it.
+> First interview me about my work, my stack, my coding and writing conventions, and the tasks I repeat, so the pages reflect me and not generic filler.
+> Then create `INDEX.md` plus a starting set of pages, each with the frontmatter shown.
+> Finally, add the pointer block to my assistant's always-on instructions and any project context files, and verify every index link resolves.
+> Keep every page dense and free of anything that goes stale.
 
 ## Gotchas
 
