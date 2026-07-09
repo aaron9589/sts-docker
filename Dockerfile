@@ -6,6 +6,9 @@ FROM php:8.0-apache-buster
 EXPOSE 80
 
 # Update sources and install all dependencies in a single RUN statement to reduce layers and image size
+# Base is EOL php:8.0-apache-buster served from archive.debian.org; versions there are frozen
+# and pinning specific ones would just make future archive changes brittle.
+# hadolint ignore=DL3008
 RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
     sed -i '/security.debian.org/d' /etc/apt/sources.list && \
     apt-get update && \
