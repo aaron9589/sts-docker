@@ -33,16 +33,21 @@ RUN find /var/www/html -type f -exec chmod 644 {} \; && \
 # Edit permissions for directories and create folder structure
 RUN mkdir -p /var/www/html/sts/temp \
     /var/www/html/sts/ImageStore/DB_Images/barcodes \
-    /var/www/html/sts/ImageStore/DB_Images/qrcodes && \
-    chmod -R 757 /var/www/html/sts/backups \
-    /var/www/html/sts/ImageStore \
-    /var/www/html/sts/temp \
-    /var/www/html/sts/uploads && \
-    chmod 757 /var/www/html/sts/cargo_list.txt && \
+    /var/www/html/sts/ImageStore/DB_Images/qrcodes \
+    /var/www/html/sts/ImageStore/DB_Images/RollingStock \
+    /var/www/html/sts/ImageStore/DB_Images/uploads && \
     chown -R www-data:www-data \
     /var/www/html/sts/backups \
     /var/www/html/sts/temp \
-    /var/www/html/sts/uploads
+    /var/www/html/sts/uploads \
+    /var/www/html/sts/ImageStore \
+    /var/www/html/sts/cargo_list.txt && \
+    chmod -R u=rwX,g=rX,o=rX \
+    /var/www/html/sts/backups \
+    /var/www/html/sts/temp \
+    /var/www/html/sts/uploads \
+    /var/www/html/sts/ImageStore \
+    /var/www/html/sts/cargo_list.txt
 
 # Copy start script
 COPY start.sh /usr/local/bin/
