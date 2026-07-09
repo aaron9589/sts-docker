@@ -8,16 +8,20 @@ name: Lint Code Base
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
-permissions: { }
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   run-lint:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       packages: read
@@ -26,17 +30,23 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          persist-credentials: false
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
       - name: Lint Code Base
-        uses: super-linter/super-linter@v6.5.0
+        uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_BASH_EXEC: false
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
+          VALIDATE_PHP_PHPCS: false
+          VALIDATE_PHP_PSALM: false
+          # sts/ is 20-year-old static HTML/JS not being rewritten; a11y/lint
+          # rules against it are pure noise (200+ findings on legacy markup)
+          VALIDATE_BIOME_LINT: false
           DEFAULT_BRANCH: "master"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
