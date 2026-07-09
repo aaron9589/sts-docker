@@ -15,6 +15,7 @@ last_updated: 06/07/2026
 ## Discovered Database Schema
 
 ### Cars Table
+
 - `Id` (int, PK, auto_increment)
 - `reporting_marks` (varchar)
 - `car_code_id` (int, FK → car_codes.Id)
@@ -30,11 +31,13 @@ last_updated: 06/07/2026
 - `last_spotted` (int) - added later
 
 ### Car_Orders Table
+
 - `waybill_number` (varchar, PK)
 - `shipment` (int, FK → shipments.Id) **NOT destination**
 - `car` (int, FK → cars.Id)
 
 ### Locations Table
+
 - `Id` (int, PK, auto_increment)
 - `code` (tinytext)
 - `station` (int, FK → routing.id) **NOT station_id**
@@ -45,6 +48,7 @@ last_updated: 06/07/2026
 - `color` (tinytext)
 
 ### History Table (created dynamically in open_db.php)
+
 ```sql
 CREATE TABLE IF NOT EXISTS history (
   car_id int,
@@ -56,6 +60,7 @@ CREATE TABLE IF NOT EXISTS history (
 ```
 
 ### Routing Table
+
 - `id` (int, PK, auto_increment)
 - `station` (tinytext)
 - `station_nbr` (int)
@@ -67,8 +72,10 @@ CREATE TABLE IF NOT EXISTS history (
 ## Endpoint Behaviour (sts/api/)
 
 ### GET /wagon/cargo/id/:tag_name
+
 **Purpose:** Scan car by reporting marks, RFID, or car ID
 **Input Formats:**
+
 - Reporting marks (e.g., "104-F") - uppercase
 - RFID code (e.g., "123456789")
 - Car ID format (e.g., "-123-") - extracts ID and looks up reporting marks
@@ -77,8 +84,10 @@ CREATE TABLE IF NOT EXISTS history (
 **Returns:** All car details including orders, locations, stations, commodities
 
 ### GET /wagon/location/:location_name
+
 **Purpose:** Get location and all cars at that location
 **Input Formats:**
+
 - Location code (e.g., "PORT1")
 - Location ID format (e.g., "%123%") - extracts ID and looks up code
 
@@ -86,8 +95,10 @@ CREATE TABLE IF NOT EXISTS history (
 **Returns:** Location details + list of cars with position, car code, status
 
 ### POST /wagon/load and /wagon/unload
+
 **Purpose:** Complete loading or unloading of a car
 **Display Query (which cars appear on page):**
+
 ```sql
 WHERE ((cars.status = "Loading")
     OR (cars.status = "Unloading")
@@ -95,6 +106,7 @@ WHERE ((cars.status = "Loading")
 ```
 
 **Update Logic (POST handler):**
+
 ```php
 if ($_POST['status'] == 'Loading') {
   $new_status = 'Loaded';
@@ -109,14 +121,17 @@ UPDATE cars SET status = ?, last_spotted = 0 WHERE id = ?;
 **Required Fields:** waybill_number, reportingMarks, status (Loading or Unloading)
 
 ### POST /wagon/reposition
+
 **Purpose:** Reposition empty car to new location
 **Display Query (which cars appear on page):**
+
 ```sql
 WHERE status = "Empty"
   AND NOT EXISTS (SELECT car_orders.car FROM car_orders WHERE cars.id = car_orders.car)
 ```
 
 **Update Logic (POST handler):**
+
 1. Get current session number from settings
 2. Generate next E-series waybill number (XXX-E##)
 3. INSERT INTO car_orders (waybill_number, shipment, car) VALUES (?, ?, ?)
@@ -139,6 +154,7 @@ WHERE status = "Empty"
 When changing `sts/api/` endpoint behaviour, verify parity against the equivalent legacy page:
 
 ### Phase 1: Through Existing Pages
+
 1. Test cargo lookup via scan_car.php
 2. Test location lookup via scan_location.php
 3. Test load operation via load_unload.php
@@ -147,6 +163,7 @@ When changing `sts/api/` endpoint behaviour, verify parity against the equivalen
 6. Record exact values, timestamps, database changes
 
 ### Phase 2: Through REST API
+
 1. Call GET /wagon/cargo/id/:tag_name with same input
 2. Call GET /wagon/location/:location_name with same location
 3. Call POST /wagon/load with captured data
@@ -155,6 +172,7 @@ When changing `sts/api/` endpoint behaviour, verify parity against the equivalen
 6. Compare results and database changes
 
 ### Phase 3: Validation
+
 - Verify fields match exactly
 - Verify status transitions are correct
 - Verify car_orders are deleted when appropriate
@@ -163,4 +181,4 @@ When changing `sts/api/` endpoint behaviour, verify parity against the equivalen
 
 ---
 
-*Migrated from `.github/instructions/api-schema.instructions.md` into the shared wiki on 06/07/2026 — see [decisions-log.md](decisions-log.md).*
+_Migrated from `.github/instructions/api-schema.instructions.md` into the shared wiki on 06/07/2026 — see [decisions-log.md](decisions-log.md)._

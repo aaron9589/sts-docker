@@ -12,12 +12,12 @@ Shared context for any developer (human or AI) making changes to this repo.
 Not a RAG — a small set of dense markdown pages. Read this index, match your
 task to a `load_when` trigger, open only that page. Don't bulk-load everything.
 
-| Page | Load when |
-|------|-----------|
-| [ui-conventions.md](ui-conventions.md) | Touching any page/template in the legacy `sts/` PHP app — CSS, layout, print styles, status badges, drag-and-drop, mobile/tablet behaviour |
-| [api-schema-pitfalls.md](api-schema-pitfalls.md) | Writing or reviewing SQL/queries against the legacy `sts/` MySQL schema, or working on `sts/api/` |
-| [release-process.md](release-process.md) | Cutting a release, tagging, or debugging why a release GitHub Action didn't run |
-| [decisions-log.md](decisions-log.md) | You want the "why" behind a past architectural or process decision, or you're about to make one worth remembering |
+| Page                                             | Load when                                                                                                                                  |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [ui-conventions.md](ui-conventions.md)           | Touching any page/template in the legacy `sts/` PHP app — CSS, layout, print styles, status badges, drag-and-drop, mobile/tablet behaviour |
+| [api-schema-pitfalls.md](api-schema-pitfalls.md) | Writing or reviewing SQL/queries against the legacy `sts/` MySQL schema, or working on `sts/api/`                                          |
+| [release-process.md](release-process.md)         | Cutting a release, tagging, or debugging why a release GitHub Action didn't run                                                            |
+| [decisions-log.md](decisions-log.md)             | You want the "why" behind a past architectural or process decision, or you're about to make one worth remembering                          |
 
 ## Scope note
 

@@ -15,7 +15,7 @@ no status updates or in-flight work. Newest first.
 
 Reviewed ~35MB of archived VS Code chat session history (from a prior machine
 profile, `/Volumes/GlobalShare/oldCopilot`) for this repo, plus a Kiro data
-volume (no sts-docker workspace found there — only unrelated "railroad-*"
+volume (no sts-docker workspace found there — only unrelated "railroad-\*"
 experiment repos, left alone). Pulled forward what was still durable and
 still true: the `publish-docker.yaml` branch-mismatch bug (see
 [release-process.md](release-process.md)), the `/opt/sql.initialized`

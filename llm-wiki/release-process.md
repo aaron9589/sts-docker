@@ -34,5 +34,5 @@ Corrected to `master`.
 
 ---
 
-*Sourced from Copilot chat history for this repo (versioning, Actions-trigger
-debugging, and a workflow review session) on 09/07/2026 — see [decisions-log.md](decisions-log.md).*
+_Sourced from Copilot chat history for this repo (versioning, Actions-trigger
+debugging, and a workflow review session) on 09/07/2026 — see [decisions-log.md](decisions-log.md)._

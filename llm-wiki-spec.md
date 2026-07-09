@@ -31,10 +31,10 @@ Three principles do the work:
    ```yaml
    ---
    title:
-   purpose:        one line — what this page is for
-   load_when:      explicit trigger, e.g. "writing or reviewing code"
-   owner:          you | assistant | shared
-   last_updated:   DD/MM/YYYY
+   purpose: one line — what this page is for
+   load_when: explicit trigger, e.g. "writing or reviewing code"
+   owner: you | assistant | shared
+   last_updated: DD/MM/YYYY
    ---
    ```
 3. **Wire it into the entry points.** Add a short pointer to the index in your assistant's always-on instructions, and in any per-project context file it reads.
@@ -65,12 +65,15 @@ The win: standards that used to be copy-pasted into every project's context file
 1. Pick a folder for the knowledge base.
 2. Create `INDEX.md` and the pages above, each with frontmatter.
 3. Add this pointer block to your assistant's always-on instructions (and to any per-project context file it reads):
+
    ```markdown
    ## Knowledge base
+
    Shared context lives in the KB at <ABSOLUTE/PATH/TO>/INDEX.md.
    Read the index first, then load only the page whose load_when trigger
    matches the task. Don't bulk-load everything.
    ```
+
 4. If your assistant's "global instructions" live in a settings UI (not just a file), paste the pointer there too. Editing a local copy of those instructions does not update the live setting.
 5. Test it: give the assistant two different tasks and confirm it opens only the matching page.
 
