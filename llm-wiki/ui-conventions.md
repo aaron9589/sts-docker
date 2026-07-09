@@ -103,8 +103,9 @@ last_updated: 09/07/2026
 ### Screen
 
 ```css
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+font-family:
+  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+  Arial, sans-serif;
 ```
 
 - **Body text:** `14px` (inherited from Bootstrap)
