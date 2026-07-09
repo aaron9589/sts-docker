@@ -48,5 +48,8 @@ jobs:
           # sts/ is 20-year-old static HTML/JS not being rewritten; a11y/lint
           # rules against it are pure noise (200+ findings on legacy markup)
           VALIDATE_BIOME_LINT: false
+          # Bundled dictionary enforces house style we didn't opt into
+          # (AJAX->Ajax, repo->repository, Id->ID, etc.) across all prose
+          VALIDATE_NATURAL_LANGUAGE: false
           DEFAULT_BRANCH: "master"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
