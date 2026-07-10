@@ -3,7 +3,7 @@ title: LLM Wiki Index
 purpose: Router — match your task to a trigger below, then open only that page.
 load_when: always (read this file first, every session)
 owner: shared
-last_updated: 06/07/2026
+last_updated: 10/07/2026
 ---
 
 # LLM Wiki
@@ -14,6 +14,7 @@ a `load_when` trigger, open only that page. Don't bulk-load everything.
 
 | Page                                             | Load when                                                                                                                                  |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [v2-app-conventions.md](v2-app-conventions.md)   | Writing or reviewing any code under `app/` (STS v2) — server modules, schema semantics, importer, known footguns                           |
 | [ui-conventions.md](ui-conventions.md)           | Touching any page/template in the legacy `sts/` PHP app — CSS, layout, print styles, status badges, drag-and-drop, mobile/tablet behaviour |
 | [api-schema-pitfalls.md](api-schema-pitfalls.md) | Writing or reviewing SQL/queries against the legacy `sts/` MySQL schema, or working on `sts/api/`                                          |
 | [release-process.md](release-process.md)         | Cutting a release, tagging, or debugging why a release GitHub Action didn't run                                                            |
