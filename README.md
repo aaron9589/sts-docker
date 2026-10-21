@@ -302,7 +302,7 @@ See [`sts/api/README.md`](sts/api/README.md) for full request/response documenta
 
 These are changes specific to running STS inside Docker rather than under XAMPP/WAMP.
 
-- **No local web server needed.** PHP 8.0, Apache, and MariaDB all run inside Docker containers. Nothing extra needs to be installed on the host machine beyond Docker itself.
+- **No local web server needed.** PHP 8.4, Apache, and MariaDB all run inside Docker containers. Nothing extra needs to be installed on the host machine beyond Docker itself.
 - **Database configured via environment variables.** The original STS hardcoded the database hostname, username, password, and database name in `credentials.php`. This fork reads those from Docker environment variables (`MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`) set in `docker-compose.yml`. Hardcoded defaults are kept as a fallback.
 - **Automatic directory setup.** The Dockerfile creates the required `temp/`, `backups/`, `uploads/`, and `ImageStore/` directories and sets the correct permissions automatically on first run.
 - **Database provisioning flag.** Set `PROVISION_DATABASE=1` in `docker-compose.yml` to create a fresh database on startup. Set it back to `0` after first run to prevent accidentally wiping your data on container restarts.
